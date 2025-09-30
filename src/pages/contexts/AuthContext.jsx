@@ -43,10 +43,14 @@ export const AuthProvider = ({ children }) => {
             const response = await authApi.login(credentials);
 
             const userData = {
-                id: response.user_id,
+                id: response.user_id || response.id,
                 access_token: response.access_token,
                 name: response.user,
-                roles: response.roles,
+                // Handle both 'role' (string) and 'roles' (array) from API
+                roles: response.roles 
+                    ? (Array.isArray(response.roles) ? response.roles : [response.roles])
+                    : (response.role ? [response.role] : ['buyer']),
+                role: response.role || (response.roles ? response.roles[0] : 'buyer'),
                 message: response.message,
             };
 
@@ -66,21 +70,34 @@ export const AuthProvider = ({ children }) => {
 
             showSuccess(response.message || 'Login successful');
 
-            // Check KYC status for buyer role
-            if (userData.role === 'buyer') {
-                const kycStatusResponse = await getKYCStatus();
-                setKycStatus(kycStatusResponse?.status);
+            // Navigate based on user role
+            if (userData.roles.includes('admin')) {
+                // Admin users go to admin dashboard
+                navigate('/admin/dashboard');
+            } else if (userData.role === 'seller' || userData.roles.includes('seller')) {
+                // Sellers go to seller dashboard
+                navigate('/dashboard');
+            } else if (userData.role === 'buyer' || userData.roles.includes('buyer')) {
+                // Check KYC status for buyer role
+                try {
+                    const kycStatusResponse = await getKYCStatus();
+                    setKycStatus(kycStatusResponse?.status);
 
-                // Handle navigation based on KYC status
-                if (kycStatusResponse.status === 'verified' || kycStatusResponse.status === 'approved') {
+                    // Handle navigation based on KYC status
+                    if (kycStatusResponse.status === 'verified' || kycStatusResponse.status === 'approved') {
+                        navigate('/dashboard');
+                    } else if (kycStatusResponse.status === 'not_submitted' || kycStatusResponse.status === 'pending') {
+                        navigate('/kyc-pending');
+                    } else {
+                        navigate('/kyc-register');
+                    }
+                } catch (error) {
+                    // If KYC check fails, navigate to dashboard anyway
+                    console.error('KYC status check failed:', error);
                     navigate('/dashboard');
-                } else if (kycStatusResponse.status === 'not_submitted' || kycStatusResponse.status === 'pending') {
-                    navigate('/kyc-pending');
-                } else {
-                    navigate('/kyc-register');
                 }
             } else {
-                // For non-buyer roles, navigate directly to dashboard
+                // Default fallback
                 navigate('/dashboard');
             }
 
@@ -96,10 +113,14 @@ export const AuthProvider = ({ children }) => {
             const response = await authApi.register(userData);
 
             const newUserData = {
-                id: response.id,
+                id: response.id || response.user_id,
                 email: response.email,
                 phone_number: response.phone_number,
-                role: response.role,
+                // Handle both 'role' (string) and 'roles' (array) from API
+                roles: response.roles 
+                    ? (Array.isArray(response.roles) ? response.roles : [response.roles])
+                    : (response.role ? [response.role] : ['buyer']),
+                role: response.role || (response.roles ? response.roles[0] : 'buyer'),
                 name: response.user,
                 message: response.message,
             };

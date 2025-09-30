@@ -37,9 +37,14 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
         }));
     };
 
-    // Check if user is admin
-    const isAdmin = user?.roles?.includes('admin');
-    const isSeller = user?.roles?.includes('seller');
+    // Normalize roles to handle both 'role' (string) and 'roles' (array)
+    const userRoles = user?.roles 
+        ? (Array.isArray(user.roles) ? user.roles : [user.roles])
+        : (user?.role ? [user.role] : []);
+    
+    // Check if user is admin or seller
+    const isAdmin = userRoles.includes('admin');
+    const isSeller = userRoles.includes('seller');
 
     // Admin menu items
     const adminMenuItems = [

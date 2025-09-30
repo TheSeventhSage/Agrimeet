@@ -27,6 +27,7 @@ import ProductModeration from '../features/admin/pages/ProductModeration';
 import TransactionOversight from '../features/admin/pages/TransactionOversight';
 import DisputeManagement from '../features/admin/pages/DisputeManagement';
 import ReportsAnalytics from '../features/admin/pages/ReportsAnalytics';
+import AdminDebug from '../features/admin/pages/AdminDebug';
 
 const NotFound = () => <div className="p-8">404 — Not found</div>;
 
@@ -70,6 +71,7 @@ export default function Router() {
             {/* Admin routes */}
             <Route path="/admin" element={<ProtectedRoutes allowedRoles={['admin']}><AdminDashboard /></ProtectedRoutes>} />
             <Route path="/admin/dashboard" element={<ProtectedRoutes allowedRoles={['admin']}><AdminDashboard /></ProtectedRoutes>} />
+            <Route path="/admin/debug" element={<ProtectedRoutes allowedRoles={[]}><AdminDebug /></ProtectedRoutes>} />
             <Route path="/admin/users" element={<ProtectedRoutes allowedRoles={['admin']}><UserManagement /></ProtectedRoutes>} />
             <Route path="/admin/seller-approval" element={<ProtectedRoutes allowedRoles={['admin']}><SellerApproval /></ProtectedRoutes>} />
             <Route path="/admin/products" element={<ProtectedRoutes allowedRoles={['admin']}><ProductModeration /></ProtectedRoutes>} />
