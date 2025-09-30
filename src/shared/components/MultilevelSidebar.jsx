@@ -17,7 +17,13 @@ import {
     Eye,
     Edit,
     Menu,
-    X
+    X,
+    Users,
+    Shield,
+    FileCheck,
+    DollarSign,
+    AlertTriangle,
+    TrendingUp
 } from 'lucide-react';
 
 const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
@@ -31,6 +37,63 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
         }));
     };
 
+    // Check if user is admin
+    const isAdmin = user?.roles?.includes('admin');
+    const isSeller = user?.roles?.includes('seller');
+
+    // Admin menu items
+    const adminMenuItems = [
+        {
+            key: 'admin-dashboard',
+            label: 'Dashboard',
+            icon: Home,
+            path: '/admin/dashboard'
+        },
+        {
+            key: 'user-management',
+            label: 'User Management',
+            icon: Users,
+            path: '/admin/users'
+        },
+        {
+            key: 'seller-approval',
+            label: 'Seller Approval',
+            icon: FileCheck,
+            path: '/admin/seller-approval'
+        },
+        {
+            key: 'product-moderation',
+            label: 'Product Moderation',
+            icon: Package,
+            path: '/admin/products'
+        },
+        {
+            key: 'transactions',
+            label: 'Transactions',
+            icon: DollarSign,
+            path: '/admin/transactions'
+        },
+        {
+            key: 'disputes',
+            label: 'Dispute Management',
+            icon: AlertTriangle,
+            path: '/admin/disputes'
+        },
+        {
+            key: 'reports',
+            label: 'Reports & Analytics',
+            icon: TrendingUp,
+            path: '/admin/reports'
+        },
+        {
+            key: 'settings',
+            label: 'Settings',
+            icon: Settings,
+            path: '/settings'
+        },
+    ];
+
+    // Seller menu items
     const menuItems = [
         {
             key: 'dashboard',
@@ -148,7 +211,7 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
 
                 {/* Menu Items */}
                 <nav className="mt-6">
-                    {menuItems.map((item) => (
+                    {(isAdmin ? adminMenuItems : menuItems).map((item) => (
                         <div key={item.key}>
                             {/* Main Menu Item */}
                             <button
@@ -194,7 +257,9 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                         </div>
                         <div>
                             <p className="text-sm font-medium">{user?.name || 'User'}</p>
-                            <p className="text-xs text-gray-400">{user?.roles?.includes('seller') ? 'Seller' : 'Inactive'}</p>
+                            <p className="text-xs text-gray-400">
+                                {isAdmin ? 'Admin' : isSeller ? 'Seller' : 'User'}
+                            </p>
                         </div>
                     </div>
                 </div>
