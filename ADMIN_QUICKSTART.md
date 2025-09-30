@@ -23,8 +23,10 @@ Set the API base URL in your environment file:
 
 ```env
 # .env or .env.local
-VITE_API_BASE_URL=https://api.agrimeet.com
+VITE_API_BASE_URL=https://agrimeet.udehcoglobalfoodsltd.com
 ```
+
+**Your API is already configured!** The admin service is pointing to your production API.
 
 ### Step 3: Test the Pages
 
