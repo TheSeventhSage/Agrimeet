@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* optional global font tweak */
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Arial, "Noto Sans", "Liberation Sans", sans-serif;
+}
+
+/* Premium scroll/selection polish */
+::selection {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+/* helper for gradient fade mask on images */
+.mask-fade-b {
+  -webkit-mask-image: linear-gradient(to bottom, #065f46 80%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #065f46 80%, transparent 100%);
+}
+
+/* BackgroundArt responsive height */
+.bg-art-responsive {
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
+}
+
+@media (max-width: 768px) {
+  .bg-art-responsive svg {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}
