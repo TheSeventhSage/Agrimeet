@@ -20,6 +20,13 @@ import KYCStatusPage from '../features/kyc/pages/KycVerified';
 import Payouts from '../features/payouts/pages/Payouts';
 import Orders from '../features/orders/pages/Orders';
 import Unauthorized from '../pages/Unauthorized';
+import AdminDashboard from '../features/admin/pages/AdminDashboard';
+import UserManagement from '../features/admin/pages/UserManagement';
+import SellerApproval from '../features/admin/pages/SellerApproval';
+import ProductModeration from '../features/admin/pages/ProductModeration';
+import TransactionOversight from '../features/admin/pages/TransactionOversight';
+import DisputeManagement from '../features/admin/pages/DisputeManagement';
+import ReportsAnalytics from '../features/admin/pages/ReportsAnalytics';
 
 const NotFound = () => <div className="p-8">404 — Not found</div>;
 
@@ -59,6 +66,16 @@ export default function Router() {
 
             {/* Orders */}
             <Route path="/orders" element={<ProtectedRoutes allowedRoles={['seller']}><Orders /></ProtectedRoutes>} />
+
+            {/* Admin routes */}
+            <Route path="/admin" element={<ProtectedRoutes allowedRoles={['admin']}><AdminDashboard /></ProtectedRoutes>} />
+            <Route path="/admin/dashboard" element={<ProtectedRoutes allowedRoles={['admin']}><AdminDashboard /></ProtectedRoutes>} />
+            <Route path="/admin/users" element={<ProtectedRoutes allowedRoles={['admin']}><UserManagement /></ProtectedRoutes>} />
+            <Route path="/admin/seller-approval" element={<ProtectedRoutes allowedRoles={['admin']}><SellerApproval /></ProtectedRoutes>} />
+            <Route path="/admin/products" element={<ProtectedRoutes allowedRoles={['admin']}><ProductModeration /></ProtectedRoutes>} />
+            <Route path="/admin/transactions" element={<ProtectedRoutes allowedRoles={['admin']}><TransactionOversight /></ProtectedRoutes>} />
+            <Route path="/admin/disputes" element={<ProtectedRoutes allowedRoles={['admin']}><DisputeManagement /></ProtectedRoutes>} />
+            <Route path="/admin/reports" element={<ProtectedRoutes allowedRoles={['admin']}><ReportsAnalytics /></ProtectedRoutes>} />
 
             {/* 404 fallback */}
             <Route path="*" element={<NotFound />} />
