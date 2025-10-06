@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     Search,
     User,
@@ -26,6 +26,20 @@ import {
     Leaf,
     ChevronDown,
     ChevronLeft,
+    Sparkles,
+    Award,
+    Globe,
+    Layers,
+    Sparkle,
+    ArrowUpRight,
+    Bot,
+    Cpu,
+    Database,
+    Cloud,
+    Wifi,
+    Smartphone,
+    Monitor,
+    Laptop,
 } from 'lucide-react';
 import { performRedirect, ROUTES } from './utils/routingManager';
 import { LogoLightIcon } from '../shared/components/Logo';
@@ -37,13 +51,17 @@ const Home = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [categories, setCategories] = useState([]);
     const [fetchingCategories, setFetchingCategories] = useState(true);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [isScrolled, setIsScrolled] = useState(false);
+    const heroRef = useRef(null);
+    const floatingElementsRef = useRef([]);
 
     // Products state
     const [products, setProducts] = useState([]);
     const [loadingProducts, setLoadingProducts] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [totalProducts, setTotalProducts] = useState(0);
+    const [totalProducts, setTotalProducts] = useState(0);ts] = useState(0);
 
     const heroSlides = [
         {
@@ -99,12 +117,32 @@ const Home = () => {
         fetchProducts();
     }, [currentPage]);
 
+    // Mouse tracking for parallax effects
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            setMousePosition({ x: e.clientX, y: e.clientY });
+        };
+
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 50);
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('scroll', handleScroll);
+        
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+
     // Auto-rotate hero slides
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
         }, 6000);
         return () => clearInterval(interval);
+    }, [heroSlides.length]);earInterval(interval);
     }, [heroSlides.length]);
 
     const handlePageChange = (newPage) => {
