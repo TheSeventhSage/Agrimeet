@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import Button from '../../../shared/components/Button';
-import LoadingSpinner from '../../../shared/components/Loading';
+import { LoadingSpinner } from '../../../shared/components/Loader';
 
 const WithdrawFunds = ({ balance, bankAccounts, onWithdraw, isLoading }) => {
     const [formData, setFormData] = useState({

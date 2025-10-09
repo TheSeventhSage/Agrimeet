@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import Button from '../../../shared/components/Button';
-import LoadingSpinner from '../../../shared/components/Loading';
+import { LoadingSpinner } from '../../../shared/components/Loader';
 
 const AddBankAccountModal = ({ isOpen, onClose, onAdd }) => {
     const [isLoading, setIsLoading] = useState(false);
