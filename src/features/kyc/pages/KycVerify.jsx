@@ -4,6 +4,7 @@ import { Upload, CheckCircle, Clock, AlertCircle, FileText, Building, User, Cred
 import Input from '../../../shared/components/Input';
 import Select from '../../../shared/components/Select';
 import Button from '../../../shared/components/Button';
+import {Textarea} from '../../../shared/components'
 // import FileUpload from '../../../shared/components/FileUpload';
 import ConfirmationModal from '../../../shared/components/ConfirmationModal';
 import { showSuccess, showError } from '../../../shared/utils/alert';
@@ -18,17 +19,18 @@ const KYCPage = () => {
     const [businessInfo, setBusinessInfo] = useState({
         businessName: '',
         businessType: '',
-        registrationNumber: '',
-        taxId: '',
+        businessBio: '',
         businessAddress: '',
         businessPhone: ''
     });
 
     const [ownerInfo, setOwnerInfo] = useState({
-        fullName: '',
-        dateOfBirth: '',
-        idNumber: '',
-        idType: 'passport'
+        firstName: '',
+        lastName: '',
+        phoneNumber: '',
+        gender: '',
+        state:  '',
+        city: '',
     });
 
     const [bankInfo, setBankInfo] = useState({
@@ -36,9 +38,6 @@ const KYCPage = () => {
         accountType: '',
         bankName: '',
         accountNumber: '',
-        routingNumber: '',
-        iban: '',
-        swiftCode: ''
     });
 
     const [documents, setDocuments] = useState({
@@ -49,7 +48,6 @@ const KYCPage = () => {
     });
 
     // Update the handleFileSelect function for each document type
-
 
     const steps = [
         { id: 1, label: 'Business Info', icon: Building },
@@ -67,7 +65,7 @@ const KYCPage = () => {
         { value: 'non_profit', label: 'Non-Profit' }
     ];
 
-    const idTypes = [
+    const genders = [
         { value: 'passport', label: 'Passport' },
         { value: 'drivers_license', label: "Driver's License" },
         { value: 'national_id', label: 'National ID' }
@@ -85,25 +83,23 @@ const KYCPage = () => {
                 return (
                     businessInfo.businessName &&
                     businessInfo.businessType &&
-                    businessInfo.registrationNumber &&
-                    businessInfo.taxId &&
+                    businessInfo.businessBio &&
                     businessInfo.businessAddress &&
                     businessInfo.businessPhone
                 );
             case 2:
                 return (
-                    ownerInfo.fullName &&
-                    ownerInfo.dateOfBirth &&
-                    ownerInfo.idNumber &&
-                    ownerInfo.idType
+                    ownerInfo.firstName &&
+                    ownerInfo.lastName &&
+                    ownerInfo.phoneNumber &&
+                    ownerInfo.gender
                 );
             case 3:
                 return (
                     bankInfo.accountHolderName &&
                     bankInfo.accountType &&
                     bankInfo.bankName &&
-                    bankInfo.accountNumber &&
-                    bankInfo.routingNumber
+                    bankInfo.accountNumber
                 );
             case 4:
                 return (
@@ -169,18 +165,12 @@ const KYCPage = () => {
                                 onChange={(e) => setBusinessInfo({ ...businessInfo, businessType: e.target.value })}
                                 required
                             />
-                            <Input
-                                label="Registration Number"
-                                value={businessInfo.registrationNumber}
-                                onChange={(e) => setBusinessInfo({ ...businessInfo, registrationNumber: e.target.value })}
-                                required
-                            />
-                            <Input
+                            {/*<Input
                                 label="Tax ID Number"
                                 value={businessInfo.taxId}
                                 onChange={(e) => setBusinessInfo({ ...businessInfo, taxId: e.target.value })}
                                 required
-                            />
+                            /> */}
                             <Input
                                 label="Business Address"
                                 value={businessInfo.businessAddress}
@@ -196,6 +186,12 @@ const KYCPage = () => {
                                 required
                             />
                         </div>
+                            <Textarea
+                                label="Business Bio"
+                                value={businessInfo.businessBio}
+                                onChange={(e) => setBusinessInfo({ ...businessInfo, businessBio: e.target.value })}
+                                required
+                            />
                     </div>
                 );
 
@@ -206,28 +202,28 @@ const KYCPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <Input
                                 label="Full Name"
-                                value={ownerInfo.fullName}
-                                onChange={(e) => setOwnerInfo({ ...ownerInfo, fullName: e.target.value })}
+                                value={ownerInfo.firstName}
+                                onChange={(e) => setOwnerInfo({ ...ownerInfo, firstName: e.target.value })}
                                 required
                             />
                             <Input
                                 label="Date of Birth"
                                 type="date"
-                                value={ownerInfo.dateOfBirth}
-                                onChange={(e) => setOwnerInfo({ ...ownerInfo, dateOfBirth: e.target.value })}
+                                value={ownerInfo.lastName}
+                                onChange={(e) => setOwnerInfo({ ...ownerInfo, lastName: e.target.value })}
                                 required
                             />
                             <Select
                                 label="ID Type"
-                                options={idTypes}
-                                value={ownerInfo.idType}
-                                onChange={(e) => setOwnerInfo({ ...ownerInfo, idType: e.target.value })}
+                                options={genders}
+                                value={ownerInfo.gender}
+                                onChange={(e) => setOwnerInfo({ ...ownerInfo, gender: e.target.value })}
                                 required
                             />
                             <Input
                                 label="ID Number"
-                                value={ownerInfo.idNumber}
-                                onChange={(e) => setOwnerInfo({ ...ownerInfo, idNumber: e.target.value })}
+                                value={ownerInfo.phoneNumber}
+                                onChange={(e) => setOwnerInfo({ ...ownerInfo, phoneNumber: e.target.value })}
                                 required
                             />
                         </div>
@@ -339,7 +335,7 @@ const KYCPage = () => {
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div><h5 className='text-gray-900 inline-block font-semibold'>Business Name:</h5> {businessInfo.businessName}</div>
                                 <div><h5 className='text-gray-800 inline-block font-semibold'>Business Type:</h5> {businessTypes.find(t => t.value === businessInfo.businessType)?.label}</div>
-                                <div><h5 className='text-gray-800 inline-block font-semibold'>Registration:</h5> {businessInfo.registrationNumber}</div>
+                                <div><h5 className='text-gray-800 inline-block font-semibold'>Registration:</h5> {businessInfo.businessBio}</div>
                                 <div><h5 className='text-gray-800 inline-block font-semibold'>Tax ID:</h5> {businessInfo.taxId}</div>
                             </div>
                         </div>
@@ -347,10 +343,10 @@ const KYCPage = () => {
                         <div className="bg-gray-50 rounded-lg p-6 space-y-4">
                             <h4 className="font-medium text-gray-900">Owner Information</h4>
                             <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div><h5 className='text-gray-800 inline-block font-semibold'>Name:</h5> {ownerInfo.fullName}</div>
-                                <div> <h5 className='text-gray-800 inline-block font-semibold'>Dateof Birth:</h5> {ownerInfo.dateOfBirth}</div>
-                                <div><h5 className='text-gray-800 inline-block font-semibold'>ID Type:</h5> {idTypes.find(t => t.value === ownerInfo.idType)?.label}</div>
-                                <div><h5 className='text-gray-800 inline-block font-semibold'>ID Number:</h5> {ownerInfo.idNumber}</div>
+                                <div><h5 className='text-gray-800 inline-block font-semibold'>Name:</h5> {ownerInfo.firstName}</div>
+                                <div> <h5 className='text-gray-800 inline-block font-semibold'>Dateof Birth:</h5> {ownerInfo.lastName}</div>
+                                <div><h5 className='text-gray-800 inline-block font-semibold'>ID Type:</h5> {genders.find(t => t.value === ownerInfo.gender)?.label}</div>
+                                <div><h5 className='text-gray-800 inline-block font-semibold'>ID Number:</h5> {ownerInfo.phoneNumber}</div>
                             </div>
                         </div>
 
@@ -403,7 +399,7 @@ const KYCPage = () => {
             </div>
 
             {/* Progress Stepper */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 mb-6">
                 <div className="flex items-center justify-between">
                     {steps.map((step, index) => {
                         const isComplete = index < currentStep - 1;
@@ -450,7 +446,7 @@ const KYCPage = () => {
             </div>
 
             {/* Form Content */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 mb-6">
                 {renderStep()}
             </div>
 

@@ -36,10 +36,15 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             [itemKey]: !prev[itemKey]
         }));
     };
-
-    // Check if user is admin
-    const isAdmin = user?.roles?.includes('admin');
-    const isSeller = user?.roles?.includes('seller');
+    
+    // Normalize roles to handle both 'role' (string) and 'roles' (array)
+    const userRoles = user?.data?.roles 
+        ? (Array.isArray(user.data.roles) ? user.data.roles : [user.data.roles])
+        : (user?.data?.role ? [user.data.role] : []);
+    
+    // Check if user is admin or seller
+    const isAdmin = userRoles.includes('admin');
+    const isSeller = userRoles.includes('seller');
 
     // Admin menu items
     const adminMenuItems = [
@@ -147,9 +152,9 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
         },
         {
             key: 'kyc',
-            label: 'KYC',
+            label: 'KYC Details',
             icon: FileText,
-            path: '/kyc'
+            path: '/kyc/status',
         },
         {
             key: 'settings',
@@ -253,10 +258,10 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                 <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-50">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-brand-500 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-medium text-white">JD</span>
+                            <span className="text-sm font-medium text-white">{user?.data?.first_name?.charAt(0) + user?.data?.first_name?.charAt(1).toUpperCase()   || 'User' }</span>
                         </div>
                         <div>
-                            <p className="text-sm font-medium">{user?.name || 'User'}</p>
+                            <p className="text-sm font-medium">{user?.data?.first_name || 'User'}</p>
                             <p className="text-xs text-gray-400">
                                 {isAdmin ? 'Admin' : isSeller ? 'Seller' : 'User'}
                             </p>

@@ -40,7 +40,7 @@ export default function OtpInput({ length = 6, value = "", onChange }) {
                     onChange={(e) => setVal(i, e.target.value)}
                     onKeyDown={(e) => onKeyDown(e, i)}
                     ref={(el) => inputs.current[i] = el}
-                    className="md:w-12 md:h-12 w-10 h-10 text-center text-lg font-medium rounded-xl border border-gray-200 focus:ring-2 focus:ring-gray-900/20 focus:border-gray-900/40 outline-none"
+                    className="md:w-12 md:h-12 w-10 h-10 text-center text-lg font-medium rounded-xl border border-gray-200 focus:ring-2 focus:ring-gray-900/20 focus:border-gray-900/40 outline-hidden"
                 />
             ))}
         </div>

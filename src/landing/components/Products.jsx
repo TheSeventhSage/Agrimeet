@@ -24,8 +24,8 @@ const Products = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {MOCK_PRODUCTS.map((p) => (
-                        <div key={p.id} className="bg-white border rounded-2xl shadow-sm p-4 flex flex-col">
-                            <div className="w-full aspect-[4/3] overflow-hidden rounded-lg mb-3">
+                        <div key={p.id} className="bg-white border rounded-2xl shadow-xs p-4 flex flex-col">
+                            <div className="w-full aspect-4/3 overflow-hidden rounded-lg mb-3">
                                 <img src={p.image} alt={p.title} className="w-full h-full object-cover" loading="lazy" />
                             </div>
 

@@ -206,7 +206,7 @@ const SellerApproval = () => {
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {statCards.map((stat, index) => (
-                        <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                        <div key={index} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-600">{stat.title}</p>
@@ -221,7 +221,7 @@ const SellerApproval = () => {
                 </div>
 
                 {/* Filters and Search */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Search */}
                         <div className="md:col-span-2">
@@ -232,7 +232,7 @@ const SellerApproval = () => {
                                     placeholder="Search by business name, user name, or ID..."
                                     value={filters.search}
                                     onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                                 />
                             </div>
                         </div>
@@ -242,7 +242,7 @@ const SellerApproval = () => {
                             <select
                                 value={filters.status}
                                 onChange={(e) => setFilters({ ...filters, status: e.target.value, page: 1 })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                             >
                                 <option value="all">All Status</option>
                                 <option value="pending">Pending</option>
@@ -261,13 +261,13 @@ const SellerApproval = () => {
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
                         </div>
                     ) : kycApplications.length === 0 ? (
-                        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+                        <div className="lg:col-span-2 bg-white rounded-xl shadow-xs border border-gray-100 p-12 text-center">
                             <FileCheck className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-600">No KYC applications found</p>
                         </div>
                     ) : (
                         kycApplications.map((kyc) => (
-                            <div key={kyc.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                            <div key={kyc.id} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 bg-brand-100 rounded-full flex items-center justify-center">
@@ -334,7 +334,7 @@ const SellerApproval = () => {
 
                 {/* Pagination */}
                 {!isLoading && kycApplications.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-4 flex items-center justify-between">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 px-6 py-4 flex items-center justify-between">
                         <div className="text-sm text-gray-700">
                             Showing <span className="font-medium">{((pagination.current_page - 1) * 10) + 1}</span> to{' '}
                             <span className="font-medium">{Math.min(pagination.current_page * 10, pagination.total)}</span> of{' '}
@@ -388,7 +388,7 @@ const SellerApproval = () => {
                                         value={confirmAction.inputValue}
                                         onChange={(e) => confirmAction.onInputChange(e.target.value)}
                                         rows={3}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                                         placeholder={`Enter ${confirmAction.type === 'approve' ? 'notes' : 'reason'}...`}
                                     />
                                 </div>

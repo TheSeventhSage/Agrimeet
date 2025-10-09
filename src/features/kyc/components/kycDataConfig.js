@@ -1,18 +1,20 @@
 // utils/kycDataConfig.js
 export const businessInfoConfig = [
   { key: 'businessName', label: 'Business Name' },
-  { key: 'businessType', label: 'Business Type', transform: (value, types) => types[value] },
-  { key: 'registrationNumber', label: 'Registration Number' },
-  { key: 'taxId', label: 'Tax ID Number' },
-  { key: 'businessAddress', label: 'Business Address', span: 'md:col-span-2' },
-  { key: 'businessPhone', label: 'Business Phone' }
+  { key: 'businessType', label: 'Business Type' },
+  { key: 'businessPhone', label: 'Business Phone' },
+  { key: 'businessAddress', label: 'Business Address' },
+  { key: 'state', label: 'State' },
+  { key: 'city', label: 'City' },
+  { key: 'businessBio', label: 'Business Bio', span: 'md:col-span-2' },
 ];
 
 export const ownerInfoConfig = [
   { key: 'fullName', label: 'Full Name' },
-  { key: 'dateOfBirth', label: 'Date of Birth' },
-  { key: 'idType', label: 'ID Type', transform: (value, types) => types[value] },
-  { key: 'idNumber', label: 'ID Number' }
+  { key: 'email', label: 'Email' },
+  { key: 'phoneNumber', label: 'Phone Number' },
+  { key: 'gender', label: 'Gender' },
+  { key: 'state', label: 'State' },
 ];
 
 export const bankInfoConfig = [
@@ -20,7 +22,4 @@ export const bankInfoConfig = [
   { key: 'accountType', label: 'Account Type', transform: (value, types) => types[value] },
   { key: 'bankName', label: 'Bank Name' },
   { key: 'accountNumber', label: 'Account Number' },
-  { key: 'routingNumber', label: 'Routing Number' },
-  { key: 'iban', label: 'IBAN', condition: (data) => data.iban },
-  { key: 'swiftCode', label: 'SWIFT/BIC Code', condition: (data) => data.swiftCode }
 ];

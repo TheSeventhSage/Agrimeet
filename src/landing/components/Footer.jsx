@@ -74,7 +74,7 @@ const Footer = () => {
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Enter your email"
                                 required
-                                className="flex-1 px-4 py-2 bg-gray-800 text-white rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                                className="flex-1 px-4 py-2 bg-gray-800 text-white rounded-l-lg focus:outline-hidden focus:ring-2 focus:ring-green-400"
                             />
                             <button type="submit" className="bg-green-600 px-4 py-2 rounded-r-lg hover:bg-green-700 transition-colors">Subscribe</button>
                         </form>

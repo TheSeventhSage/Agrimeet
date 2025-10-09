@@ -45,12 +45,12 @@ const DownloadApp = () => {
 
                             <div className="mt-8 flex flex-col sm:flex-row gap-4">
                                 {/* Official store badges (add assets to /public/images) */}
-                                <a href="#" className="inline-flex items-center gap-3 px-4 py-3 rounded-lg bg-black text-white shadow-sm hover:bg-gray-800" aria-label="Download on the App Store">
+                                <a href="#" className="inline-flex items-center gap-3 px-4 py-3 rounded-lg bg-black text-white shadow-xs hover:bg-gray-800" aria-label="Download on the App Store">
                                     <Apple className="w-5 h-5" />
                                     <span className="text-sm">App Store</span>
                                 </a>
 
-                                <a href="#" className="inline-flex items-center gap-3 px-4 py-3 rounded-lg bg-black text-white shadow-sm hover:bg-gray-800" aria-label="Get it on Google Play">
+                                <a href="#" className="inline-flex items-center gap-3 px-4 py-3 rounded-lg bg-black text-white shadow-xs hover:bg-gray-800" aria-label="Get it on Google Play">
                                     <Play className="w-5 h-5" />
                                     <span className="text-sm">Google Play</span>
                                 </a>

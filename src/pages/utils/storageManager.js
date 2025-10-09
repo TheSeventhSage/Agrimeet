@@ -3,7 +3,7 @@ export const storageManager = {
     KEYS: {
         USER_DATA: 'user_data',
         AUTH_TOKENS: 'auth_tokens',
-        VERIFICATION_STATUS: 'verification_status'
+        VERIFICATION_STATUS: 'verification_status',
     },
 
     // User data
@@ -17,10 +17,11 @@ export const storageManager = {
     },
 
     // Tokens
-    setTokens: (accessToken, refreshToken) => {
+    setTokens: (accessToken, refreshToken, roles) => {
         localStorage.setItem(storageManager.KEYS.AUTH_TOKENS, JSON.stringify({
             access_token: accessToken,
-            refresh_token: refreshToken
+            refresh_token: refreshToken,
+            role: roles,
         }));
     },
 

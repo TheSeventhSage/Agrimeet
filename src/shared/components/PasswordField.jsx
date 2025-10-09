@@ -6,14 +6,14 @@ const PasswordField = ({ label, error, className = '', ...props }) => {
         <label className="block">
             {label && <span className="text-sm text-gray-700 font-medium">{label}</span>}
             <div className={[
-                "mt-1 flex items-center rounded-xl border bg-white backdrop-blur",
+                "mt-1 flex items-center rounded-xl border bg-white backdrop-blur-sm",
                 error ? "border-red-300" : "border-gray-200",
                 className
             ].join(' ')}>
                 <input
                     {...props}
                     type={show ? 'text' : 'password'}
-                    className="w-full px-3.5 py-2.5 outline-none rounded-xl bg-transparent"
+                    className="w-full px-3.5 py-2.5 outline-hidden rounded-xl bg-transparent"
                 />
                 <button
                     type="button"

@@ -33,7 +33,7 @@ export const LogoMerge = ({ classNameDraw, classNameText, classNameMain }) => {
                 </div>
 
                 <div
-                    className={`grid place-self-center rounded-md text-white ${classNameText} shadow-soft w-[100%] -ms-2`}
+                    className={`grid place-self-center rounded-md text-white ${classNameText} shadow-soft w-full -ms-2`}
                     aria-label="Agrimeet"
                     title="Agrimeet"
                 >
@@ -48,7 +48,7 @@ export const LogoDark = () => {
     return (
         <Link to={"/"}>
             <div
-                className="grid items-start rounded-md text-white w-[70%] md:hidden h-16 overflow-hidden"
+                className="grid items-start rounded-md text-white  sm:w-[30%] w-[70%] md:hidden h-16 overflow-hidden"
                 aria-label="Agrimeet"
                 title="Agrimeet"
             >

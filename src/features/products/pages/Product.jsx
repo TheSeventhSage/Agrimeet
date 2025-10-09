@@ -3,20 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import ProductGridHeader from '../components/ProductGridHeader';
 import ProductTable from '../components/ProductTable';
-import LoadingSpinner from '../../../shared/components/Loading';
+import { LoadingSpinner } from '../../../shared/components/Loader';
 import {
     getProducts,
     deleteProduct,
     transformProductData
 } from '../api/productsApi';
 import { showSuccess, showError } from '../../../shared/utils/alert';
-
-// Loading Spinner Component
-// const LoadingSpinner = () => (
-//     <div className="flex items-center justify-center py-12">
-//         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
-//     </div>
-// );
 
 // Pagination Component
 const Pagination = ({ currentPage, lastPage, onPageChange }) => {
@@ -101,8 +94,9 @@ export default function ProductGrid() {
 
             // Transform API data to match component expectations
             const transformedProducts = response.data.map(transformProductData);
-
+            console.log(transformedProducts);
             setProducts(transformedProducts);
+
             setPagination(response.meta);
 
         } catch (error) {
@@ -176,7 +170,7 @@ export default function ProductGrid() {
             <DashboardLayout>
                 <div className="max-w-4xl mx-auto">
                     <ProductGridHeader onAddProduct={handleAddProduct} />
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-8 text-center">
                         <div className="text-red-500 mb-4">
                             <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -207,7 +201,7 @@ export default function ProductGrid() {
             />
 
             {/* Search and Filter Bar */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+            <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-4 mb-6">
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
                         <input
@@ -215,14 +209,14 @@ export default function ProductGrid() {
                             placeholder="Search products..."
                             value={filters.search}
                             onChange={(e) => handleFilterChange({ search: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                         />
                     </div>
                     <div className="flex gap-4">
                         <select
                             value={filters.status}
                             onChange={(e) => handleFilterChange({ status: e.target.value })}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                         >
                             <option value="">All Status</option>
                             <option value="active">Active</option>
@@ -240,7 +234,7 @@ export default function ProductGrid() {
             </div>
 
             {/* Products Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ">
+            <div className="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden ">
                 {/* Table Header */}
                 <div className="p-6 border-b border-gray-200">
                     <div className="flex items-center justify-between">

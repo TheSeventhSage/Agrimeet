@@ -118,7 +118,7 @@ const OrderDetails = ({ order, onBack, onUpdateStatus, onPrintInvoice, isLoading
             </div>
 
             {/* Order Timeline */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Timeline</h2>
                 <div className="relative">
                     {timeline.map((step, index) => (
@@ -152,7 +152,7 @@ const OrderDetails = ({ order, onBack, onUpdateStatus, onPrintInvoice, isLoading
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Customer Information */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <div className="flex items-center mb-4">
                         <User className="w-5 h-5 text-gray-400 mr-2" />
                         <h2 className="text-lg font-semibold text-gray-900">Customer Information</h2>
@@ -175,7 +175,7 @@ const OrderDetails = ({ order, onBack, onUpdateStatus, onPrintInvoice, isLoading
                 </div>
 
                 {/* Shipping Information */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <div className="flex items-center mb-4">
                         <MapPin className="w-5 h-5 text-gray-400 mr-2" />
                         <h2 className="text-lg font-semibold text-gray-900">Shipping Address</h2>
@@ -194,13 +194,13 @@ const OrderDetails = ({ order, onBack, onUpdateStatus, onPrintInvoice, isLoading
                                 <Truck className="w-4 h-4 text-gray-400 mr-2" />
                                 <p className="text-sm font-medium text-gray-700">Tracking Number</p>
                             </div>
-                            <p className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">{order.trackingNumber}</p>
+                            <p className="font-mono text-sm bg-gray-100 px-2 py-1 rounded-sm">{order.trackingNumber}</p>
                         </div>
                     )}
                 </div>
 
                 {/* Payment Information */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <div className="flex items-center mb-4">
                         <CreditCard className="w-5 h-5 text-gray-400 mr-2" />
                         <h2 className="text-lg font-semibold text-gray-900">Payment Information</h2>
@@ -239,7 +239,7 @@ const OrderDetails = ({ order, onBack, onUpdateStatus, onPrintInvoice, isLoading
             </div>
 
             {/* Order Items */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                 <div className="flex items-center mb-6">
                     <Package className="w-5 h-5 text-gray-400 mr-2" />
                     <h2 className="text-lg font-semibold text-gray-900">Order Items ({order.items.length})</h2>
@@ -290,7 +290,7 @@ const OrderDetails = ({ order, onBack, onUpdateStatus, onPrintInvoice, isLoading
 
             {/* Order Notes */}
             {order.notes && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <div className="flex items-center mb-4">
                         <FileText className="w-5 h-5 text-gray-400 mr-2" />
                         <h2 className="text-lg font-semibold text-gray-900">Order Notes</h2>

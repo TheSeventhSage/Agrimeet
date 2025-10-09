@@ -44,7 +44,7 @@ const HowItWorks = () => {
                 <div className="mt-10 text-center">
                     <a
                         href="/signup"
-                        className="inline-flex items-center gap-2 px-5 py-3 bg-green-600 text-white rounded-full font-medium shadow hover:bg-green-500"
+                        className="inline-flex items-center gap-2 px-5 py-3 bg-green-600 text-white rounded-full font-medium shadow-sm hover:bg-green-500"
                         aria-label="Create account now"
                     >
                         Get Started — Join AgriMeet

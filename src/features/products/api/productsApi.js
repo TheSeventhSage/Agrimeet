@@ -206,14 +206,12 @@ export const transformProductData = (apiProduct) => {
         price: parseFloat(apiProduct.discount_price || apiProduct.base_price),
         discount: apiProduct.discount_price ?
             Math.round(((apiProduct.base_price - apiProduct.discount_price) / apiProduct.base_price) * 100) : 0,
-        stock: apiProduct.stock_quantity,
-        category: apiProduct.category?.name || 'Unknown',
+        stock: apiProduct.sku,
+        category: apiProduct.category || 'Unknown',
         categoryId: apiProduct.category_id,
         status: apiProduct.status,
-        sku: apiProduct.slug, // Using slug as SKU for now
-        image: apiProduct.thumbnail ?
-            `https://agrimeet.udehcoglobalfoodsltd.com/storage/${apiProduct.thumbnail}` :
-            null,
+        slug: apiProduct.slug, // Using slug as SKU for now
+        image: apiProduct?.thumbnail,
         images: apiProduct.images?.map(img =>
             `https://agrimeet.udehcoglobalfoodsltd.com/storage/${img.url}`
         ) || [],
@@ -221,8 +219,8 @@ export const transformProductData = (apiProduct) => {
         reviews: 0, // Default reviews since not in API
         unit: apiProduct.unit?.name || 'Unit',
         unitSymbol: apiProduct.unit?.symbol || '',
-        sellerId: apiProduct.seller_id,
-        seller: apiProduct.seller,
+        sellerId: apiProduct.seller.seller_id,
+        seller: apiProduct.seller.name,
         variants: apiProduct.variants || [],
         createdAt: apiProduct.created_at,
         updatedAt: apiProduct.updated_at

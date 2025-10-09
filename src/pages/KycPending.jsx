@@ -5,7 +5,7 @@ import { performRedirect, ROUTES } from './utils/routingManager';
 
 export const KycPending = () => {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4 relative">
+        <div className="min-h-screen bg-linear-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4 relative">
             <BackgroundArt />
             <div className="bg-white rounded-3xl shadow-2xl p-12 text-center max-w-lg relative z-10">
                 <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">

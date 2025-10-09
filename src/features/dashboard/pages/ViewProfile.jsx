@@ -69,9 +69,9 @@ const ViewProfile = () => {
                 </div>
 
                 {/* Profile Card */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden">
                     {/* Cover Photo */}
-                    <div className="h-32 bg-gradient-to-r from-brand-500 to-brand-600 relative">
+                    <div className="h-32 bg-linear-to-r from-brand-500 to-brand-600 relative">
                         <div className="absolute inset-0 bg-black bg-opacity-20"></div>
                     </div>
 
@@ -131,7 +131,7 @@ const ViewProfile = () => {
                 {/* Details Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Contact Information */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
@@ -166,7 +166,7 @@ const ViewProfile = () => {
                     </div>
 
                     {/* About */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">About</h3>
                         <p className="text-gray-700 leading-relaxed mb-4">{userData.bio}</p>
 
@@ -184,7 +184,7 @@ const ViewProfile = () => {
                 </div>
 
                 {/* Achievements */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Achievements</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {userData.achievements.map((achievement, index) => (

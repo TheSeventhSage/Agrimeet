@@ -45,7 +45,7 @@ const OrderTabs = ({ activeTab, onTabChange, orderStats = {} }) => {
     ];
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-1 mb-6 overflow-x-auto">
+        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-1 mb-6 overflow-x-auto">
             <div className="flex space-x-1 min-w-max">
                 {tabs.map((tab) => {
                     const IconComponent = tab.icon;
@@ -56,7 +56,7 @@ const OrderTabs = ({ activeTab, onTabChange, orderStats = {} }) => {
                             key={tab.id}
                             onClick={() => onTabChange(tab.id)}
                             className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${isActive
-                                    ? 'bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-md transform scale-105'
+                                    ? 'bg-linear-to-r from-brand-500 to-brand-600 text-white shadow-md transform scale-105'
                                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                                 }`}
                         >

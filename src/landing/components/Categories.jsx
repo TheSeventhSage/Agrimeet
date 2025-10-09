@@ -23,14 +23,14 @@ const Categories = () => {
                             className="group relative overflow-hidden rounded-2xl shadow-lg bg-white"
                             aria-labelledby={`cat-${idx}-title`}
                         >
-                            <div className="relative w-full aspect-[16/10] overflow-hidden">
+                            <div className="relative w-full aspect-16/10 overflow-hidden">
                                 <img
                                     src={category.image}
                                     alt={category.name}
                                     loading="lazy"
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+                                <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent pointer-events-none" />
                             </div>
 
                             <div className="p-5">
@@ -42,7 +42,7 @@ const Categories = () => {
                                 <div className="mt-4 flex items-center justify-between">
                                     <a
                                         href={`/shop?category=${encodeURIComponent(category.name)}`}
-                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-600 text-white text-sm font-medium shadow-sm hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-300"
+                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-600 text-white text-sm font-medium shadow-xs hover:bg-green-500 focus:outline-hidden focus:ring-2 focus:ring-green-300"
                                         aria-label={`Explore ${category.name}`}
                                     >
                                         Explore

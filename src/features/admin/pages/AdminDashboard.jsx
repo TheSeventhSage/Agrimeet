@@ -185,7 +185,7 @@ const AdminDashboard = () => {
                 {/* Main Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {mainStats.map((stat, index) => (
-                        <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                        <div key={index} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
                             <div className="flex items-center justify-between">
                                 <div className="flex-1">
                                     <p className="text-sm font-medium text-gray-600">{stat.title}</p>
@@ -235,7 +235,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Quick Stats */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Statistics</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {quickStats.map((stat, index) => (
@@ -255,7 +255,7 @@ const AdminDashboard = () => {
                 {/* Two Column Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Recent Activities */}
-                    <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="lg:col-span-2 bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-semibold text-gray-900">Recent Activities</h2>
                             <button className="text-brand-600 hover:text-brand-700 text-sm font-medium">
@@ -295,7 +295,7 @@ const AdminDashboard = () => {
                     </div>
 
                     {/* Platform Health */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-6">Platform Health</h2>
                         <div className="space-y-4">
                             <div>
@@ -353,7 +353,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <button

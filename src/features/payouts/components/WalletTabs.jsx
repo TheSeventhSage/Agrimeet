@@ -10,7 +10,7 @@ const WalletTabs = ({ activeTab, onTabChange }) => {
     ];
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-1 mb-6 overflow-auto">
+        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-1 mb-6 overflow-auto">
             <div className="flex space-x-1">
                 {tabs.map((tab) => {
                     const IconComponent = tab.icon;

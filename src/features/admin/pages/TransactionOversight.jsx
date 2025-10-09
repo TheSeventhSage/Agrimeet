@@ -182,7 +182,7 @@ const TransactionOversight = () => {
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {statCards.map((stat, index) => (
-                        <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                        <div key={index} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-600">{stat.title}</p>
@@ -198,7 +198,7 @@ const TransactionOversight = () => {
                 </div>
 
                 {/* Filters and Search */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                         {/* Search */}
                         <div className="md:col-span-2">
@@ -209,7 +209,7 @@ const TransactionOversight = () => {
                                     placeholder="Search by transaction ID, user, or order..."
                                     value={filters.search}
                                     onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                                 />
                             </div>
                         </div>
@@ -219,7 +219,7 @@ const TransactionOversight = () => {
                             <select
                                 value={filters.status}
                                 onChange={(e) => setFilters({ ...filters, status: e.target.value, page: 1 })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                             >
                                 <option value="all">All Status</option>
                                 <option value="completed">Completed</option>
@@ -235,7 +235,7 @@ const TransactionOversight = () => {
                             <select
                                 value={filters.type}
                                 onChange={(e) => setFilters({ ...filters, type: e.target.value, page: 1 })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                             >
                                 <option value="all">All Types</option>
                                 <option value="payment">Payment</option>
@@ -251,7 +251,7 @@ const TransactionOversight = () => {
                                 type="date"
                                 value={filters.date_from}
                                 onChange={(e) => setFilters({ ...filters, date_from: e.target.value, page: 1 })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                                 placeholder="From"
                             />
                         </div>
@@ -259,7 +259,7 @@ const TransactionOversight = () => {
                 </div>
 
                 {/* Transactions Table */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead className="bg-gray-50 border-b border-gray-200">

@@ -5,8 +5,8 @@ const TextField = ({ label, hint, error, className = '', ...props }) => {
             <input
                 {...props}
                 className={[
-                    "mt-1 w-full rounded-xl border px-3.5 py-2.5 outline-none",
-                    "bg-white backdrop-blur",
+                    "mt-1 w-full rounded-xl border px-3.5 py-2.5 outline-hidden",
+                    "bg-white backdrop-blur-sm",
                     "focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500/50",
                     error ? "border-red-300" : "border-gray-200",
                     className

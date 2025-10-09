@@ -196,7 +196,7 @@ export default function Register() {
                             type="checkbox"
                             checked={form.terms_accepted}
                             onChange={handleChange}
-                            className="focus:ring-brand-500 h-4 w-4 text-brand-600 border-gray-300 rounded"
+                            className="focus:ring-brand-500 h-4 w-4 text-brand-600 border-gray-300 rounded-sm"
                         />
                     </div>
                     <div className="ml-3 text-sm">

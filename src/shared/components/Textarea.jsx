@@ -28,7 +28,7 @@ const Textarea = ({
                 required={required}
                 rows={rows}
                 className={`
-          w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-vertical
+          w-full px-3 py-2 border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-vertical
           ${error ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'}
           ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}
           ${className}

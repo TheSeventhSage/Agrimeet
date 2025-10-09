@@ -1,23 +1,19 @@
 import { useState, useEffect } from 'react';
 import {
     User,
-    Mail,
-    Phone,
-    MapPin,
     Lock,
     Bell,
-    Shield,
     Save,
-    Camera,
     Eye,
     EyeOff
 } from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import Input from '../../../shared/components/Input';
 import AvatarUpload from '../../../shared/components/AvatarUpload';
-import Textarea from '../../../shared/components/Textarea';
 import Button from '../../../shared/components/Button';
 import { showSuccess, showError } from '../../../shared/utils/alert';
+import { storageManager } from '../../../pages/utils/storageManager';
+import { updateUserProfile } from '../api/profile.api';
 
 const Settings = () => {
     const [activeTab, setActiveTab] = useState('profile');
@@ -25,17 +21,12 @@ const Settings = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [avatarFile, setAvatarFile] = useState(null);
-    const [avatarPreviewUrl, setAvatarPreviewUrl] = useState("https://via.placeholder.com/100x100/10b981/ffffff?text=JD");
+    const [avatarPreviewUrl, setAvatarPreviewUrl] = useState(null);
+    const [currentUserData, setCurrentUserData] = useState(null);
 
     useEffect(() => {
         return () => {
-            const placeholder =
-                "https://via.placeholder.com/100x100/10b981/ffffff?text=JD";
-            if (
-                avatarPreviewUrl &&
-                avatarPreviewUrl !== placeholder &&
-                avatarPreviewUrl.startsWith("blob:")
-            ) {
+            if (avatarPreviewUrl && avatarPreviewUrl.startsWith && avatarPreviewUrl.startsWith("blob:")) {
                 try {
                     URL.revokeObjectURL(avatarPreviewUrl);
                 } catch (e) {
@@ -45,17 +36,37 @@ const Settings = () => {
         };
     }, [avatarPreviewUrl]);
 
-    // Profile form data
+    // Profile form data (controlled inputs)
     const [profileData, setProfileData] = useState({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@agrimeet.com',
-        phone: '+1 (555) 123-4567',
-        location: 'Lagos, Nigeria',
-        bio: 'Passionate farmer and agricultural entrepreneur with over 5 years of experience in sustainable farming practices.',
-        website: 'https://johndoe-farms.com',
-        specialties: ['Organic Farming', 'Sustainable Agriculture', 'Crop Management']
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
     });
+
+    useEffect(() => {
+        // Load user data from storage manager
+        const userData = storageManager.getUserData();
+
+        if (userData && userData.data) {
+            setCurrentUserData(userData.data);
+
+            setProfileData(prev => ({
+                ...prev,
+                firstName: userData.data.first_name || '',
+                lastName: userData.data.last_name || '',
+                email: userData.data.email || '',
+                phone: userData.data.phone_number || ''
+            }));
+
+            // Set avatar if available in user data
+            if (userData.data.profile_photo) {
+                setAvatarPreviewUrl(userData.data.profile_photo);
+            } else if (userData.avatar_url) {
+                setAvatarPreviewUrl(userData.avatar_url);
+            }
+        }
+    }, []);
 
     // Password form data
     const [passwordData, setPasswordData] = useState({
@@ -64,43 +75,75 @@ const Settings = () => {
         confirmPassword: ''
     });
 
-    // Notification preferences
-    const [notifications, setNotifications] = useState({
-        emailNotifications: true,
-        smsNotifications: false,
-        orderUpdates: true,
-        productUpdates: true,
-        marketingEmails: false,
-        securityAlerts: true
-    });
-
     const tabs = [
         { id: 'profile', label: 'Profile', icon: User },
         { id: 'security', label: 'Security', icon: Lock },
         { id: 'notifications', label: 'Notifications', icon: Bell },
     ];
 
-    const handleProfileChange = (e) => {
-        const { name, value } = e.target;
+    /**
+     * Robust handler for profile inputs.
+     * Accepts either:
+     *  - (event) where event.target.name and event.target.value exist
+     *  - (name, valueOrEvent) where valueOrEvent can be an event or a raw string
+     *
+     * Many custom Input components call onChange(value) instead of onChange(event).
+     * To support both, prefer calling: onChange={(v)=>handleProfileChange('firstName', v)}
+     * but this handler is defensive so passing the raw event also works.
+     */
+    const handleProfileChange = (eOrName, maybeValue) => {
+        let name, value;
+
+        // Called as handleProfileChange('firstName', valueOrEvent)
+        if (typeof eOrName === 'string') {
+            name = eOrName;
+            const v = maybeValue;
+            if (v && v.target) {
+                value = v.target.value;
+            } else {
+                value = v;
+            }
+        } else if (eOrName && eOrName.target) {
+            // Called as handleProfileChange(event)
+            name = eOrName.target.name;
+            value = eOrName.target.value;
+        } else {
+            // Unexpected call signature, do nothing
+            return;
+        }
+
         setProfileData(prev => ({
             ...prev,
             [name]: value
         }));
+
+        console.log('Profile data updated:', profileData);
     };
 
-    const handlePasswordChange = (e) => {
-        const { name, value } = e.target;
+    /**
+     * Robust handler for password inputs similar to profile handler.
+     */
+    const handlePasswordChange = (eOrName, maybeValue) => {
+        let name, value;
+
+        if (typeof eOrName === 'string') {
+            name = eOrName;
+            const v = maybeValue;
+            if (v && v.target) {
+                value = v.target.value;
+            } else {
+                value = v;
+            }
+        } else if (eOrName && eOrName.target) {
+            name = eOrName.target.name;
+            value = eOrName.target.value;
+        } else {
+            return;
+        }
+
         setPasswordData(prev => ({
             ...prev,
             [name]: value
-        }));
-    };
-
-    const handleNotificationChange = (e) => {
-        const { name, checked } = e.target;
-        setNotifications(prev => ({
-            ...prev,
-            [name]: checked
         }));
     };
 
@@ -109,35 +152,96 @@ const Settings = () => {
         setIsSubmitting(true);
 
         try {
-            // Build FormData to send to server (multipart)
-            const formData = new FormData();
-            formData.append('firstName', profileData.firstName);
-            formData.append('lastName', profileData.lastName);
-            formData.append('email', profileData.email);
-            formData.append('phone', profileData.phone);
-            formData.append('location', profileData.location);
-            formData.append('bio', profileData.bio || '');
-            formData.append('website', profileData.website || '');
-            // append avatar if selected
-            if (avatarFile) {
-                formData.append('avatar', avatarFile);
+            // Get current user data for merging
+            const userData = storageManager.getUserData();
+            if (!userData || !userData.data) {
+                throw new Error('User data not found');
             }
 
-            // Example: use your API client to send multipart request:
-            // await api.patch('/api/seller/profile', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            const seller = userData.data.seller;
 
-            // For now keep your simulated API call to preserve existing behavior:
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Create FormData for multipart request
+            const formData = new FormData();
+            formData.append('name', profileData.firstName + ' ' + profileData.lastName);
+            // formData.append('last_name', profileData.lastName);
+            formData.append('email', profileData.email);
+            formData.append('phone_number', profileData.phone);
+
+            // if (avatarFile) {
+            // }
+            formData.append('profile_photo', avatarFile);
+            formData.append('country_name', 'Nigeria');
+
+            formData.append('business_type_id', seller.business_type_id);
+            formData.append('company', seller.store_name),
+            formData.append('address', seller.address),
+            formData.append('state', seller.state),
+            formData.append('city', seller.city),
+            formData.append('business_bio', seller.business_bio),
+            formData.append('bank_name', seller.bank_name),
+            formData.append('bank_account_number', seller.bank_account_number),
+            formData.append('business_phone_number', seller.business_phone_number),
+            formData.append('name_on_account', seller.name_on_account),
+
+            // Add seller as JSON string (backend should parse JSON) — safe fallback
+            // if (seller) {
+            //     formData.append('seller', JSON.stringify({
+            //         business_type_id: seller.business_type_id,
+            //         store_name: seller.store_name,
+            //         address: seller.address,
+            //         city: seller.city,
+            //         state: seller.state,
+            //         business_bio: seller.business_bio,
+            //         bank_name: seller.bank_name,
+            //         bank_account_number: seller.bank_account_number,
+            //         business_phone_number: seller.business_phone_number,
+            //         name_on_account: seller.name_on_account,
+            //         gender: seller.gender
+            //     }));
+            // }
+
+            // DEBUG: Log what we're sending (formData)
+            // Note: Iterating FormData is safe in modern browsers
+            console.log('FormData contents:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+
+            // Call the API with the FormData (multipart request)
+            const response = await updateUserProfile(userData.data.id, formData);
+
+            // Update local storage with the new data (merge)
+            const updatedUserData = {
+                ...userData,
+                data: {
+                    ...userData.data,
+                    first_name: profileData.firstName,
+                    last_name: profileData.lastName,
+                    email: profileData.email,
+                    phone_number: profileData.phone,
+                    profile_photo: (response?.data && (response.data.profile_photo || response.data.user?.profile_photo)) || userData.data.profile_photo,
+                    // keep seller object (could be updated from backend if returned)
+                    seller: response?.data?.seller || userData.data.seller
+                }
+            };
+
+            storageManager.setUserData(updatedUserData);
+
+            // Update avatar preview if we have a new photo URL
+            if (response?.data?.profile_photo || response?.data?.user?.profile_photo) {
+                const newPhoto = response.data.profile_photo || response.data.user?.profile_photo;
+                setAvatarPreviewUrl(newPhoto);
+            }
 
             showSuccess('Profile updated successfully!');
+
         } catch (error) {
-            showError('Failed to update profile. Please try again.');
             console.error('Profile update error:', error);
+            showError((error && error.message) ? error.message : 'Failed to update profile. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
     };
-
 
     const handlePasswordSubmit = async (e) => {
         e.preventDefault();
@@ -150,7 +254,7 @@ const Settings = () => {
         setIsSubmitting(true);
 
         try {
-            // Simulate API call
+            // Simulate API call (replace with real call)
             await new Promise(resolve => setTimeout(resolve, 1000));
             showSuccess('Password updated successfully!');
             setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -162,20 +266,11 @@ const Settings = () => {
         }
     };
 
-    const handleSettingsSubmit = async (e) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-
-        try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            showSuccess('Settings updated successfully!');
-        } catch (error) {
-            showError('Failed to update settings. Please try again.');
-            console.error('Settings update error:', error);
-        } finally {
-            setIsSubmitting(false);
-        }
+    const handleAvatarSelected = (file, previewUrl) => {
+        if (!file) return;
+        setAvatarFile(file);
+        setAvatarPreviewUrl(previewUrl);
+        console.log('Avatar selected:', file.name, 'Preview URL:', previewUrl);
     };
 
     const renderProfileTab = () => (
@@ -183,46 +278,27 @@ const Settings = () => {
             {/* Avatar Section */}
             <AvatarUpload
                 src={avatarPreviewUrl}
-                onFileSelected={(file, previewUrl) => {
-                    // AvatarUpload might send only file or (file, previewUrl).
-                    // Prefer previewUrl if provided, else create a blob URL here.
-                    if (previewUrl) {
-                        setAvatarPreviewUrl(previewUrl);
-                    } else if (file) {
-                        const url = URL.createObjectURL(file);
-                        setAvatarPreviewUrl(url);
-                        // If you create a blob URL here, you may want to revoke on unmount:
-                        // We'll handle cleanup in useEffect below.
-                    }
-
-                    setAvatarFile(file);
-
-                    // if you need the same format as DocumentUpload:
-                    const fileObject = {
-                        id: Math.random().toString(36).substr(2, 9),
-                        file,
-                        name: file?.name,
-                        size: file?.size,
-                        type: file?.type
-                    };
-                    console.log('avatar selected', fileObject);
-                }}
+                onFileSelected={handleAvatarSelected}
             />
 
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* IMPORTANT:
+                    Many custom Input components call onChange(value) instead of onChange(event).
+                    To be safe we pass a wrapper that always supplies the field name as first arg.
+                */}
                 <Input
                     label="First Name"
                     name="firstName"
                     value={profileData.firstName}
-                    onChange={handleProfileChange}
+                    onChange={(v) => handleProfileChange('firstName', v)}
                     required
                 />
                 <Input
                     label="Last Name"
                     name="lastName"
                     value={profileData.lastName}
-                    onChange={handleProfileChange}
+                    onChange={(v) => handleProfileChange('lastName', v)}
                     required
                 />
                 <Input
@@ -230,37 +306,16 @@ const Settings = () => {
                     name="email"
                     type="email"
                     value={profileData.email}
-                    onChange={handleProfileChange}
+                    onChange={(v) => handleProfileChange('email', v)}
                     required
                 />
                 <Input
                     label="Phone"
                     name="phone"
                     value={profileData.phone}
-                    onChange={handleProfileChange}
-                />
-                <Input
-                    label="Location"
-                    name="location"
-                    value={profileData.location}
-                    onChange={handleProfileChange}
-                />
-                <Input
-                    label="Website"
-                    name="website"
-                    value={profileData.website}
-                    onChange={handleProfileChange}
+                    onChange={(v) => handleProfileChange('phone', v)}
                 />
             </div>
-
-            <Textarea
-                label="Bio"
-                name="bio"
-                value={profileData.bio}
-                onChange={handleProfileChange}
-                rows={4}
-                placeholder="Tell us about yourself and your farming experience..."
-            />
 
             <div className="flex justify-end">
                 <Button
@@ -283,7 +338,7 @@ const Settings = () => {
                     name="currentPassword"
                     type={showPassword ? 'text' : 'password'}
                     value={passwordData.currentPassword}
-                    onChange={handlePasswordChange}
+                    onChange={(v) => handlePasswordChange('currentPassword', v)}
                     required
                 />
                 <Input
@@ -291,7 +346,7 @@ const Settings = () => {
                     name="newPassword"
                     type={showPassword ? 'text' : 'password'}
                     value={passwordData.newPassword}
-                    onChange={handlePasswordChange}
+                    onChange={(v) => handlePasswordChange('newPassword', v)}
                     required
                 />
                 <Input
@@ -299,7 +354,7 @@ const Settings = () => {
                     name="confirmPassword"
                     type={showPassword ? 'text' : 'password'}
                     value={passwordData.confirmPassword}
-                    onChange={handlePasswordChange}
+                    onChange={(v) => handlePasswordChange('confirmPassword', v)}
                     required
                 />
             </div>
@@ -328,54 +383,6 @@ const Settings = () => {
         </form>
     );
 
-    const renderNotificationsTab = () => (
-        <form onSubmit={handleSettingsSubmit} className="space-y-6">
-            <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">Email Notifications</h3>
-                {Object.entries(notifications).map(([key, value]) => (
-                    <div key={key} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-                        <div>
-                            <p className="font-medium text-gray-900">
-                                {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                                {key === 'emailNotifications' && 'Receive notifications via email'}
-                                {key === 'smsNotifications' && 'Receive notifications via SMS'}
-                                {key === 'orderUpdates' && 'Get notified about order status changes'}
-                                {key === 'productUpdates' && 'Get notified about product updates'}
-                                {key === 'marketingEmails' && 'Receive marketing and promotional emails'}
-                                {key === 'securityAlerts' && 'Get notified about security-related activities'}
-                            </p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                name={key}
-                                checked={value}
-                                onChange={handleNotificationChange}
-                                className="sr-only peer"
-                            />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
-                        </label>
-                    </div>
-                ))}
-            </div>
-
-            <div className="flex justify-end">
-                <Button
-                    type="submit"
-                    loading={isSubmitting}
-                    className="px-6 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-2"
-                >
-                    <Save className="w-4 h-4" />
-                    Save Settings
-                </Button>
-            </div>
-        </form>
-    );
-
-
-
     return (
         <DashboardLayout>
             <div className="max-w-6xl mx-auto">
@@ -387,7 +394,7 @@ const Settings = () => {
 
                 <div className="flex flex-col lg:flex-row gap-6">
                     {/* Sidebar */}
-                    <div className="lg:w-64 flex-shrink-0">
+                    <div className="lg:w-64 shrink-0">
                         <nav className="space-y-1">
                             {tabs.map((tab) => (
                                 <button
@@ -407,10 +414,9 @@ const Settings = () => {
 
                     {/* Content */}
                     <div className="flex-1">
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                             {activeTab === 'profile' && renderProfileTab()}
                             {activeTab === 'security' && renderSecurityTab()}
-                            {activeTab === 'notifications' && renderNotificationsTab()}
                         </div>
                     </div>
                 </div>

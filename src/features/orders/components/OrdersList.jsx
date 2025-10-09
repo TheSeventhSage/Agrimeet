@@ -64,7 +64,7 @@ const OrdersList = ({
     return (
         <div className="space-y-6">
             {/* Search and Filters Bar */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-4">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                     {/* Search */}
                     <form onSubmit={handleSearchSubmit} className="flex-1 max-w-md">
@@ -218,7 +218,7 @@ const OrdersList = ({
 
             {/* Orders Table */}
             {orders.length === 0 ? (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-12 text-center">
                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Search className="w-8 h-8 text-gray-400" />
                     </div>
@@ -240,7 +240,7 @@ const OrdersList = ({
                     )}
                 </div>
             ) : (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>

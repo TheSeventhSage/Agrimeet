@@ -36,7 +36,7 @@ export default function SimpleCart() {
             {/* Cart button */}
             <button
                 onClick={() => setOpen(v => !v)}
-                className="relative inline-flex items-center p-2 bg-white border rounded-md shadow-sm hover:bg-gray-50"
+                className="relative inline-flex items-center p-2 bg-white border rounded-md shadow-xs hover:bg-gray-50"
                 aria-expanded={open}
                 aria-label="Open cart"
             >
@@ -73,9 +73,9 @@ export default function SimpleCart() {
                                     </div>
 
                                     <div className="mt-2 flex items-center gap-2">
-                                        <button onClick={() => { updateQty(it.id, (it.qty || 1) - 1); const c = getCart(); setItems(c); setCount(cartCount(c)); }} className="px-2 py-1 border rounded">-</button>
+                                        <button onClick={() => { updateQty(it.id, (it.qty || 1) - 1); const c = getCart(); setItems(c); setCount(cartCount(c)); }} className="px-2 py-1 border rounded-sm">-</button>
                                         <div className="px-3 text-sm">{it.qty || 1}</div>
-                                        <button onClick={() => { updateQty(it.id, (it.qty || 1) + 1); const c = getCart(); setItems(c); setCount(cartCount(c)); }} className="px-2 py-1 border rounded">+</button>
+                                        <button onClick={() => { updateQty(it.id, (it.qty || 1) + 1); const c = getCart(); setItems(c); setCount(cartCount(c)); }} className="px-2 py-1 border rounded-sm">+</button>
                                     </div>
                                 </div>
                             </div>
@@ -89,8 +89,8 @@ export default function SimpleCart() {
                         </div>
 
                         <div className="flex gap-2">
-                            <button onClick={() => { /* replace with real checkout */ alert('Checkout (mock)'); }} className="flex-1 px-3 py-2 bg-green-600 text-white rounded">Checkout</button>
-                            <button onClick={() => { setOpen(false); }} className="px-3 py-2 border rounded">Close</button>
+                            <button onClick={() => { /* replace with real checkout */ alert('Checkout (mock)'); }} className="flex-1 px-3 py-2 bg-green-600 text-white rounded-sm">Checkout</button>
+                            <button onClick={() => { setOpen(false); }} className="px-3 py-2 border rounded-sm">Close</button>
                         </div>
                     </div>
                 </div>

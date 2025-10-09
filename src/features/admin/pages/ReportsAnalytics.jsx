@@ -148,7 +148,7 @@ const ReportsAnalytics = () => {
                         <select
                             value={selectedPeriod}
                             onChange={(e) => setSelectedPeriod(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                         >
                             <option value="7days">Last 7 Days</option>
                             <option value="30days">Last 30 Days</option>
@@ -168,7 +168,7 @@ const ReportsAnalytics = () => {
                 {/* Main Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {statCards.map((stat, index) => (
-                        <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                        <div key={index} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-600">{stat.title}</p>
@@ -189,7 +189,7 @@ const ReportsAnalytics = () => {
                 </div>
 
                 {/* Key Metrics */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-6">Key Performance Metrics</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {topMetrics.map((metric, index) => (
@@ -217,7 +217,7 @@ const ReportsAnalytics = () => {
                 </div>
 
                 {/* Revenue Chart */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-xl font-semibold text-gray-900">Revenue Trend</h2>
                         <LineChart className="w-5 h-5 text-gray-400" />
@@ -242,7 +242,7 @@ const ReportsAnalytics = () => {
                 {/* Two Column Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Top Products */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-semibold text-gray-900">Top Products</h2>
                             <Package className="w-5 h-5 text-gray-400" />
@@ -272,7 +272,7 @@ const ReportsAnalytics = () => {
                     </div>
 
                     {/* Top Sellers */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-semibold text-gray-900">Top Sellers</h2>
                             <Users className="w-5 h-5 text-gray-400" />
@@ -308,7 +308,7 @@ const ReportsAnalytics = () => {
                 {/* User Growth & Order Statistics */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* User Growth */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-semibold text-gray-900">User Growth</h2>
                             <Users className="w-5 h-5 text-gray-400" />
@@ -338,7 +338,7 @@ const ReportsAnalytics = () => {
                     </div>
 
                     {/* Order Statistics */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-semibold text-gray-900">Order Statistics</h2>
                             <ShoppingCart className="w-5 h-5 text-gray-400" />
@@ -373,7 +373,7 @@ const ReportsAnalytics = () => {
                 </div>
 
                 {/* Category Performance */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-xl font-semibold text-gray-900">Category Performance</h2>
                         <PieChart className="w-5 h-5 text-gray-400" />

@@ -8,7 +8,7 @@ const NavItem = ({ icon, label, active = false }) => {
             }`}>
             <div className={`w-5 h-5 ${active ? 'text-white' : 'text-gray-400'}`}>
                 {/* Icon placeholder - you can replace with actual icons */}
-                <div className="w-full h-full bg-current rounded-sm opacity-60"></div>
+                <div className="w-full h-full bg-current rounded-xs opacity-60"></div>
             </div>
             <span className="text-sm">{label}</span>
             {!active && <ChevronDown className="w-3 h-3 ml-auto" />}

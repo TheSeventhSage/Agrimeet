@@ -10,16 +10,16 @@ import BackgroundArt from '../shared/components/BackgroundArt';
 
 const AuthLayout = ({ className, title, subtitle, footer, mode = 'art', children }) => {
     return (
-        <div className={`min-h-screen relative overflow-hidden bg-gradient-to-br from-brand-50 to-brand-100 ${className}`}>
+        <div className={`min-h-screen relative overflow-hidden bg-linear-to-br from-brand-50 to-brand-100 ${className}`}>
             {/* Background based on mode */}
             {mode === 'art' ? (
                 <div className="absolute inset-0">
                     <BackgroundArt className="absolute w-[120%] h-auto opacity-90" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/20 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-b from-white/40 via-white/20 to-transparent" />
                 </div>
             ) : mode === 'photo' ? (
                 <div className="absolute inset-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-brand-900/55 via-brand-700/45 to-brand-600/35 mix-blend-multiply" />
+                    <div className="absolute inset-0 bg-linear-to-br from-brand-900/55 via-brand-700/45 to-brand-600/35 mix-blend-multiply" />
                 </div>
             ) : null}
 
@@ -36,7 +36,7 @@ const AuthLayout = ({ className, title, subtitle, footer, mode = 'art', children
                         {subtitle && <p className="text-brand-600 mt-2">{subtitle}</p>}
                     </div>
 
-                    <div className="rounded-2xl bg-white/80 backdrop-blur p-6 shadow-lg border border-white/40">
+                    <div className="rounded-2xl bg-white/80 backdrop-blur-sm p-6 shadow-lg border border-white/40">
                         {children}
                     </div>
 

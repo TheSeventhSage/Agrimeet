@@ -5,6 +5,8 @@ import ConfirmationModal from '../../../shared/components/ConfirmationModal';
 const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false }) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+    console.log(product)
+    console.log(product.image)
     const handleDeleteClick = () => {
         setShowDeleteModal(true);
     };
@@ -80,19 +82,15 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
                 {/* Product Image and Name */}
                 <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                            {product.image ? (
+                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                        
                                 <img
                                     src={product.image}
                                     alt={product.name}
                                     className="w-full h-full object-cover"
                                     onError={handleImageError}
                                 />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                    <Package className="w-5 h-5 text-gray-400" />
-                                </div>
-                            )}
+                          
                         </div>
                         <div className="min-w-0 flex-1">
                             <div className="font-medium text-gray-900 text-sm truncate" title={product.name}>
@@ -101,9 +99,9 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
                             <div className="text-xs text-gray-500 truncate" title={product.description}>
                                 {product.description || 'No description'}
                             </div>
-                            {product.sku && (
+                            {product.slug && (
                                 <div className="text-xs text-gray-400">
-                                    SKU: {product.sku}
+                                    Slug: {product.slug}
                                 </div>
                             )}
                         </div>

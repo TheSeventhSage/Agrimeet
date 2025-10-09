@@ -110,7 +110,7 @@ const NotificationDropdown = () => {
                             )}
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="p-1 hover:bg-gray-100 rounded"
+                                className="p-1 hover:bg-gray-100 rounded-sm"
                             >
                                 <X className="w-4 h-4 text-gray-500" />
                             </button>
@@ -153,7 +153,7 @@ const NotificationDropdown = () => {
                                                         {!notification.read && (
                                                             <button
                                                                 onClick={() => markAsRead(notification.id)}
-                                                                className="ml-2 p-1 hover:bg-gray-200 rounded"
+                                                                className="ml-2 p-1 hover:bg-gray-200 rounded-sm"
                                                             >
                                                                 <Check className="w-3 h-3 text-gray-400" />
                                                             </button>

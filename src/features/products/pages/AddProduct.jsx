@@ -6,8 +6,8 @@ import Select from '../../../shared/components/Select';
 import Textarea from '../../../shared/components/Textarea';
 import Button from '../../../shared/components/Button';
 import DocumentUpload from '../../../shared/components/DocumentUpload';
-import { ConfirmationModal, Loading } from '../../../shared/components';
-
+import { ConfirmationModal } from '../../../shared/components';
+import { Loading } from '../../../shared/components/Loader';
 import { showSuccess, showError } from '../../../shared/utils/alert';
 import { createProduct, getCategories, getUnits } from '../api/productsApi';
 import { storageManager } from '../../../pages/utils/storageManager';
@@ -27,6 +27,8 @@ const AddProduct = () => {
         images: []
     });
 
+    // const store = storageManager.getUserData();
+    // console.log(store.data.seller.id);
     const [uploadedImages, setUploadedImages] = useState([]);
     const [thumbnailImages, setThumbnailImages] = useState([]);
     const [errors, setErrors] = useState({});
@@ -128,8 +130,7 @@ const AddProduct = () => {
         try {
             // Get current user data
             const userData = storageManager.getUserData();
-            console.log(userData);
-            if (!userData || !userData.id) {
+            if (!userData || !userData.data.id) {
                 showError('User not authenticated. Please login again.');
                 window.location.href = '/login';
                 return;
@@ -152,7 +153,7 @@ const AddProduct = () => {
             formDataToSend.append('stock_quantity', formData.stock_quantity);
             formDataToSend.append('status', formData.status);
             formDataToSend.append('category_id', formData.category_id);
-            formDataToSend.append('seller_id', userData.id);
+            formDataToSend.append('seller_id', userData.data.seller.id);
 
             // Add thumbnail
             if (thumbnailImages.length > 0) {
@@ -257,7 +258,7 @@ const AddProduct = () => {
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Basic Information */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-6">Basic Information</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -345,7 +346,7 @@ const AddProduct = () => {
                     </div>
 
                     {/* Pricing */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-6">Pricing</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

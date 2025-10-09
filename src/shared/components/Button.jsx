@@ -8,7 +8,7 @@ const Button = ({ children, className = '', loading, ...props }) => {
                 "bg-brand-500 text-white hover:bg-brand-600 active:scale-[0.99]",
                 "disabled:opacity-60 disabled:cursor-not-allowed",
                 "shadow-md transition-all duration-200",
-                "font-medium",
+                "font-medium cursor-pointer",
                 className
             ].join(' ')}
         >

@@ -287,7 +287,7 @@ SPACING
     └─ Borders: rounded-xl
 
 SHADOWS
-    ├─ Cards: shadow-sm
+    ├─ Cards: shadow-xs
     ├─ Hover: shadow-md
     └─ Modals: shadow-xl
 

@@ -6,7 +6,8 @@ import Input from '../../../shared/components/Input';
 import Select from '../../../shared/components/Select';
 import Textarea from '../../../shared/components/Textarea';
 import Button from '../../../shared/components/Button';
-import { ConfirmationModal, Loading } from '../../../shared/components';
+import { ConfirmationModal } from '../../../shared/components';
+// import { Loading } from '../../../shared/components/Loader';
 import DocumentUpload from '../../../shared/components/DocumentUpload';
 import { showSuccess, showError } from '../../../shared/utils/alert';
 import { getProduct, updateProduct, getCategories, getUnits } from '../api/productsApi';
@@ -252,7 +253,7 @@ const EditProduct = () => {
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Basic Information */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-6">Basic Information</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -336,7 +337,7 @@ const EditProduct = () => {
                     </div>
 
                     {/* Pricing */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-6">Pricing</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -367,7 +368,7 @@ const EditProduct = () => {
                     </div>
 
                     {/* Images */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-6">Product Images</h2>
 
                         {/* Existing Images */}

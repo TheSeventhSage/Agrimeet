@@ -3,7 +3,7 @@ import { Edit, Trash2, Eye, MoreHorizontal } from 'lucide-react';
 
 const ProductList = ({ products }) => {
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden">
             {/* Table Header */}
             <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
                 <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-700">

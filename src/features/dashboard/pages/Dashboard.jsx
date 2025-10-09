@@ -8,51 +8,106 @@ import {
     Eye,
     Plus,
     ArrowUpRight
-} from 'lucide-react';
+} 
+from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useState, useEffect } from 'react';
-import { getProducts } from '../../products/api/productsApi'; // Adjust the path as needed
+import { getProducts } from '../../products/api/productsApi';
+import { getUserProfile } from '../api/profile.api';
+import { useAuth } from '../../../pages/contexts/AuthContext';
+import { LoadingSpinner, PageLoader } from '../../../shared/components/Loader';
+import { showError } from '../../../shared/utils/alert';
+import { storageManager } from '../../../pages/utils/storageManager';
 
 const Dashboard = () => {
-    // Add these with the other state declarations (if any) at the top of the component
+    const { user: authUser } = useAuth();
+    
+    // State for products
     const [products, setProducts] = useState([]);
     const [totalProducts, setTotalProducts] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingProducts, setIsLoadingProducts] = useState(true);
     const [previousTotalProducts, setPreviousTotalProducts] = useState(0);
+    
+    // State for user profile
+    // const [userProfile, setUserProfile] = useState(null);
+    const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+    
+    // Combined loading state
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-    // Replace the current useEffect with this:
+    // Fetch user profile
+    // Remove the useEffect for fetching user profile and replace it with this approach
+    useEffect(() => {
+        const fetchFreshUserData = async () => {
+            if (!authUser?.id) {
+                setIsLoadingProfile(false);
+                return;
+            }
+
+            try {
+                setIsLoadingProfile(true);
+                const profileData = await getUserProfile(authUser.id);
+                console.log('Fetched fresh user data:', profileData.data);
+
+                if (profileData?.data) {
+                    // Always set fresh data to storageManager
+                    storageManager.setUserData(profileData.data);
+                    console.log('Fetched fresh user data:', profileData.data);
+                } else {
+                    console.warn('No user data found in response');
+                }
+            } catch (error) {
+                console.error('Error fetching fresh user data:', error);
+                showError('Failed to load profile data');
+            } finally {
+                setIsLoadingProfile(false);
+            }
+        };
+
+        // Fetch fresh data on every component mount (page reload)
+        fetchFreshUserData();
+    }, [authUser?.id]);
+
+    // Also add this useEffect to handle page refresh detection
+    useEffect(() => {
+        // This will run on every component mount (including page reloads)
+        console.log('Dashboard mounted - fetching fresh data');
+    }, []);
+
+    // Fetch products
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                setIsLoading(true);
-                const response = await getProducts(1, { per_page: 6 }); // Get first 6 products
+                setIsLoadingProducts(true);
+                const response = await getProducts(1, { per_page: 6 });
                 const productsData = response.data || [];
                 const currentTotal = response.total || response.meta?.total || productsData.length;
 
-                // Calculate growth (for now, we'll set it to 0% since we don't have historical data)
-                const growthPercentage = 0; // Start with 0% growth
-
                 setProducts(productsData);
                 setTotalProducts(currentTotal);
-                setPreviousTotalProducts(currentTotal); // Set both to same value for 0% growth
+                setPreviousTotalProducts(currentTotal);
             } catch (error) {
                 console.error('Error fetching products:', error);
-                // Keep the mock data as fallback
                 setProducts([]);
-                setTotalProducts(24); // Fallback to mock value
-                setPreviousTotalProducts(24); // Set both to same value for 0% growth
+                setTotalProducts(0);
+                setPreviousTotalProducts(0);
             } finally {
-                setIsLoading(false);
+                setIsLoadingProducts(false);
             }
         };
 
         fetchProducts();
     }, []);
 
-    // Add this function after the state declarations and before the stats array
+    // Update initial loading state
+    useEffect(() => {
+        if (!isLoadingProfile && !isLoadingProducts) {
+            setIsInitialLoading(false);
+        }
+    }, [isLoadingProfile, isLoadingProducts]);
+
     const calculateGrowth = (current, previous) => {
         if (previous === 0) {
-            // If no previous data, return 0% growth
             return 0;
         }
         return ((current - previous) / previous) * 100;
@@ -61,71 +116,35 @@ const Dashboard = () => {
     const stats = [
         {
             title: 'Total Products',
-            value: isLoading ? '...' : totalProducts.toString(),
-            change: '+12%',
+            value: isLoadingProducts ? '...' : totalProducts.toString(),
+            change: '0%',
             changeType: 'positive',
             icon: Package,
             color: 'bg-brand-500'
         },
-        // ... keep the other stats objects the same
         {
             title: 'Total Orders',
-            value: '156',
-            change: '+8%',
+            value: '0',
+            change: '0%',
             changeType: 'positive',
             icon: ShoppingCart,
             color: 'bg-blue-500'
         },
         {
             title: 'Revenue',
-            value: '$12,450',
-            change: '+23%',
+            value: '$0',
+            change: '0%',
             changeType: 'positive',
             icon: DollarSign,
             color: 'bg-green-500'
         },
         {
             title: 'Growth Rate',
-            value: '18.2%',
-            change: '+5%',
+            value: '0%',
+            change: '0%',
             changeType: 'positive',
             icon: TrendingUp,
             color: 'bg-purple-500'
-        }
-    ];
-
-    const recentOrders = [
-        {
-            id: 'ORD-001',
-            customer: 'John Doe',
-            product: 'Fresh Maize',
-            amount: '$120',
-            status: 'completed',
-            date: '2024-01-15'
-        },
-        {
-            id: 'ORD-002',
-            customer: 'Jane Smith',
-            product: 'Premium Rice',
-            amount: '$180',
-            status: 'pending',
-            date: '2024-01-14'
-        },
-        {
-            id: 'ORD-003',
-            customer: 'Mike Johnson',
-            product: 'Fresh Tomatoes',
-            amount: '$80',
-            status: 'shipped',
-            date: '2024-01-13'
-        },
-        {
-            id: 'ORD-004',
-            customer: 'Sarah Wilson',
-            product: 'Organic Yam',
-            amount: '$150',
-            status: 'completed',
-            date: '2024-01-12'
         }
     ];
 
@@ -169,19 +188,35 @@ const Dashboard = () => {
         }
     };
 
+    // Show full page loader during initial load
+    if (isInitialLoading) {
+        return <PageLoader message="Loading your dashboard..." />;
+    }
+
+    let userProfile = storageManager.getUserData();
+    // Get display name
+    const displayName = userProfile?.data?.first_name || authUser?.name || 'User';
+    const storeName = userProfile?.data?.seller?.store_name;
+
     return (
         <DashboardLayout>
             <div className="space-y-6">
                 {/* Header */}
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-                    <p className="text-gray-600 mt-2">Welcome back! Here's what's happening with your agricultural business.</p>
+                    <h1 className="text-3xl font-bold text-gray-900">
+                        Dashboard
+                    </h1>
+                    <p className="text-gray-600 mt-2">
+                        Welcome back, {displayName}! 
+                        {storeName && ` Managing ${storeName}.`}
+                        {!storeName && " Here's what's happening with your agricultural business."}
+                    </p>
                 </div>
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {stats.map((stat, index) => (
-                        <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div key={index} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-600">{stat.title}</p>
@@ -205,7 +240,7 @@ const Dashboard = () => {
                 {/* Main Content Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Recent Products */}
-                    <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div className="lg:col-span-2 bg-white rounded-xl shadow-xs border border-gray-100">
                         <div className="p-6 border-b border-gray-100">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-lg font-semibold text-gray-900">Recent Products</h2>
@@ -219,9 +254,9 @@ const Dashboard = () => {
                             </div>
                         </div>
                         <div className="p-6">
-                            {isLoading ? (
+                            {isLoadingProducts ? (
                                 <div className="flex items-center justify-center py-8">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
+                                    <LoadingSpinner size="md" message="Loading products..." />
                                 </div>
                             ) : products.length > 0 ? (
                                 <div className="space-y-4">
@@ -269,7 +304,7 @@ const Dashboard = () => {
                     </div>
 
                     {/* Top Products */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100">
                         <div className="p-6 border-b border-gray-100">
                             <h2 className="text-lg font-semibold text-gray-900">Top Products</h2>
                         </div>
@@ -301,7 +336,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <button
@@ -350,6 +385,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-
-

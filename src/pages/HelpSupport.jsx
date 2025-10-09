@@ -161,7 +161,7 @@ const HelpSupport = () => {
                             placeholder="Search for help articles, FAQs, or topics..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-lg"
+                            className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500 focus:border-transparent text-lg"
                         />
                     </div>
                 </div>
@@ -171,7 +171,7 @@ const HelpSupport = () => {
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {contactMethods.map((method, index) => (
-                            <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                            <div key={index} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
                                 <div className={`w-12 h-12 ${method.color} rounded-lg flex items-center justify-center mb-4`}>
                                     <method.icon className="w-6 h-6 text-white" />
                                 </div>
@@ -194,9 +194,9 @@ const HelpSupport = () => {
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">Popular Questions</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {popularFaqs.map((faq) => (
-                            <div key={faq.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div key={faq.id} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                                 <div className="flex items-start gap-3">
-                                    <Star className="w-5 h-5 text-yellow-400 fill-current mt-1 flex-shrink-0" />
+                                    <Star className="w-5 h-5 text-yellow-400 fill-current mt-1 shrink-0" />
                                     <div>
                                         <h3 className="font-semibold text-gray-900 mb-2">{faq.question}</h3>
                                         <p className="text-gray-600 text-sm leading-relaxed">{faq.answer}</p>

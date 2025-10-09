@@ -207,7 +207,7 @@ const ProductModeration = () => {
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {statCards.map((stat, index) => (
-                        <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                        <div key={index} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-600">{stat.title}</p>
@@ -222,7 +222,7 @@ const ProductModeration = () => {
                 </div>
 
                 {/* Filters and Search */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Search */}
                         <div>
@@ -233,7 +233,7 @@ const ProductModeration = () => {
                                     placeholder="Search products..."
                                     value={filters.search}
                                     onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                                 />
                             </div>
                         </div>
@@ -243,7 +243,7 @@ const ProductModeration = () => {
                             <select
                                 value={filters.category}
                                 onChange={(e) => setFilters({ ...filters, category: e.target.value, page: 1 })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                             >
                                 <option value="all">All Categories</option>
                                 <option value="grains">Grains</option>
@@ -259,7 +259,7 @@ const ProductModeration = () => {
                             <select
                                 value={filters.status}
                                 onChange={(e) => setFilters({ ...filters, status: e.target.value, page: 1 })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                             >
                                 <option value="all">All Status</option>
                                 <option value="pending">Pending</option>
@@ -278,13 +278,13 @@ const ProductModeration = () => {
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
                         </div>
                     ) : products.length === 0 ? (
-                        <div className="lg:col-span-2 xl:col-span-3 bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+                        <div className="lg:col-span-2 xl:col-span-3 bg-white rounded-xl shadow-xs border border-gray-100 p-12 text-center">
                             <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-600">No products found</p>
                         </div>
                     ) : (
                         products.map((product) => (
-                            <div key={product.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                            <div key={product.id} className="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                                 {/* Product Image */}
                                 <div className="h-48 bg-gray-100 relative">
                                     {product.images && product.images[0] ? (
@@ -379,7 +379,7 @@ const ProductModeration = () => {
 
                 {/* Pagination */}
                 {!isLoading && products.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-4 flex items-center justify-between">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 px-6 py-4 flex items-center justify-between">
                         <div className="text-sm text-gray-700">
                             Showing <span className="font-medium">{((pagination.current_page - 1) * 10) + 1}</span> to{' '}
                             <span className="font-medium">{Math.min(pagination.current_page * 10, pagination.total)}</span> of{' '}
@@ -433,7 +433,7 @@ const ProductModeration = () => {
                                         value={confirmAction.inputValue}
                                         onChange={(e) => confirmAction.onInputChange(e.target.value)}
                                         rows={3}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                                         placeholder={`Enter ${confirmAction.type === 'approve' ? 'notes' : 'reason'}...`}
                                     />
                                 </div>

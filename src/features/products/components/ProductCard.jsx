@@ -27,7 +27,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+        <div className="bg-white rounded-xl shadow-xs border border-gray-100 hover:shadow-lg transition-shadow duration-300">
             {/* Product Image */}
             <div className="relative aspect-square bg-gray-100">
                 <img
@@ -38,7 +38,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
                         e.target.src = `https://via.placeholder.com/300x300/f3f4f6/6b7280?text=${encodeURIComponent(product.name)}`;
                     }}
                 />
-                <button className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors">
+                <button className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-xs rounded-full hover:bg-white transition-colors">
                     <Heart className="w-4 h-4 text-gray-600 hover:text-red-500" />
                 </button>
             </div>

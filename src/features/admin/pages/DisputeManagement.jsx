@@ -203,7 +203,7 @@ const DisputeManagement = () => {
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {statCards.map((stat, index) => (
-                        <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                        <div key={index} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-600">{stat.title}</p>
@@ -218,7 +218,7 @@ const DisputeManagement = () => {
                 </div>
 
                 {/* Filters and Search */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Search */}
                         <div>
@@ -229,7 +229,7 @@ const DisputeManagement = () => {
                                     placeholder="Search disputes..."
                                     value={filters.search}
                                     onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                                 />
                             </div>
                         </div>
@@ -239,7 +239,7 @@ const DisputeManagement = () => {
                             <select
                                 value={filters.status}
                                 onChange={(e) => setFilters({ ...filters, status: e.target.value, page: 1 })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                             >
                                 <option value="all">All Status</option>
                                 <option value="open">Open</option>
@@ -254,7 +254,7 @@ const DisputeManagement = () => {
                             <select
                                 value={filters.priority}
                                 onChange={(e) => setFilters({ ...filters, priority: e.target.value, page: 1 })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                             >
                                 <option value="all">All Priority</option>
                                 <option value="high">High</option>
@@ -268,22 +268,22 @@ const DisputeManagement = () => {
                 {/* Disputes List */}
                 <div className="space-y-4">
                     {isLoading ? (
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+                        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-12 text-center">
                             <div className="flex items-center justify-center">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
                             </div>
                         </div>
                     ) : disputes.length === 0 ? (
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+                        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-12 text-center">
                             <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-600">No disputes found</p>
                         </div>
                     ) : (
                         disputes.map((dispute) => (
-                            <div key={dispute.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                            <div key={dispute.id} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-start gap-4 flex-1">
-                                        <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center shrink-0">
                                             <AlertTriangle className="w-6 h-6 text-red-600" />
                                         </div>
                                         <div className="flex-1">
@@ -342,7 +342,7 @@ const DisputeManagement = () => {
 
                 {/* Pagination */}
                 {!isLoading && disputes.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-4 flex items-center justify-between">
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 px-6 py-4 flex items-center justify-between">
                         <div className="text-sm text-gray-700">
                             Showing <span className="font-medium">{((pagination.current_page - 1) * 10) + 1}</span> to{' '}
                             <span className="font-medium">{Math.min(pagination.current_page * 10, pagination.total)}</span> of{' '}
@@ -460,7 +460,7 @@ const DisputeManagement = () => {
                                         value={newNote}
                                         onChange={(e) => setNewNote(e.target.value)}
                                         placeholder="Add a note..."
-                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                                     />
                                     <button
                                         onClick={handleAddNote}
@@ -484,7 +484,7 @@ const DisputeManagement = () => {
                                                 value={resolution}
                                                 onChange={(e) => setResolution(e.target.value)}
                                                 rows={4}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                                                 placeholder="Enter resolution details..."
                                             />
                                         </div>
@@ -496,7 +496,7 @@ const DisputeManagement = () => {
                                                 type="number"
                                                 value={refundAmount}
                                                 onChange={(e) => setRefundAmount(e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                                                 placeholder="0.00"
                                             />
                                         </div>

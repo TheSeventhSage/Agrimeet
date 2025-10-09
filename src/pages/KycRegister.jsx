@@ -226,11 +226,11 @@ const KYCRegistrationForm = () => {
     // }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 relative">
+        <div className="min-h-screen bg-linear-to-br from-gray-50 to-green-50 relative">
             <BackgroundArt />
 
             {/* Header */}
-            <div className="bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100 relative z-10">
+            <div className="bg-white/95 backdrop-blur-xs shadow-xs border-b border-gray-100 relative z-10">
                 <div className="max-w-4xl mx-auto px-4 py-6">
                     <div className="flex items-center justify-between">
                         <button
@@ -241,7 +241,7 @@ const KYCRegistrationForm = () => {
                             <ArrowLeft className="w-5 h-5 text-gray-600" />
                         </button>
                         <div className="flex items-center">
-                            <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-green-700 rounded-2xl flex items-center justify-center shadow-lg">
+                            <div className="w-12 h-12 bg-linear-to-r from-green-600 to-green-700 rounded-2xl flex items-center justify-center shadow-lg">
                                 <Leaf className="w-7 h-7 text-white" />
                             </div>
                             <div className="ml-4">
@@ -264,9 +264,9 @@ const KYCRegistrationForm = () => {
 
             {/* Main Content */}
             <div className="max-w-4xl mx-auto px-4 py-8 relative z-10">
-                <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+                <div className="bg-white/95 backdrop-blur-xs rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
                     {/* Step Header */}
-                    <div className="bg-gradient-to-r from-green-600 to-green-700 px-8 py-6">
+                    <div className="bg-linear-to-r from-green-600 to-green-700 px-8 py-6">
                         <div className="flex items-center justify-between text-white">
                             <div>
                                 {currentStep === 1 && (
@@ -544,7 +544,7 @@ const KYCRegistrationForm = () => {
                 </div>
 
                 {/* Help Section */}
-                <div className="mt-8 bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-6">
+                <div className="mt-8 bg-white/95 backdrop-blur-xs rounded-2xl shadow-lg border border-gray-100 p-6">
                     <div className="flex items-start gap-4">
                         <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
                             <Shield className="w-6 h-6 text-blue-600" />
@@ -569,7 +569,7 @@ const KYCRegistrationForm = () => {
                 </div>
 
                 {/* Security Notice */}
-                <div className="mt-6 bg-green-50/95 backdrop-blur-sm rounded-2xl p-6 border border-green-200">
+                <div className="mt-6 bg-green-50/95 backdrop-blur-xs rounded-2xl p-6 border border-green-200">
                     <div className="flex items-start gap-3">
                         <Shield className="w-6 h-6 text-green-600 mt-1" />
                         <div>

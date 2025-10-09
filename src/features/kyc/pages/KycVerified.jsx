@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import {
     CheckCircle,
@@ -16,63 +16,114 @@ import {
 import Button from '../../../shared/components/Button';
 import InfoField from '../components/InfoField';
 import InfoSection from '../components/InfoSection';
-import LoadingSpinner from '../../../shared/components/Loading';
+import { LoadingSpinner } from '../../../shared/components/Loader';
 import ConfirmationModal from '../../../shared/components/ConfirmationModal';
 import { businessInfoConfig, ownerInfoConfig, bankInfoConfig } from '../components/kycDataConfig';
 import { showSuccess, showError } from '../../../shared/utils/alert';
+import { storageManager } from '../../../pages/utils/storageManager';
+import { getBusinessTypes } from '../../dashboard/api/profile.api'; // adjust path as needed
+
 
 const KYCStatusPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [updateReason, setUpdateReason] = useState('');
+    const [businessTypes, setBusinessTypes] = useState( []);
 
-    // Mock data - in real app, this would come from API
+    useEffect(() => {
+        const fetchBusinessTypes = async () => {
+            try {
+                const types = await getBusinessTypes(); // now returns an array
+                setBusinessTypes(types);
+                console.log(businessTypes);
+            } catch (error) {
+                console.error('Failed to fetch business types:', error);
+            }
+        };
+
+       
+            console.log(fetchBusinessTypes());
+       
+    }, []);
+
+
+    // Get real data from storageManager
+    const userData = storageManager.getUserData();
+    console.log(userData);
+    
+    const user = userData?.data;
+    const seller = user?.seller;
+
+    // Determine KYC status based on verification_status and kyc_verified_at
+    const getKYCStatus = () => {
+        if (seller?.kyc_verified_at) {
+            return 'verified';
+        } else if (seller?.verification_status === 'pending') {
+            return 'pending';
+        } else if (seller?.verification_status === 'rejected') {
+            return 'rejected';
+        }
+        return 'pending'; // Default status
+    };
+
+    // Format dates
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Not available';
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
+    // Real KYC data from user data
+    // Compute business type name dynamically once we have data
+    const businessTypeName =
+        businessTypes?.find(bt => Number(bt.id) === Number(seller?.business_type_id))?.name ||
+        'Not provided';
+
     const kycData = {
-        status: 'verified',
-        submittedDate: '2024-01-15',
-        verifiedDate: '2024-01-18',
-        verificationId: 'KYC-2024-0015',
+        status: getKYCStatus(),
+        verifiedDate: seller?.kyc_verified_at ? formatDate(seller.kyc_verified_at) : 'Not submitted',
+        verified: seller?.verification_status ? formatDate(seller.verification_status) : 'Not verified',
+        verificationId: `KYC-${user?.id?.toString().padStart(4, '0') || '0000'}`,
 
         businessInfo: {
-            businessName: 'AgriTech Solutions Ltd',
-            businessType: 'llc',
-            registrationNumber: 'REG-123456789',
-            taxId: 'TAX-987654321',
-            businessAddress: '123 Farm Street, Agricultural Zone, City 10001',
-            businessPhone: '+1 (555) 123-4567'
+            businessName: seller?.store_name || 'Not provided',
+            businessType: businessTypeName, // <-- fixed mapping
+            businessAddress: seller?.address || 'Not provided',
+            businessPhone: seller?.business_phone_number || 'Not provided',
+            city: seller?.city || 'Not provided',
+            state: seller?.state || 'Not provided',
+            businessBio: seller?.business_bio || 'Not provided'
         },
 
+
         ownerInfo: {
-            fullName: 'John Doe',
-            dateOfBirth: '1985-06-15',
-            idNumber: 'ID-123456789',
-            idType: 'national_id'
+            fullName: `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'Not provided',
+            email: user?.email || 'Not provided',
+            phoneNumber: user?.phone_number || 'Not provided',
+            gender: seller?.gender || 'Not provided',
+            state: seller?.state || 'Not provided',
+            status: user?.user_status || 'Not provided',
         },
 
         bankInfo: {
-            accountHolderName: 'John Doe',
-            accountType: 'business',
-            bankName: 'Agricultural Bank',
-            accountNumber: '•••• •••• •••• 1234',
-            routingNumber: '021000021',
-            iban: '',
-            swiftCode: 'AGRIOUS33'
+            accountHolderName: seller?.name_on_account || 'Not provided',
+            accountType: 'business', // Default to business account
+            bankName: seller?.bank_name || 'Not provided',
+            accountNumber: seller?.bank_account_number ? `•••• •••• •••• ${seller.bank_account_number.slice(-4)}` : 'Not provided',
         },
 
         documents: {
-            businessRegistration: { name: 'business_registration.pdf', uploaded: '2024-01-15' },
-            taxCertificate: { name: 'tax_certificate.pdf', uploaded: '2024-01-15' },
-            idDocument: { name: 'national_id_front.jpg', uploaded: '2024-01-15' },
-            proofOfAddress: { name: 'utility_bill.pdf', uploaded: '2024-01-15' }
+            businessRegistration: {
+                name: seller?.document_type || 'No document uploaded',
+                uploaded: seller?.created_at ? formatDate(seller.created_at) : 'Not uploaded'
+            },
+            taxCertificate: { name: 'No document uploaded', uploaded: 'Not uploaded' },
+            idDocument: { name: 'No document uploaded', uploaded: 'Not uploaded' },
+            proofOfAddress: { name: 'No document uploaded', uploaded: 'Not uploaded' }
         }
-    };
-
-    const businessTypes = {
-        sole_proprietorship: 'Sole Proprietorship',
-        partnership: 'Partnership',
-        llc: 'LLC',
-        corporation: 'Corporation',
-        non_profit: 'Non-Profit'
     };
 
     const idTypes = {
@@ -203,7 +254,7 @@ const KYCStatusPage = () => {
             </div>
 
             {/* Status Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 mb-6">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center">
                         <Shield className="w-8 h-8 text-brand-600 mr-4" />
@@ -217,7 +268,7 @@ const KYCStatusPage = () => {
                     <div className="text-right">
                         <InfoField label="Verification ID" value={kycData.verificationId} />
                         <p className="text-xs text-gray-500 mt-1">
-                            Submitted: {kycData.submittedDate} • Verified: {kycData.verifiedDate}
+                            Verified at: {kycData.verifiedDate} • Status: {kycData.status}
                         </p>
                     </div>
                 </div>
@@ -239,7 +290,7 @@ const KYCStatusPage = () => {
             </InfoSection>
 
             {/* Uploaded Documents */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 mb-6">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center">
                         <FileText className="w-6 h-6 text-gray-400 mr-3" />
@@ -252,7 +303,7 @@ const KYCStatusPage = () => {
                         title="Business Registration Certificate"
                         document={kycData.documents.businessRegistration}
                     />
-                    <DocumentCard
+                    {/* <DocumentCard
                         title="Tax Certificate"
                         document={kycData.documents.taxCertificate}
                     />
@@ -263,7 +314,7 @@ const KYCStatusPage = () => {
                     <DocumentCard
                         title="Proof of Address"
                         document={kycData.documents.proofOfAddress}
-                    />
+                    /> */}
                 </div>
             </div>
 
@@ -301,7 +352,7 @@ const KYCStatusPage = () => {
                         value={updateReason}
                         onChange={(e) => setUpdateReason(e.target.value)}
                         placeholder="Please describe what information needs to be updated and why..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                         rows={4}
                         disabled={isLoading}
                     />
@@ -315,7 +366,7 @@ const KYCStatusPage = () => {
             {kycData.status === 'verified' && (
                 <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                     <div className="flex">
-                        <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
+                        <CheckCircle className="w-5 h-5 text-green-600 mr-3 shrink-0" />
                         <div>
                             <h4 className="text-sm font-medium text-green-800">Verification Complete</h4>
                             <p className="text-sm text-green-700">

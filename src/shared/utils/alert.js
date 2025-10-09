@@ -38,7 +38,7 @@ export const showAlert = (message, type = 'info', duration = 5000) => {
 
     // Create icon based on type
     const icon = document.createElement('div');
-    icon.className = 'flex-shrink-0';
+    icon.className = 'shrink-0';
     icon.innerHTML = type === 'success'
         ? '✓'
         : type === 'error'
@@ -54,7 +54,7 @@ export const showAlert = (message, type = 'info', duration = 5000) => {
 
     // Create close button
     const closeBtn = document.createElement('button');
-    closeBtn.className = 'flex-shrink-0 text-gray-400 hover:text-gray-600';
+    closeBtn.className = 'shrink-0 text-gray-400 hover:text-gray-600';
     closeBtn.innerHTML = '×';
     closeBtn.onclick = () => alertContainer.remove();
 

@@ -63,7 +63,7 @@ const ProductFilters = ({ onFilterChange }) => {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
             <h3 className="font-semibold text-gray-900 mb-4">Filters</h3>
 
             {/* Search */}
@@ -75,7 +75,7 @@ const ProductFilters = ({ onFilterChange }) => {
                         placeholder="Search..."
                         value={searchTerm}
                         onChange={handleSearchChange}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     />
                 </div>
             </div>
@@ -134,14 +134,14 @@ const ProductFilters = ({ onFilterChange }) => {
                             type="number"
                             value={priceRange[0]}
                             onChange={(e) => handleCustomPriceChange(0, e.target.value)}
-                            className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                            className="w-20 px-2 py-1 border border-gray-300 rounded-sm text-sm"
                         />
                         <span className="text-sm text-gray-500">to</span>
                         <input
                             type="number"
                             value={priceRange[1]}
                             onChange={(e) => handleCustomPriceChange(1, e.target.value)}
-                            className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                            className="w-20 px-2 py-1 border border-gray-300 rounded-sm text-sm"
                         />
                     </div>
                     <div className="relative flex flex-col gap-6">

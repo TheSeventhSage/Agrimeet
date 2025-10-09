@@ -28,7 +28,7 @@ const Input = ({
                 disabled={disabled}
                 required={required}
                 className={`
-          w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent
+          w-full px-3 py-2 border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-transparent
           ${error ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'}
           ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}
           ${className}
