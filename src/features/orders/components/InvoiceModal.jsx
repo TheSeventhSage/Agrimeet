@@ -2,7 +2,7 @@
 import { X, Printer, Download, Mail } from 'lucide-react';
 import { useRef } from 'react';
 import Button from '../../../shared/components/Button';
-import LoadingSpinner from '../../../shared/components/Loading';
+import { LoadingSpinner } from '../../../shared/components/Loader';
 
 const InvoiceModal = ({ isOpen, onClose, order, isLoading }) => {
     const printRef = useRef();

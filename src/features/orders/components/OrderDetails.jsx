@@ -2,7 +2,7 @@
 import { ArrowLeft, Package, User, MapPin, CreditCard, Truck, Calendar, FileText, Edit3, Printer } from 'lucide-react';
 import { useState } from 'react';
 import Button from '../../../shared/components/Button';
-import LoadingSpinner from '../../../shared/components/Loading';
+import { LoadingSpinner } from '../../../shared/components/Loader';;
 import { STATUS_CONFIG } from '../api/orderService';
 
 const OrderDetails = ({ order, onBack, onUpdateStatus, onPrintInvoice, isLoading }) => {
