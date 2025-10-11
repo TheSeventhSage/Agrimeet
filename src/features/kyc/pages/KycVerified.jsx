@@ -21,14 +21,14 @@ import ConfirmationModal from '../../../shared/components/ConfirmationModal';
 import { businessInfoConfig, ownerInfoConfig, bankInfoConfig } from '../components/kycDataConfig';
 import { showSuccess, showError } from '../../../shared/utils/alert';
 import { storageManager } from '../../../pages/utils/storageManager';
-import { getBusinessTypes } from '../../dashboard/api/profile.api'; // adjust path as needed
+import { getBusinessTypes } from '../../../pages/api/profile.api'; // adjust path as needed
 
 
 const KYCStatusPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [updateReason, setUpdateReason] = useState('');
-    const [businessTypes, setBusinessTypes] = useState( []);
+    const [businessTypes, setBusinessTypes] = useState([]);
 
     useEffect(() => {
         const fetchBusinessTypes = async () => {
@@ -41,16 +41,16 @@ const KYCStatusPage = () => {
             }
         };
 
-       
-            console.log(fetchBusinessTypes());
-       
+
+        console.log(fetchBusinessTypes());
+
     }, []);
 
 
     // Get real data from storageManager
     const userData = storageManager.getUserData();
     console.log(userData);
-    
+
     const user = userData?.data;
     const seller = user?.seller;
 

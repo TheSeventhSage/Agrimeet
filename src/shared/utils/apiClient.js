@@ -8,7 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://agrimeet.udeh
  * Create a configured CallApi instance with default options
  * This can be reused across your entire application
  */
-export const apiClient = createFetchClient ({ // Changed from callApi to createFetchClient
+export const apiClient = createFetchClient({ // Changed from callApi to createFetchClient
     baseURL: API_BASE_URL,
     timeout: 30000, // 30 seconds
     retryAttempts: 2, // Use retryAttempts instead of retry.maxRetries
@@ -18,11 +18,11 @@ export const apiClient = createFetchClient ({ // Changed from callApi to createF
     // Request interceptor - runs before every request
     onRequest: (context) => {
         const token = storageManager.getAccessToken();
-    
+
         if (!context.request) context.request = {};
         const currentHeaders = context.request.headers || {};
         const isHeadersInstance = typeof currentHeaders?.set === 'function';
-    
+
         if (token) {
             if (isHeadersInstance) {
                 currentHeaders.set('Authorization', `Bearer ${token}`);
@@ -46,34 +46,34 @@ export const apiClient = createFetchClient ({ // Changed from callApi to createF
     // Error interceptor - runs when request fails
     onResponseError: async (context) => { // Changed error to context
         console.error('API Error:', context.error); // Access error details via context.error
-        
+
         // Handle 401 Unauthorized - session expired
         if (context.response?.status === 401) {
             storageManager.clearAll();
             // Redirect will happen in clearAll()
         }
-        
+
         // Handle 403 Forbidden
         if (context.response?.status === 403) {
             console.error('Access forbidden');
         }
-        
+
         // Handle 404 Not Found
         if (context.response?.status === 404) {
             console.error('Resource not found');
         }
-        
+
         // Handle 422 Validation Errors
         if (context.response?.status === 422) {
             const errors = context.error?.errorData?.errors || {}; // Access errorData from context.error
             console.error('Validation errors:', errors);
         }
-        
+
         // Handle 500 Server Errors
         if (context.response?.status >= 500) {
             console.error('Server error occurred');
         }
-        
+
         // Re-throw the original error so it can be caught by the calling function
         // If throwOnError is true on the client, you don't need to re-throw here.
         // However, if you perform custom error handling and then want to re-throw,
@@ -198,7 +198,7 @@ export const getErrorMessage = (error) => {
         if (error.errorData?.message) { // Access errorData from the HTTPError object
             return error.errorData.message;
         }
-        
+
         // Check for generic error property
         if (error.errorData?.error) {
             return error.errorData.error;
@@ -222,12 +222,12 @@ export const getErrorMessage = (error) => {
                 return error.message || 'An unexpected error occurred.';
         }
     }
-    
+
     // Network errors (e.g., TypeError, AbortError for timeout)
     if (error.name === 'TypeError' || error.name === 'AbortError') { // AbortError for timeouts in CallApi
         return 'Network error or request timed out. Please check your connection.';
     }
-    
+
     // Generic fallback for any other unexpected errors
     return error.message || 'An unexpected error occurred.';
 };

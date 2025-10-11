@@ -45,4 +45,25 @@ export const api = {
             throw error;
         }
     },
+
+    async getProduct(productId) {
+        try {
+            const response = await fetch(`${BASE_URL}/seller/products/${productId}/show_product`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(`Failed to fetch product: ${response.status} ${text}`);
+            }
+
+            const result = await response.json();
+            // API returns an object representing the product (not wrapped in data)
+            return result;
+        } catch (error) {
+            console.error("Error fetching product:", error);
+            throw error;
+        }
+      },
 };

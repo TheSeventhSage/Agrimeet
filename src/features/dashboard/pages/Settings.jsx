@@ -13,7 +13,7 @@ import AvatarUpload from '../../../shared/components/AvatarUpload';
 import Button from '../../../shared/components/Button';
 import { showSuccess, showError } from '../../../shared/utils/alert';
 import { storageManager } from '../../../pages/utils/storageManager';
-import { updateUserProfile } from '../api/profile.api';
+import { updateUserProfile } from '../../../pages/api/profile.api';
 
 const Settings = () => {
     const [activeTab, setActiveTab] = useState('profile');
@@ -174,35 +174,35 @@ const Settings = () => {
 
             formData.append('business_type_id', seller.business_type_id);
             formData.append('company', seller.store_name),
-            formData.append('address', seller.address),
-            formData.append('state', seller.state),
-            formData.append('city', seller.city),
-            formData.append('business_bio', seller.business_bio),
-            formData.append('bank_name', seller.bank_name),
-            formData.append('bank_account_number', seller.bank_account_number),
-            formData.append('business_phone_number', seller.business_phone_number),
-            formData.append('name_on_account', seller.name_on_account),
+                formData.append('address', seller.address),
+                formData.append('state', seller.state),
+                formData.append('city', seller.city),
+                formData.append('business_bio', seller.business_bio),
+                formData.append('bank_name', seller.bank_name),
+                formData.append('bank_account_number', seller.bank_account_number),
+                formData.append('business_phone_number', seller.business_phone_number),
+                formData.append('name_on_account', seller.name_on_account),
 
-            // Add seller as JSON string (backend should parse JSON) — safe fallback
-            // if (seller) {
-            //     formData.append('seller', JSON.stringify({
-            //         business_type_id: seller.business_type_id,
-            //         store_name: seller.store_name,
-            //         address: seller.address,
-            //         city: seller.city,
-            //         state: seller.state,
-            //         business_bio: seller.business_bio,
-            //         bank_name: seller.bank_name,
-            //         bank_account_number: seller.bank_account_number,
-            //         business_phone_number: seller.business_phone_number,
-            //         name_on_account: seller.name_on_account,
-            //         gender: seller.gender
-            //     }));
-            // }
+                // Add seller as JSON string (backend should parse JSON) — safe fallback
+                // if (seller) {
+                //     formData.append('seller', JSON.stringify({
+                //         business_type_id: seller.business_type_id,
+                //         store_name: seller.store_name,
+                //         address: seller.address,
+                //         city: seller.city,
+                //         state: seller.state,
+                //         business_bio: seller.business_bio,
+                //         bank_name: seller.bank_name,
+                //         bank_account_number: seller.bank_account_number,
+                //         business_phone_number: seller.business_phone_number,
+                //         name_on_account: seller.name_on_account,
+                //         gender: seller.gender
+                //     }));
+                // }
 
-            // DEBUG: Log what we're sending (formData)
-            // Note: Iterating FormData is safe in modern browsers
-            console.log('FormData contents:');
+                // DEBUG: Log what we're sending (formData)
+                // Note: Iterating FormData is safe in modern browsers
+                console.log('FormData contents:');
             for (let [key, value] of formData.entries()) {
                 console.log(key, value);
             }

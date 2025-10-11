@@ -8,12 +8,12 @@ import {
     Eye,
     Plus,
     ArrowUpRight
-} 
-from 'lucide-react';
+}
+    from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useState, useEffect } from 'react';
 import { getProducts } from '../../products/api/productsApi';
-import { getUserProfile } from '../api/profile.api';
+import { getUserProfile } from '../../../pages/api/profile.api';
 import { useAuth } from '../../../pages/contexts/AuthContext';
 import { LoadingSpinner, PageLoader } from '../../../shared/components/Loader';
 import { showError } from '../../../shared/utils/alert';
@@ -21,17 +21,17 @@ import { storageManager } from '../../../pages/utils/storageManager';
 
 const Dashboard = () => {
     const { user: authUser } = useAuth();
-    
+
     // State for products
     const [products, setProducts] = useState([]);
     const [totalProducts, setTotalProducts] = useState(0);
     const [isLoadingProducts, setIsLoadingProducts] = useState(true);
     const [previousTotalProducts, setPreviousTotalProducts] = useState(0);
-    
+
     // State for user profile
     // const [userProfile, setUserProfile] = useState(null);
     const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-    
+
     // Combined loading state
     const [isInitialLoading, setIsInitialLoading] = useState(true);
 
@@ -112,7 +112,7 @@ const Dashboard = () => {
         }
         return ((current - previous) / previous) * 100;
     };
-    
+
     const stats = [
         {
             title: 'Total Products',
@@ -207,7 +207,7 @@ const Dashboard = () => {
                         Dashboard
                     </h1>
                     <p className="text-gray-600 mt-2">
-                        Welcome back, {displayName}! 
+                        Welcome back, {displayName}!
                         {storeName && ` Managing ${storeName}.`}
                         {!storeName && " Here's what's happening with your agricultural business."}
                     </p>
@@ -277,10 +277,10 @@ const Dashboard = () => {
                                             <div className="text-right">
                                                 <p className="font-semibold text-gray-900">${product.base_price}</p>
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.status === 'active'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : product.status === 'inactive'
-                                                            ? 'bg-red-100 text-red-800'
-                                                            : 'bg-gray-100 text-gray-800'
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : product.status === 'inactive'
+                                                        ? 'bg-red-100 text-red-800'
+                                                        : 'bg-gray-100 text-gray-800'
                                                     }`}>
                                                     {product.status}
                                                 </span>

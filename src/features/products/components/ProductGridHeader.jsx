@@ -9,7 +9,7 @@ const ProductGridHeader = ({
     return (
         <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">AGRICULTURAL PRODUCTS</h1>
-            <div className="flex items-center justify-between">
+            <div className="flex items-start lg:items-center justify-between lg:flex-row flex-col gap-4">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                     <span>Dashboard</span>
                     <span>›</span>
@@ -27,7 +27,7 @@ const ProductGridHeader = ({
                     </button>
                 </div>
             </div>
-            <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center justify-between mt-4">
                 <p className="text-sm text-gray-600">
                     Showing <strong>{totalProducts}</strong> agricultural products
                     {totalPages > 1 && (

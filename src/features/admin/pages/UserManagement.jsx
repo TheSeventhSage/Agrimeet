@@ -56,16 +56,13 @@ const UserManagement = () => {
     const loadUsers = async () => {
         try {
             setIsLoading(true);
-            const response = await adminService.getUsers(filters);
-            setUsers(response.data.data || response.data);
-            setPagination(response.data.meta || response.data.pagination || {
+            // Add your API call here
+            setUsers([]);
+            setPagination({
                 current_page: 1,
                 total_pages: 1,
-                total: response.data.length || 0
+                total: 0
             });
-        } catch (error) {
-            console.error('Failed to load users:', error);
-            showError('Failed to load users');
         } finally {
             setIsLoading(false);
         }
@@ -73,8 +70,8 @@ const UserManagement = () => {
 
     const loadStats = async () => {
         try {
-            const response = await adminService.getUserStats();
-            setStats(response.data);
+            // Add your API call here
+            setStats({});
         } catch (error) {
             console.error('Failed to load stats:', error);
         }
@@ -82,8 +79,7 @@ const UserManagement = () => {
 
     const handleViewUser = async (user) => {
         try {
-            const response = await adminService.getUserById(user.id);
-            setSelectedUser(response.data);
+            setSelectedUser(user);
             setShowUserModal(true);
         } catch (error) {
             showError('Failed to load user details');
@@ -95,17 +91,17 @@ const UserManagement = () => {
         setConfirmAction({
             type: 'suspend',
             title: 'Suspend User',
-            message: `Are you sure you want to suspend ${user.name}? They will not be able to access their account.`,
+            message: `Are you sure you want to suspend ${user.name}?`,
             confirmText: 'Suspend',
             onConfirm: async () => {
                 try {
-                    await adminService.suspendUser(user.id, 'Suspended by admin');
-                    showSuccess('User suspended successfully');
+                    // Add your API call here
+                    console.log('Suspending user:', user.id);
                     loadUsers();
                     loadStats();
                     setShowConfirmModal(false);
                 } catch (error) {
-                    showError('Failed to suspend user');
+                    console.error('Failed to suspend user');
                 }
             }
         });
@@ -121,13 +117,13 @@ const UserManagement = () => {
             confirmText: 'Activate',
             onConfirm: async () => {
                 try {
-                    await adminService.activateUser(user.id);
-                    showSuccess('User activated successfully');
+                    // Add your API call here
+                    console.log('Activating user:', user.id);
                     loadUsers();
                     loadStats();
                     setShowConfirmModal(false);
                 } catch (error) {
-                    showError('Failed to activate user');
+                    console.error('Failed to activate user');
                 }
             }
         });
@@ -139,17 +135,17 @@ const UserManagement = () => {
         setConfirmAction({
             type: 'delete',
             title: 'Delete User',
-            message: `Are you sure you want to permanently delete ${user.name}? This action cannot be undone.`,
+            message: `Are you sure you want to permanently delete ${user.name}?`,
             confirmText: 'Delete',
             onConfirm: async () => {
                 try {
-                    await adminService.deleteUser(user.id);
-                    showSuccess('User deleted successfully');
+                    // Add your API call here
+                    console.log('Deleting user:', user.id);
                     loadUsers();
                     loadStats();
                     setShowConfirmModal(false);
                 } catch (error) {
-                    showError('Failed to delete user');
+                    console.error('Failed to delete user');
                 }
             }
         });

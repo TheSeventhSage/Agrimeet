@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { performRedirect, ROUTES } from "./utils/routingManager";
 import { LogoLightIcon } from "../shared/components/Logo";
+import { Link } from "react-router-dom";
 import { api } from "./api/home.api";
 import { images } from "../assets";
 import  VideoModal from "./VideoModal";
@@ -103,19 +104,21 @@ const Home = () => {
         setLoadingProducts(true);
         const result = await api.getAllProducts(currentPage, 12);
 
-        setProducts(result.data);
-        console.log(result.data);
-        console.log(result.data);
-        const totalVariantStock = result.data
-          .flatMap((product) => product.variants || []) // flatten all variants into one array
+        // result.data should be an array of products
+        const productsArray = Array.isArray(result?.data) ? result.data : [];
+
+        setProducts(productsArray);
+        console.log("Products:", productsArray);
+
+        // total stock across all variants (safe)
+        const totalVariantStock = productsArray
+          .flatMap((product) => Array.isArray(product.variants) ? product.variants : [])
           .reduce((sum, v) => sum + (Number(v.stock_quantity) || 0), 0);
 
-        console.log("Total stock across this products:", totalVariantStock);
-        console.log(result.data.variants[0].stock_quantity);
+        console.log("Total stock across these products:", totalVariantStock);
 
-        console.log(totalVariantStock);
-        setTotalPages(result.meta.last_page);
-        setTotalProducts(result.meta.total);
+        setTotalPages(result?.meta?.last_page ?? 1);
+        setTotalProducts(result?.meta?.total ?? productsArray.length);
       } catch (error) {
         console.error("Failed to fetch products:", error);
       } finally {
@@ -125,6 +128,7 @@ const Home = () => {
 
     fetchProducts();
   }, [currentPage]);
+
 
   // Auto-rotate hero slides
   useEffect(() => {
@@ -372,7 +376,16 @@ const Home = () => {
               ) : (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {products.map((product) => (
+                    {products.map((product) => {
+                      // safe computation of variant stock sum
+                      const variantStock = Array.isArray(product.variants)
+                        ? product.variants.reduce((sum, v) => sum + (Number(v.stock_quantity) || 0), 0)
+                        : 0;
+
+                      // overall availability boolean
+                      const isAvailable = variantStock > 0;
+                      
+                      return (
                       <div
                         key={product.id}
                         className="group relative bg-white border border-gray-100 rounded-3xl p-6 hover:shadow-xl hover:border-green-200 transition-all duration-300 transform hover:scale-[1.02]"
@@ -419,7 +432,7 @@ const Home = () => {
                                 ${product.discount_price || product.base_price}
                               </span>
                               {product.discount_price &&
-                                product.discount_price < product.base_price && (
+                                Number(product.discount_price) < Number(product.base_price) && (
                                   <span className="text-sm text-gray-400 line-through">
                                     ${product.base_price}
                                   </span>
@@ -427,49 +440,31 @@ const Home = () => {
                             </div>
                             <div className="text-right">
                               <div
-                                className={`text-xs font-medium ${
-                                  product.stock_quantity > 0
-                                    ? "text-green-600"
-                                    : "text-red-500"
-                                }`}
+                                className={`text-xs font-medium ${isAvailable ? "text-green-600" : "text-red-500"
+                                  }`}
                               >
-                                {product.variants[0].stock_quantity > 0
-                                  ? "In Stock"
-                                  : "Out of Stock"}
+                                {isAvailable ? "In Stock" : "Out of Stock"}
                               </div>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-2 text-xs text-gray-500">
                             <span>
-                              {product.stock_quantity}{" "}
-                              {product.unit?.symbol || "units"} available
+                              {variantStock} {product.unit?.symbol || "units"} available
                             </span>
                           </div>
 
-                          <button
-                            disabled={
-                              product.stock_quantity +
-                                product.variants.reduce(
-                                  (sum, v) => sum + v.stock_quantity,
-                                  0
-                                ) ===
-                              0
-                            }
-                            className="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-2xl hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all transform active:scale-95"
-                          >
-                            {product.stock_quantity +
-                              product.variants.reduce(
-                                (sum, v) => sum + v.stock_quantity,
-                                0
-                              ) >
-                            0
-                              ? "Buy Now"
-                              : "Out of Stock"}
-                          </button>
+                          <Link to={`/product/${product.id}`}>
+                            <button
+                              disabled={!isAvailable}
+                              className="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-2xl hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all transform active:scale-95 cursor-pointer"
+                            >
+                              {isAvailable ? "Buy Now" : "Out of Stock"}
+                            </button>
+                          </Link>
                         </div>
                       </div>
-                    ))}
+                    )})}
                   </div>
 
                   {/* Pagination */}

@@ -1,5 +1,5 @@
 // modules/auth/api/profile.api.js
-import { api, getErrorMessage } from '../../../shared/utils/apiClient';
+import { api, getErrorMessage } from '../../shared/utils/apiClient';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
 
 /**
@@ -49,12 +49,12 @@ export const uploadProfilePhoto = async (userId, photoFile) => {
         return response;
     } catch (error) {
         console.error('Error uploading profile photo:', error);
-        
+
         // Special handling for file upload errors
         if (error.response?.status === 413) {
             throw new Error('Photo file is too large. Please choose a smaller file.');
         }
-        
+
         throw new Error(getErrorMessage(error));
     }
 };
@@ -82,7 +82,7 @@ export const getBusinessTypes = async () => {
     try {
         const response = await api.get('/allbusinesstypes');
         console.log(response.data.data);
-        
+
         return response?.data?.data || [];
     } catch (error) {
         console.error('Error fetching business types:', error);

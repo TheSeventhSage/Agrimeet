@@ -15,8 +15,7 @@ import {
     MessageSquare,
     XCircle
 } from 'lucide-react';
-import adminService from '../api/adminService';
-import { showError } from '../../../shared/utils/alert';
+import { storageManager } from '../../../pages/utils/storageManager';
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({});
@@ -30,13 +29,7 @@ const AdminDashboard = () => {
     const loadDashboardData = async () => {
         try {
             setIsLoading(true);
-            const response = await adminService.getDashboardStats();
-            setStats(response.data.stats || response.data);
-            setRecentActivities(response.data.activities || []);
-        } catch (error) {
-            console.error('Failed to load dashboard data:', error);
-            showError('Failed to load dashboard data');
-            // Set default values on error
+            // You'll fetch your data here
             setStats({});
             setRecentActivities([]);
         } finally {

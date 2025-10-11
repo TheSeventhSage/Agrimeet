@@ -57,9 +57,9 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
         }
 
         return (
-            <div className="flex flex-col">
+            <div className="flex">
                 <span className="font-semibold text-gray-900 text-sm">{stock}</span>
-                <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+                <span className={` px-1.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
                     {config.label}
                 </span>
             </div>
@@ -80,17 +80,17 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
         <>
             <tr className="hover:bg-gray-50 transition-colors border-b border-gray-100">
                 {/* Product Image and Name */}
-                <td className="px-4 py-3">
+                <td className="px-2 py-3">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                        
-                                <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover"
-                                    onError={handleImageError}
-                                />
-                          
+
+                            <img
+                                src={product.image}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                                onError={handleImageError}
+                            />
+
                         </div>
                         <div className="min-w-0 flex-1">
                             <div className="font-medium text-gray-900 text-sm truncate" title={product.name}>
@@ -109,14 +109,14 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
                 </td>
 
                 {/* Category */}
-                <td className="px-4 py-3">
+                <td className="px-3 py-3">
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                         {product.category}
                     </span>
                 </td>
 
                 {/* Price */}
-                <td className="px-4 py-3">
+                <td className="px-3 py-3">
                     <div className="flex flex-col">
                         <div className="flex items-center gap-1">
                             <span className="font-semibold text-gray-900 text-sm">
@@ -143,17 +143,17 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
                 </td>
 
                 {/* Stock */}
-                <td className="px-4 py-3">
+                <td className="px-2 py-3 w-fit">
                     <StockBadge stock={product.stock} />
                 </td>
 
                 {/* Status */}
-                <td className="px-4 py-3">
+                <td className="px-3 py-3">
                     <StatusBadge status={product.status} />
                 </td>
 
                 {/* Actions */}
-                <td className="px-4 py-3">
+                <td className="px-3 py-3">
                     <div className="flex items-center gap-1">
                         <button
                             onClick={() => onView && onView(product)}
