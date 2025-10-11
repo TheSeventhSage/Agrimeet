@@ -29,6 +29,7 @@ import {
 const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
     const [expandedItems, setExpandedItems] = useState({});
     const user = storageManager.getUserData();
+    console.log(user);
 
     const toggleExpanded = (itemKey) => {
         setExpandedItems(prev => ({
@@ -38,9 +39,28 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
     };
     
     // Normalize roles to handle both 'role' (string) and 'roles' (array)
-    const userRoles = user?.data?.roles 
-        ? (Array.isArray(user.data.roles) ? user.data.roles : [user.data.roles])
-        : (user?.data?.role ? [user.data.role] : []);
+    const userRoles = (() => {
+        if (!user) return [];
+
+        // Check data.roles first
+        if (user.data?.roles) {
+            return Array.isArray(user.data.roles) ? user.data.roles : [user.data.roles];
+        }
+
+        // Check top-level roles
+        if (user.roles) {
+            return Array.isArray(user.roles) ? user.roles : [user.roles];
+        }
+
+        // Check data.role as fallback
+        if (user.data?.role) {
+            return [user.data.role];
+        }
+
+        return [];
+    })();
+
+    console.log(userRoles);
     
     // Check if user is admin or seller
     const isAdmin = userRoles.includes('admin');
@@ -89,12 +109,6 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             label: 'Reports & Analytics',
             icon: TrendingUp,
             path: '/admin/reports'
-        },
-        {
-            key: 'settings',
-            label: 'Settings',
-            icon: Settings,
-            path: '/settings'
         },
     ];
 

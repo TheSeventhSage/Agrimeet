@@ -15,6 +15,10 @@ const ProductDetails = () => {
     const [selectedImage, setSelectedImage] = useState(0);
     const [activeTab, setActiveTab] = useState('description');
 
+    // New state: selected variant and quantity
+    const [selectedVariantId, setSelectedVariantId] = useState(null);
+    const [quantity, setQuantity] = useState(1);
+
     useEffect(() => {
         const fetchProduct = async () => {
             if (!id) {
@@ -28,11 +32,19 @@ const ProductDetails = () => {
                 setError(null);
 
                 const response = await getProduct(id);
-                const transformedProduct = transformProductData(response.data || response);
+                const raw = response?.data ?? response;
+                const transformedProduct = transformProductData(raw);
                 setProduct(transformedProduct);
 
-                // Set first image as selected by default
-                if (transformedProduct.images && transformedProduct.images.length > 0) {
+                // set default selected variant: prefer first variant, else null
+                if (Array.isArray(transformedProduct?.variants) && transformedProduct.variants.length > 0) {
+                    setSelectedVariantId(transformedProduct.variants[0].id);
+                } else {
+                    setSelectedVariantId(null);
+                }
+
+                // default selected image
+                if (Array.isArray(transformedProduct?.images) && transformedProduct.images.length > 0) {
                     setSelectedImage(0);
                 }
             } catch (err) {
@@ -55,6 +67,35 @@ const ProductDetails = () => {
         navigate('/products');
     };
 
+    // Helper: compute variant stock sum and total stock (safe)
+    const computeVariantStockSum = (p) => {
+        if (!p) return 0;
+        if (!Array.isArray(p.variants)) return 0;
+        return p.variants.reduce((s, v) => s + (Number(v?.stock_quantity ?? v?.stock ?? 0) || 0), 0);
+    };
+
+    const variantStockSum = computeVariantStockSum(product);
+    const topLevelStock = Number(product?.stock ?? product?.stock_quantity ?? 0) || 0;
+    const totalStock = topLevelStock + variantStockSum;
+    const isAvailable = totalStock > 0;
+
+    // Selected variant object
+    const selectedVariant =
+        Array.isArray(product?.variants) && selectedVariantId
+            ? product.variants.find((v) => v.id === selectedVariantId) ?? null
+            : null;
+
+    const selectedVariantStock = Number(selectedVariant?.stock_quantity ?? selectedVariant?.stock ?? 0) || 0;
+
+    // Price display: prefer variant price if selected, else product discounted/base price
+    const displayPrice = selectedVariant?.price ?? product?.discountedPrice ?? product?.discount_price ?? product?.price ?? product?.base_price;
+
+    // Quantity controls - respect selected variant stock or total stock
+    const increaseQty = () => {
+        const maxStock = selectedVariant ? selectedVariantStock : totalStock;
+        setQuantity((q) => Math.min(maxStock || Infinity, q + 1));
+    };
+
     const StatusBadge = ({ status }) => {
         const statusConfig = {
             'active': { bg: 'bg-green-100', text: 'text-green-800', label: 'Active' },
@@ -62,7 +103,7 @@ const ProductDetails = () => {
             'draft': { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Draft' }
         };
 
-        const config = statusConfig[status?.toLowerCase()] || statusConfig['draft'];
+        const config = statusConfig[(status || '').toLowerCase()] || statusConfig['draft'];
 
         return (
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${config.bg} ${config.text}`}>
@@ -71,36 +112,36 @@ const ProductDetails = () => {
         );
     };
 
-    const StockIndicator = ({ stock }) => {
+    const StockIndicator = ({ stock, selectedStock = null }) => {
+        // stock = totalStock, selectedStock = selectedVariantStock (optional)
         let config;
         if (stock > 50) {
-            config = { bg: 'bg-green-500', text: 'In Stock', color: 'text-green-600' };
+            config = { dot: 'bg-green-500', text: 'In Stock', color: 'text-green-600' };
         } else if (stock > 10) {
-            config = { bg: 'bg-yellow-500', text: 'Low Stock', color: 'text-yellow-600' };
+            config = { dot: 'bg-yellow-500', text: 'Low Stock', color: 'text-yellow-600' };
         } else if (stock > 0) {
-            config = { bg: 'bg-orange-500', text: 'Very Low', color: 'text-orange-600' };
+            config = { dot: 'bg-orange-500', text: 'Very Low', color: 'text-orange-600' };
         } else {
-            config = { bg: 'bg-red-500', text: 'Out of Stock', color: 'text-red-600' };
+            config = { dot: 'bg-red-500', text: 'Out of Stock', color: 'text-red-600' };
         }
 
         return (
-            <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${config.bg}`}></div>
-                <span className={`text-sm font-medium ${config.color}`}>
-                    {config.text} ({stock} units)
-                </span>
+            <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${config.dot}`}></div>
+                <div>
+                    <div className={`text-sm font-medium ${config.color}`}>{config.text}</div>
+                    <div className="text-xs text-gray-500">
+                        {stock} units total{selectedStock != null ? ` • selected: ${selectedStock} units` : ''}
+                    </div>
+                </div>
             </div>
         );
     };
 
-    const renderStars = (rating) => {
-        return Array.from({ length: 5 }, (_, i) => (
-            <Star
-                key={i}
-                className={`w-5 h-5 ${i < Math.floor(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
-            />
+    const renderStars = (rating) =>
+        Array.from({ length: 5 }, (_, i) => (
+            <Star key={i} className={`w-5 h-5 ${i < Math.floor(rating || 0) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
         ));
-    };
 
     if (loading) {
         return (
@@ -172,8 +213,13 @@ const ProductDetails = () => {
                             {/* Main Image */}
                             <div className="aspect-square rounded-xl bg-gray-100 overflow-hidden">
                                 <img
-                                    src={product.images && product.images.length > 0 ? product.images[selectedImage] : product.image}
-                                    alt={product.name}
+                                    src={
+                                        product?.image
+                                        || (Array.isArray(product?.images) && product.images[selectedImage])
+                                        || product?.thumbnail
+                                        || ''
+                                    }
+                                    alt={product?.name}
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
                                         e.target.src = `data:image/svg+xml;base64,${btoa(`
@@ -187,15 +233,15 @@ const ProductDetails = () => {
                             </div>
 
                             {/* Thumbnail Images */}
-                            {product.images && product.images.length > 1 && (
+                            {Array.isArray(product?.images) && product.images.length > 1 && (
                                 <div className="flex gap-3 overflow-x-auto pb-2">
                                     {product.images.map((image, index) => (
                                         <button
                                             key={index}
                                             onClick={() => setSelectedImage(index)}
                                             className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
-                                                    ? 'border-brand-500 ring-2 ring-brand-100'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-brand-500 ring-2 ring-brand-100'
+                                                : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
                                             <img
@@ -222,7 +268,7 @@ const ProductDetails = () => {
                                 <div className="flex items-center gap-4 text-sm text-gray-500">
                                     <span>SKU: {product.slug || 'N/A'}</span>
                                     <span>•</span>
-                                    <span>Category: {product.category}</span>
+                                    <span>Category: {product.category ?? '—'}</span>
                                 </div>
                             </div>
 
@@ -232,14 +278,14 @@ const ProductDetails = () => {
                                     {renderStars(product.rating)}
                                 </div>
                                 <span className="text-sm text-gray-600">
-                                    {product.rating} • {product.reviews} reviews
+                                    {product.rating ?? 0} • {product.reviews ?? 0} reviews
                                 </span>
                             </div>
 
                             {/* Price */}
                             <div className="flex items-center gap-4">
                                 <span className="text-3xl font-bold text-gray-900">
-                                    ${product.discountedPrice || product.price}
+                                    ${Number(displayPrice ?? 0).toFixed(2)}
                                 </span>
                                 {product.originalPrice && product.originalPrice > (product.discountedPrice || product.price) && (
                                     <>
@@ -252,12 +298,53 @@ const ProductDetails = () => {
                                     </>
                                 )}
                                 <span className="text-sm text-gray-500">
-                                    per {product.unitSymbol || product.unit}
+                                    per {product.unitSymbol || product.unit || product.unit?.symbol || ''}
                                 </span>
                             </div>
 
                             {/* Stock */}
-                            <StockIndicator stock={product.stock} />
+                            <StockIndicator stock={totalStock} selectedStock={selectedVariant ? selectedVariantStock : null} />
+
+                            {/* Variant selector (if variants exist) */}
+                            {Array.isArray(product?.variants) && product.variants.length > 0 && (
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-700 mb-2">Variants</h4>
+
+                                    {/* If many variants, render as horizontal scrollable pills */}
+                                    <div className="flex gap-2 overflow-x-auto pb-2">
+                                        {product.variants.map((v) => {
+                                            const vStock = Number(v?.stock_quantity ?? v?.stock ?? 0) || 0;
+                                            const disabled = vStock <= 0;
+                                            const isSelected = selectedVariantId === v.id;
+
+                                            return (
+                                                <button
+                                                    key={v.id}
+                                                    onClick={() => {
+                                                        setSelectedVariantId(v.id);
+                                                        setQuantity(1);
+                                                    }}
+                                                    disabled={disabled}
+                                                    className={`flex-shrink-0 px-3 py-2 rounded-lg border transition-all text-left min-w-[150px]
+                                                        ${isSelected ? 'border-brand-500 bg-brand-50' : 'border-gray-200 hover:border-gray-300'}
+                                                        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="text-sm font-medium">{v.name || `Variant ${v.id}`}</div>
+                                                        <div className="text-sm font-semibold">${Number(v.price ?? 0).toFixed(2)}</div>
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        {v.attribute_values ? v.attribute_values.map(av => `${av.attribute}: ${av.value}`).join(' • ') : ''}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400 mt-1">
+                                                        {vStock} {v.unit?.symbol ?? product.unit ?? ''} available
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Description Preview */}
                             <div>
@@ -272,8 +359,8 @@ const ProductDetails = () => {
                                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                                     <Package className="w-5 h-5 text-brand-500" />
                                     <div>
-                                        <div className="text-sm font-medium text-gray-900">In Stock</div>
-                                        <div className="text-xs text-gray-500">{product.stock} units</div>
+                                        <div className="text-sm font-medium text-gray-900">Total Stock</div>
+                                        <div className="text-xs text-gray-500">{totalStock} units</div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
@@ -298,20 +385,6 @@ const ProductDetails = () => {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex gap-3 pt-4">
-                                <button className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors">
-                                    <ShoppingCart className="w-5 h-5" />
-                                    Add to Cart
-                                </button>
-                                <button className="p-3 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
-                                    <Heart className="w-5 h-5" />
-                                </button>
-                                <button className="p-3 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
-                                    <Share2 className="w-5 h-5" />
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -326,8 +399,8 @@ const ProductDetails = () => {
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
                                     className={`py-4 px-1 border-b-2 font-medium text-sm capitalize transition-colors ${activeTab === tab
-                                            ? 'border-brand-500 text-brand-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                                        ? 'border-brand-500 text-brand-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700'
                                         }`}
                                 >
                                     {tab}
@@ -358,7 +431,7 @@ const ProductDetails = () => {
                                         </div>
                                         <div className="flex justify-between py-2 border-b border-gray-100">
                                             <span className="text-gray-500">Unit</span>
-                                            <span className="font-medium text-gray-900">{product.unit}</span>
+                                            <span className="font-medium text-gray-900">{product.unit ?? product.unitSymbol}</span>
                                         </div>
                                         <div className="flex justify-between py-2 border-b border-gray-100">
                                             <span className="text-gray-500">SKU</span>
@@ -375,7 +448,7 @@ const ProductDetails = () => {
                                     <div className="space-y-3">
                                         <div className="flex justify-between py-2 border-b border-gray-100">
                                             <span className="text-gray-500">Base Price</span>
-                                            <span className="font-medium text-gray-900">${product.originalPrice}</span>
+                                            <span className="font-medium text-gray-900">${product.originalPrice ?? product.base_price ?? product.price}</span>
                                         </div>
                                         {product.discountedPrice && (
                                             <div className="flex justify-between py-2 border-b border-gray-100">
@@ -385,12 +458,12 @@ const ProductDetails = () => {
                                         )}
                                         <div className="flex justify-between py-2 border-b border-gray-100">
                                             <span className="text-gray-500">Stock Quantity</span>
-                                            <span className="font-medium text-gray-900">{product.stock} units</span>
+                                            <span className="font-medium text-gray-900">{totalStock} units</span>
                                         </div>
                                         <div className="flex justify-between py-2 border-b border-gray-100">
                                             <span className="text-gray-500">Created</span>
                                             <span className="font-medium text-gray-900">
-                                                {new Date(product.createdAt).toLocaleDateString()}
+                                                {product.createdAt ? new Date(product.createdAt).toLocaleDateString() : ''}
                                             </span>
                                         </div>
                                     </div>

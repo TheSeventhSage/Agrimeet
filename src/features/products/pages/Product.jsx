@@ -37,8 +37,8 @@ const Pagination = ({ currentPage, lastPage, onPageChange }) => {
                         key={page}
                         onClick={() => onPageChange(page)}
                         className={`px-3 py-1 text-sm border border-gray-300 rounded-md ${page === currentPage
-                                ? 'bg-brand-500 text-white border-brand-500'
-                                : 'hover:bg-gray-50'
+                            ? 'bg-brand-500 text-white border-brand-500'
+                            : 'hover:bg-gray-50'
                             }`}
                     >
                         {page}
@@ -164,6 +164,10 @@ export default function ProductGrid() {
         fetchProducts(pagination.current_page);
     };
 
+    const handleManageVariants = (product) => {
+        navigate(`/products/${product.id}/variants/add`);
+    };
+
     // Error state
     if (error && !loading) {
         return (
@@ -270,6 +274,7 @@ export default function ProductGrid() {
                                         onEdit={handleEditProduct}
                                         onDelete={handleDeleteProduct}
                                         onView={handleViewProduct}
+                                        onManageVariants={handleManageVariants}  // Add this line
                                         isDeleting={deleting[product.id]}
                                     />
                                 ))}

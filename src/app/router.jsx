@@ -7,7 +7,7 @@ import { LoadingSpinner } from '../shared/components/Loader';
 // Lazy load all components
 /** Home page */
 const HomePage = lazy(() => import('../pages/HomePage'));
-const ProductDetailsWrapper = lazy(() => import('../pages/ProductDetails'));
+const BuyerApp = lazy(() => import('../pages/BuyerAppRedirect'));
 const HelpSupport = lazy(() => import('../pages/HelpSupport'));
 const AppDemo = lazy(() => import('../Add.demo'));
 /** Auth pages */
@@ -24,8 +24,12 @@ const ViewProfile = lazy(() => import('../features/dashboard/pages/ViewProfile')
 const Settings = lazy(() => import('../features/dashboard/pages/Settings'));
 const ProductGrid = lazy(() => import('../features/products/pages/Product'));
 const AddProduct = lazy(() => import('../features/products/pages/AddProduct'));
+const AddVariant = lazy(() => import('../features/products/pages/AddVariant'));
 const ProductDetails = lazy(() => import('../features/products/pages/ProductDetails'));
+const VariantsList = lazy(() => import('../features/products/pages/VariantsList'));
 const EditProduct = lazy(() => import('../features/products/pages/EditProduct'));
+const EditVariant = lazy(() => import('../features/products/pages/EditVariant'));
+const Messages = lazy(() => import('../features/messages/pages/Messages'));
 const KYCPage = lazy(() => import('../features/kyc/pages/KycVerify'));
 const KYCStatusPage = lazy(() => import('../features/kyc/pages/KycVerified'));
 const Payouts = lazy(() => import('../features/payouts/pages/Payouts'));
@@ -51,7 +55,7 @@ export default function Router() {
                 <Route path="/test" element={<AppDemo />} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/index" element={<HomePage />} />
-                <Route path="/product/:id" element={<ProductDetailsWrapper />} />
+                <Route path="/product/download" element={<BuyerApp />} />
 
                 {/* Auth routes */}
                 <Route path="/login" element={<Login />} />
@@ -69,8 +73,13 @@ export default function Router() {
                 {/* Product routes */}
                 <Route path="/products" element={<ProtectedRoutes allowedRoles={['seller']}><ProductGrid /></ProtectedRoutes>} />
                 <Route path="/products/add" element={<ProtectedRoutes allowedRoles={['seller']}><AddProduct /></ProtectedRoutes>} />
+                <Route path="/products/:productId/variants/add" element={<ProtectedRoutes allowedRoles={['seller']}><AddVariant /></ProtectedRoutes>} />
                 <Route path="/products/:id" element={<ProtectedRoutes allowedRoles={['seller']}><ProductDetails /></ProtectedRoutes>} />
                 <Route path="/products/edit/:id" element={<ProtectedRoutes allowedRoles={['seller']}><EditProduct /></ProtectedRoutes>} />
+                <Route path="/products/:productId/variants" element={<ProtectedRoutes allowedRoles={['seller']}><VariantsList /></ProtectedRoutes>} />
+                <Route path="/products/:productId/variants/:variantId/edit" element={<ProtectedRoutes allowedRoles={['seller']}><EditVariant /></ProtectedRoutes>} />
+                {/* Messages */}
+                <Route path="/messages" element={<ProtectedRoutes allowedRoles={['seller']}><Messages /></ProtectedRoutes>} />
                 {/* KYC routes */}
                 <Route path="/kyc" element={<ProtectedRoutes allowedRoles={['seller']}><KYCPage /></ProtectedRoutes>} />
                 <Route path="/kyc/status" element={<ProtectedRoutes allowedRoles={['seller']}><KYCStatusPage /></ProtectedRoutes>} />

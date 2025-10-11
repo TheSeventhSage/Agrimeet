@@ -195,6 +195,83 @@ export const getUnits = async () => {
     }
 };
 
+// Create product variant
+export const createVariant = async (productId, variantData) => {
+    try {
+        const response = await fetch(`${BASE_URL}/seller/products/${productId}/variants`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(variantData)
+        });
+
+        return await handleResponse(response);
+    } catch (error) {
+        console.error('Error creating variant:', error);
+        throw error;
+    }
+};
+
+// Get all variants for a product
+export const getVariants = async (productId) => {
+    try {
+        const response = await fetch(`${BASE_URL}/seller/products/${productId}/variants`, {
+            method: 'GET',
+            headers: getAuthHeaders()
+        });
+
+        return await handleResponse(response);
+    } catch (error) {
+        console.error('Error fetching variants:', error);
+        throw error;
+    }
+};
+
+// Get single variant
+export const getVariant = async (productId, variantId) => {
+    try {
+        const response = await fetch(`${BASE_URL}/seller/products/${productId}/variants/${variantId}`, {
+            method: 'GET',
+            headers: getAuthHeaders()
+        });
+
+        return await handleResponse(response);
+    } catch (error) {
+        console.error('Error fetching variant:', error);
+        throw error;
+    }
+};
+
+// Update variant
+export const updateVariant = async (productId, variantId, variantData) => {
+    try {
+        const response = await fetch(`${BASE_URL}/seller/products/${productId}/variants/${variantId}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(variantData)
+        });
+
+        return await handleResponse(response);
+    } catch (error) {
+        console.error('Error updating variant:', error);
+        throw error;
+    }
+};
+
+// Delete variant
+export const deleteVariant = async (productId, variantId) => {
+    try {
+        const response = await fetch(`${BASE_URL}/seller/products/${productId}/variants/${variantId}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+
+        return await handleResponse(response);
+    } catch (error) {
+        console.error('Error deleting variant:', error);
+        throw error;
+    }
+};
+
 // Helper function to transform API product data to match component expectations
 export const transformProductData = (apiProduct) => {
     return {

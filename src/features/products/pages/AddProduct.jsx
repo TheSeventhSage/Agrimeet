@@ -11,7 +11,7 @@ import { Loading } from '../../../shared/components/Loader';
 import { showSuccess, showError } from '../../../shared/utils/alert';
 import { createProduct, getCategories, getUnits } from '../api/productsApi';
 import { storageManager } from '../../../pages/utils/storageManager';
-
+import { useNavigate } from 'react-router-dom';
 const AddProduct = () => {
     const [formData, setFormData] = useState({
         name: '',
@@ -38,6 +38,7 @@ const AddProduct = () => {
     const [isLoading, setIsLoading] = useState(true);
     // Add this with the other useState declarations
     const [units, setUnits] = useState([]);
+    const navigate = useNavigate();
 
     // Load categories on component mount
     useEffect(() => {
@@ -184,15 +185,21 @@ const AddProduct = () => {
 
             showSuccess(response.message || 'Product created successfully!');
 
-            // Redirect to products page after successful creation
-            window.location.hash = '/products';
+            // Redirect to add variants page after successful creation
+            const newProductId = response.data?.id || response.product?.id;
+            if (newProductId) {
+                navigate(`/products/${newProductId}/variants/add`);
+            } else {
+                // Fallback to products page if no ID returned
+                navigate('/products');
+            }
         } catch (error) {
             console.error('Error creating product:', error);
 
             // Handle different types of errors
             if (error.message.includes('Session expired')) {
                 showError('Session expired. Please login again.');
-                window.location.hash = '/login';
+                navigate('/login');
             } else if (error.message.includes('Validation error') || error.message.includes('invalid')) {
                 showError('Please check your input and try again.');
             } else {
@@ -212,13 +219,13 @@ const AddProduct = () => {
         if (hasData) {
             setShowCancelModal(true);
         } else {
-            window.location.hash = '/products';
+            navigate('/products');
         }
     };
 
     const handleCancelConfirm = () => {
         setShowCancelModal(false);
-        window.location.hash = '/products';
+        navigate('/products');
     };
 
     if (isLoading) {

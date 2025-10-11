@@ -36,7 +36,6 @@ const Dashboard = () => {
     const [isInitialLoading, setIsInitialLoading] = useState(true);
 
     // Fetch user profile
-    // Remove the useEffect for fetching user profile and replace it with this approach
     useEffect(() => {
         const fetchFreshUserData = async () => {
             if (!authUser?.id) {

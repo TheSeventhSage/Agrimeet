@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2, Save } from 'lucide-react';
+import { ArrowLeft, Trash2, Save, Package } from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import Input from '../../../shared/components/Input';
 import Select from '../../../shared/components/Select';
@@ -188,6 +188,10 @@ const EditProduct = () => {
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const handleManageVariants = () => {
+        navigate(`/products/${productId}/variants`);
     };
 
     const goBack = () => {
@@ -451,22 +455,33 @@ const EditProduct = () => {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
+                    <div className="flex items-center justify-between pt-6 border-t border-gray-200">
                         <Button
                             type="button"
-                            onClick={goBack}
-                            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                            onClick={handleManageVariants}
+                            className="px-6 py-2 border border-purple-500 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors flex items-center gap-2"
                         >
-                            Cancel
+                            <Package className="w-4 h-4" />
+                            Manage Variants
                         </Button>
-                        <Button
-                            type="submit"
-                            loading={isSubmitting}
-                            className="px-6 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-2"
-                        >
-                            <Save className="w-4 h-4" />
-                            {isSubmitting ? 'Updating...' : 'Update Product'}
-                        </Button>
+
+                        <div className="flex items-center gap-4">
+                            <Button
+                                type="button"
+                                onClick={goBack}
+                                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                loading={isSubmitting}
+                                className="px-6 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-2"
+                            >
+                                <Save className="w-4 h-4" />
+                                {isSubmitting ? 'Updating...' : 'Update Product'}
+                            </Button>
+                        </div>
                     </div>
                 </form>
 

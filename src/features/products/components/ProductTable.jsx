@@ -2,11 +2,26 @@ import { useState } from 'react';
 import { Edit, Trash2, Eye, Star, Package } from 'lucide-react';
 import ConfirmationModal from '../../../shared/components/ConfirmationModal';
 
-const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false }) => {
+const ProductTable = ({ product, onEdit, onDelete, onView, onManageVariants, isDeleting = false }) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    console.log(product)
-    console.log(product.image)
+    // Defensive: try multiple places for images
+    const imageSrc = product?.image
+        || product?.thumbnail
+        || (Array.isArray(product?.images) && product.images[0])
+        || '';
+
+    // Compute variant stock safely
+    const variantStock = Array.isArray(product?.variants)
+        ? product.variants.reduce((sum, v) => sum + (Number(v?.stock_quantity ?? v?.stock ?? 0) || 0), 0)
+        : 0;
+
+    // Support both product.stock and product.stock_quantity or fallback to 0
+    const topLevelStock = Number(product?.stock ?? product?.stock_quantity ?? 0) || 0;
+
+    const totalStock = topLevelStock + variantStock;
+    const isAvailable = totalStock > 0;
+
     const handleDeleteClick = () => {
         setShowDeleteModal(true);
     };
@@ -22,7 +37,7 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
         return Array.from({ length: 5 }, (_, i) => (
             <Star
                 key={i}
-                className={`w-3 h-3 ${i < Math.floor(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                className={`w-3 h-3 ${i < Math.floor(rating || 0) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
             />
         ));
     };
@@ -35,7 +50,7 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
             'pending': { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending' }
         };
 
-        const config = statusConfig[status?.toLowerCase()] || statusConfig['draft'];
+        const config = statusConfig[(status || '').toLowerCase()] || statusConfig['draft'];
 
         return (
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
@@ -57,9 +72,9 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
         }
 
         return (
-            <div className="flex">
+            <div className="flex items-center gap-2">
                 <span className="font-semibold text-gray-900 text-sm">{stock}</span>
-                <span className={` px-1.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+                <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
                     {config.label}
                 </span>
             </div>
@@ -83,25 +98,29 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
                 <td className="px-2 py-3">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-
                             <img
-                                src={product.image}
-                                alt={product.name}
+                                src={imageSrc}
+                                alt={product?.name}
                                 className="w-full h-full object-cover"
                                 onError={handleImageError}
                             />
-
                         </div>
                         <div className="min-w-0 flex-1">
-                            <div className="font-medium text-gray-900 text-sm truncate" title={product.name}>
-                                {product.name}
+                            <div className="font-medium text-gray-900 text-sm truncate" title={product?.name}>
+                                {product?.name}
                             </div>
-                            <div className="text-xs text-gray-500 truncate" title={product.description}>
-                                {product.description || 'No description'}
+                            <div className="text-xs text-gray-500 truncate" title={product?.description}>
+                                {product?.description || 'No description'}
                             </div>
-                            {product.slug && (
+                            {product?.slug && (
                                 <div className="text-xs text-gray-400">
                                     Slug: {product.slug}
+                                </div>
+                            )}
+                            {/* Variant count if present */}
+                            {Array.isArray(product?.variants) && product.variants.length > 0 && (
+                                <div className="text-xs text-gray-400 mt-1">
+                                    {product.variants.length} variant{product.variants.length > 1 ? 's' : ''}
                                 </div>
                             )}
                         </div>
@@ -111,7 +130,7 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
                 {/* Category */}
                 <td className="px-3 py-3">
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {product.category}
+                        {product?.category ?? '—'}
                     </span>
                 </td>
 
@@ -120,16 +139,16 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
                     <div className="flex flex-col">
                         <div className="flex items-center gap-1">
                             <span className="font-semibold text-gray-900 text-sm">
-                                ${product.discountedPrice || product.price}
+                                ${product?.discountedPrice ?? product?.price ?? product?.discount_price ?? product?.base_price}
                             </span>
-                            {product.unit && (
+                            {product?.unit && (
                                 <span className="text-xs text-gray-500">
-                                    /{product.unitSymbol || product.unit}
+                                    /{product?.unitSymbol ?? product?.unit?.symbol ?? product?.unit}
                                 </span>
                             )}
                         </div>
 
-                        {product.originalPrice && product.originalPrice > (product.discountedPrice || product.price) && (
+                        {product?.originalPrice && product?.originalPrice > (product?.discountedPrice ?? product?.price) && (
                             <div className="flex items-center gap-2">
                                 <span className="text-xs text-gray-500 line-through">
                                     ${product.originalPrice}
@@ -144,12 +163,12 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
 
                 {/* Stock */}
                 <td className="px-2 py-3 w-fit">
-                    <StockBadge stock={product.stock} />
+                    <StockBadge stock={totalStock} />
                 </td>
 
                 {/* Status */}
                 <td className="px-3 py-3">
-                    <StatusBadge status={product.status} />
+                    <StatusBadge status={product?.status} />
                 </td>
 
                 {/* Actions */}
@@ -169,6 +188,14 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
                             title="Edit Product"
                         >
                             <Edit className="w-4 h-4" />
+                        </button>
+
+                        <button
+                            onClick={() => onManageVariants && onManageVariants(product)}
+                            className="p-1.5 text-purple-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                            title="Manage Variants"
+                        >
+                            <Package className="w-4 h-4" />
                         </button>
 
                         <button
@@ -193,7 +220,7 @@ const ProductTable = ({ product, onEdit, onDelete, onView, isDeleting = false })
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={handleDeleteConfirm}
                 title="Delete Product"
-                message={`Are you sure you want to delete "${product.name}"? This action cannot be undone.`}
+                message={`Are you sure you want to delete "${product?.name}"? This action cannot be undone.`}
                 confirmText="Delete"
                 cancelText="Cancel"
                 type="danger"

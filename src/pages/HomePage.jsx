@@ -454,7 +454,7 @@ const Home = () => {
                             </span>
                           </div>
 
-                          <Link to={`/product/${product.id}`}>
+                          <Link to={`/product/download`}>
                             <button
                               disabled={!isAvailable}
                               className="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-2xl hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all transform active:scale-95 cursor-pointer"

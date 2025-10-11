@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     User,
     Mail,
@@ -11,16 +11,16 @@ import {
     Camera
 } from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
+import { storageManager } from '../../../pages/utils/storageManager';
 
 const ViewProfile = () => {
-    // Mock user data
-    const userData = {
-        name: 'John Doe',
-        email: 'john.doe@agrimeet.com',
-        phone: '+1 (555) 123-4567',
+    const [userData, setUserData] = useState({
+        name: '',
+        email: '',
+        phone: '',
         location: 'Lagos, Nigeria',
-        joinDate: 'January 15, 2023',
-        role: 'Seller',
+        joinDate: '',
+        role: '',
         status: 'Verified',
         avatar: 'https://via.placeholder.com/150x150/10b981/ffffff?text=JD',
         rating: 4.8,
@@ -35,13 +35,37 @@ const ViewProfile = () => {
             'Customer Choice Award',
             'Sustainability Champion'
         ]
-    };
+    });
+
+    useEffect(() => {
+        // Get user data from local storage
+        const storedUserData = storageManager.getUserData();
+        if (storedUserData) {
+            // Extract user data from the stored data structure
+            const user = storedUserData.data || storedUserData;
+            
+            // Update state with real user data, keeping defaults for missing fields
+            setUserData(prevData => ({
+                ...prevData,
+                name: user.first_name + ' ' + user.last_name || user.full_name || prevData.name,
+                email: user.email || prevData.email,
+                phone: user.phone_number || prevData.phone,
+                role: user.role || (user.roles && user.roles[1]) || prevData.role,
+                bio: user.seller.business_bio,
+                joinDate: user.created_at ? new Date(user.created_at).toLocaleDateString() : prevData.joinDate,
+                status: user.user_status,
+                // Keep other default values if not available in stored data
+            }));
+            
+            console.log('User data loaded from storage:', storedUserData);
+        }
+    }, []);
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'Verified':
+            case 'Active':
                 return 'bg-green-100 text-green-800';
-            case 'Pending':
+            case 'Inactive':
                 return 'bg-yellow-100 text-yellow-800';
             case 'Suspended':
                 return 'bg-red-100 text-red-800';
@@ -60,7 +84,7 @@ const ViewProfile = () => {
                         <p className="text-gray-600 mt-2">View and manage your profile information</p>
                     </div>
                     <button
-                        onClick={() => window.location.hash = '/settings'}
+                        onClick={() => window.location.href = '/settings'}
                         className="flex items-center gap-2 px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
                     >
                         <Edit className="w-4 h-4" />
@@ -72,7 +96,7 @@ const ViewProfile = () => {
                 <div className="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden">
                     {/* Cover Photo */}
                     <div className="h-32 bg-linear-to-r from-brand-500 to-brand-600 relative">
-                        <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+                        {/* <div className="absolute inset-0 bg-black bg-opacity-20"></div> */}
                     </div>
 
                     {/* Profile Info */}
@@ -96,22 +120,28 @@ const ViewProfile = () => {
                                     <h2 className="text-2xl font-bold text-gray-900">{userData.name}</h2>
                                     <p className="text-gray-600">{userData.role}</p>
                                     <div className="flex items-center gap-2 mt-2">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(userData.status)}`}>
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                                            (userData?.status || "")
+                                                .toString()
+                                                .trim()
+                                                .charAt(0)
+                                                .toUpperCase() || "?"
+                                        ) }`}>
                                             <Shield className="w-3 h-3 mr-1" />
-                                            {userData.status}
+                                            {userData.status.charAt(0).toUpperCase()}
                                         </span>
-                                        <div className="flex items-center gap-1">
+                                        {/* <div className="flex items-center gap-1">
                                             <Star className="w-4 h-4 text-yellow-400 fill-current" />
                                             <span className="text-sm font-medium text-gray-700">{userData.rating}</span>
                                             <span className="text-sm text-gray-500">({userData.totalReviews} reviews)</span>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Stats */}
-                        <div className="grid grid-cols-3 gap-6 mt-6 pt-6 border-t border-gray-100">
+                        {/* <div className="grid grid-cols-3 gap-6 mt-6 pt-6 border-t border-gray-100">
                             <div className="text-center">
                                 <p className="text-2xl font-bold text-gray-900">{userData.totalSales}</p>
                                 <p className="text-sm text-gray-600">Total Sales</p>
@@ -124,7 +154,7 @@ const ViewProfile = () => {
                                 <p className="text-2xl font-bold text-gray-900">{userData.totalReviews}</p>
                                 <p className="text-sm text-gray-600">Reviews</p>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
 
@@ -184,7 +214,7 @@ const ViewProfile = () => {
                 </div>
 
                 {/* Achievements */}
-                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
+                {/* <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Achievements</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {userData.achievements.map((achievement, index) => (
@@ -196,7 +226,7 @@ const ViewProfile = () => {
                             </div>
                         ))}
                     </div>
-                </div>
+                </div> */}
             </div>
         </DashboardLayout>
     );
