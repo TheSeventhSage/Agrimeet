@@ -29,6 +29,7 @@ const ProductDetails = lazy(() => import('../features/products/pages/ProductDeta
 const VariantsList = lazy(() => import('../features/products/pages/VariantsList'));
 const EditProduct = lazy(() => import('../features/products/pages/EditProduct'));
 const EditVariant = lazy(() => import('../features/products/pages/EditVariant'));
+const Analytics = lazy(() => import('../features/analytics/page/Analytics'));
 const Messages = lazy(() => import('../features/messages/pages/Messages'));
 const KYCPage = lazy(() => import('../features/kyc/pages/KycVerify'));
 const KYCStatusPage = lazy(() => import('../features/kyc/pages/KycVerified'));
@@ -80,6 +81,8 @@ export default function Router() {
                 <Route path="/products/:productId/variants/:variantId/edit" element={<ProtectedRoutes allowedRoles={['seller']}><EditVariant /></ProtectedRoutes>} />
                 {/* Messages */}
                 <Route path="/messages" element={<ProtectedRoutes allowedRoles={['seller']}><Messages /></ProtectedRoutes>} />
+                {/* Analytics */}
+                <Route path="/analytics" element={<ProtectedRoutes allowedRoles={['seller']}><Analytics /></ProtectedRoutes>} />
                 {/* KYC routes */}
                 <Route path="/kyc" element={<ProtectedRoutes allowedRoles={['seller']}><KYCPage /></ProtectedRoutes>} />
                 <Route path="/kyc/status" element={<ProtectedRoutes allowedRoles={['seller']}><KYCStatusPage /></ProtectedRoutes>} />

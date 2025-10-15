@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paginated Payment History</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 2rem;
+            background-color: #f9fafb;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        #filters {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        #filters label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        #filters select,
+        #filters input {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Status styling */
+        .status {
+            font-weight: bold;
+        }
+
+        .status-paid {
+            color: green;
+        }
+
+        .status-pending {
+            color: orange;
+        }
+
+        .status-failed {
+            color: red;
+        }
+
+        /* Pagination styling */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        #pagination-controls button,
+        #pagination-controls span {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            color: #337ab7;
+            padding: 8px 12px;
+            margin: 0 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+            -webkit-user-select: none;
+            /* Safari */
+            -ms-user-select: none;
+            /* IE 10 and IE 11 */
+            user-select: none;
+            /* Standard syntax */
+        }
+
+        #pagination-controls button:hover {
+            background-color: #f0f0f0;
+        }
+
+        #pagination-controls button.active {
+            background-color: #337ab7;
+            color: white;
+            border-color: #337ab7;
+            font-weight: bold;
+        }
+
+        #pagination-controls button:disabled {
+            color: #ccc;
+            cursor: not-allowed;
+            background-color: #f9f9f9;
+        }
+
+        #pagination-controls span.ellipsis {
+            border: none;
+            cursor: default;
+            padding: 8px 4px;
+            background-color: transparent;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Payment History 💳</h2>
+
+        <!-- Filter Controls -->
+        <div id="filters">
+            <div>
+                <label for="search-filter">Search:</label>
+                <input type="text" id="search-filter" placeholder="Search table...">
+            </div>
+            <div>
+                <label for="status-filter">Status:</label>
+                <select id="status-filter">
+                    <option value="all">All</option>
+                    <option value="paid">Paid</option>
+                    <option value="pending">Pending</option>
+                    <option value="failed">Failed</option>
+                </select>
+            </div>
+            <div>
+                <label for="start-date">From:</label>
+                <input type="date" id="start-date">
+            </div>
+            <div>
+                <label for="end-date">To:</label>
+                <input type="date" id="end-date">
+            </div>
+        </div>
+
+        <!-- This is the table your PHP backend will generate -->
+        <table id="payment-table">
+            <thead>
+                <tr>
+                    <th>Invoice ID</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- PHP FOREACH LOOP WOULD START HERE -->
+                <tr>
+                    <td>INV-001</td>
+                    <td>2025-10-01</td>
+                    <td>Monthly Subscription</td>
+                    <td>$29.99</td>
+                    <td><span class="status status-paid">Paid</span></td>
+                </tr>
+                <tr>
+                    <td>INV-002</td>
+                    <td>2025-10-05</td>
+                    <td>One-Time Purchase</td>
+                    <td>$150.00</td>
+                    <td><span class="status status-paid">Paid</span></td>
+                </tr>
+                <tr>
+                    <td>INV-003</td>
+                    <td>2025-10-10</td>
+                    <td>Service Fee</td>
+                    <td>$45.50</td>
+                    <td><span class="status status-pending">Pending</span></td>
+                </tr>
+                <tr>
+                    <td>INV-004</td>
+                    <td>2025-10-12</td>
+                    <td>Hardware Purchase</td>
+                    <td>$899.00</td>
+                    <td><span class="status status-failed">Failed</span></td>
+                </tr>
+                <tr>
+                    <td>INV-005</td>
+                    <td>2025-09-15</td>
+                    <td>Consulting Services</td>
+                    <td>$500.00</td>
+                    <td><span class="status status-paid">Paid</span></td>
+                </tr>
+                <tr>
+                    <td>INV-006</td>
+                    <td>2025-09-20</td>
+                    <td>Cloud Storage Fee</td>
+                    <td>$9.99</td>
+                    <td><span class="status status-pending">Pending</span></td>
+                </tr>
+                <tr>
+                    <td>INV-007</td>
+                    <td>2025-08-30</td>
+                    <td>Software License</td>
+                    <td>$250.00</td>
+                    <td><span class="status status-paid">Paid</span></td>
+                </tr>
+                <tr>
+                    <td>INV-008</td>
+                    <td>2025-10-14</td>
+                    <td>Support Ticket</td>
+                    <td>$75.00</td>
+                    <td><span class="status status-paid">Paid</span></td>
+                </tr>
+                <tr>
+                    <td>INV-009</td>
+                    <td>2025-11-01</td>
+                    <td>Monthly Subscription</td>
+                    <td>$29.99</td>
+                    <td><span class="status status-paid">Paid</span></td>
+                </tr>
+                <tr>
+                    <td>INV-010</td>
+                    <td>2025-11-05</td>
+                    <td>Plugin Purchase</td>
+                    <td>$49.00</td>
+                    <td><span class="status status-paid">Paid</span></td>
+                </tr>
+                <tr>
+                    <td>INV-011</td>
+                    <td>2025-11-10</td>
+                    <td>Ad Credits</td>
+                    <td>$100.00</td>
+                    <td><span class="status status-pending">Pending</span></td>
+                </tr>
+                <tr>
+                    <td>INV-012</td>
+                    <td>2025-11-12</td>
+                    <td>Domain Renewal</td>
+                    <td>$15.00</td>
+                    <td><span class="status status-failed">Failed</span></td>
+                </tr>
+                <!-- PHP FOREACH LOOP WOULD END HERE -->
+
+                <tr id="no-results-row" style="display: none;">
+                    <td colspan="5" style="text-align: center;">No payments found matching your criteria.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Pagination Controls will be generated here -->
+        <div class="pagination-container">
+            <div id="pagination-controls"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- STATE & CONFIG ---
+            const rowsPerPage = 5;
+            let currentPage = 1;
+
+            // --- ELEMENTS ---
+            const searchFilter = document.getElementById('search-filter');
+            const statusFilter = document.getElementById('status-filter');
+            const startDateFilter = document.getElementById('start-date');
+            const endDateFilter = document.getElementById('end-date');
+            const allRows = Array.from(document.querySelectorAll('#payment-table tbody tr:not(#no-results-row)'));
+            const noResultsRow = document.getElementById('no-results-row');
+            const paginationControls = document.getElementById('pagination-controls');
+
+            // --- EVENT LISTENERS ---
+            // Listen for changes on any filter
+            document.getElementById('filters').addEventListener('input', () => {
+                currentPage = 1;
+                render();
+            });
+
+            // Use event delegation for pagination clicks
+            paginationControls.addEventListener('click', (e) => {
+                const target = e.target;
+                if (target.tagName !== 'BUTTON' || target.disabled) return;
+
+                const pageAction = target.dataset.page;
+                const pageCount = Math.ceil(getFilteredRows().length / rowsPerPage);
+
+                if (pageAction === 'prev' && currentPage > 1) currentPage--;
+                else if (pageAction === 'next' && currentPage < pageCount) currentPage++;
+                else if (!isNaN(pageAction)) currentPage = parseInt(pageAction, 10);
+
+                render();
+            });
+
+            // --- CORE RENDER FUNCTION ---
+            function render() {
+                const filteredRows = getFilteredRows();
+                renderPagination(filteredRows.length);
+                displayPageRows(filteredRows);
+                noResultsRow.style.display = filteredRows.length === 0 ? '' : 'none';
+            }
+
+            // --- HELPER FUNCTIONS ---
+            function getFilteredRows() {
+                const searchValue = searchFilter.value.toLowerCase();
+                const statusValue = statusFilter.value;
+                const startDate = startDateFilter.value ? new Date(startDateFilter.value) : null;
+                const endDate = endDateFilter.value ? new Date(endDateFilter.value) : null;
+
+                return allRows.filter(row => {
+                    const rowText = row.textContent.toLowerCase();
+                    const dateCell = row.cells[1].textContent;
+                    const statusCell = row.cells[4].textContent.trim().toLowerCase();
+                    const rowDate = new Date(dateCell);
+
+                    const searchMatch = rowText.includes(searchValue);
+                    const statusMatch = (statusValue === 'all' || statusCell === statusValue);
+                    const startDateMatch = (!startDate || rowDate >= startDate);
+                    const endDateMatch = (!endDate || rowDate <= endDate);
+
+                    return searchMatch && statusMatch && startDateMatch && endDateMatch;
+                });
+            }
+
+            function renderPagination(totalRows) {
+                const pageCount = Math.ceil(totalRows / rowsPerPage);
+                if (pageCount <= 1) {
+                    paginationControls.innerHTML = '';
+                    return;
+                }
+
+                const pages = getPaginationPages(currentPage, pageCount);
+                const prevDisabled = currentPage === 1 ? 'disabled' : '';
+                const nextDisabled = currentPage === pageCount ? 'disabled' : '';
+
+                const pageButtonsHtml = pages.map(page => {
+                    if (page === '...') return `<span class="ellipsis">...</span>`;
+                    return `<button data-page="${page}" class="${page === currentPage ? 'active' : ''}">${page}</button>`;
+                }).join('');
+
+                paginationControls.innerHTML = `
+            <button data-page="prev" ${prevDisabled}>&laquo; Previous</button>
+            ${pageButtonsHtml}
+            <button data-page="next" ${nextDisabled}>Next &raquo;</button>
+        `;
+            }
+
+            function getPaginationPages(currentPage, pageCount, siblingCount = 1) {
+                if (siblingCount + 5 >= pageCount) {
+                    return Array.from({ length: pageCount }, (_, i) => i + 1);
+                }
+
+                const leftSibling = Math.max(currentPage - siblingCount, 1);
+                const rightSibling = Math.min(currentPage + siblingCount, pageCount);
+                const showLeftDots = leftSibling > 2;
+                const showRightDots = rightSibling < pageCount - 2;
+
+                if (!showLeftDots && showRightDots) {
+                    let leftRange = Array.from({ length: 3 + 2 * siblingCount }, (_, i) => i + 1);
+                    return [...leftRange, '...', pageCount];
+                }
+                if (showLeftDots && !showRightDots) {
+                    let rightRange = Array.from({ length: 3 + 2 * siblingCount }, (_, i) => pageCount - (3 + 2 * siblingCount) + 1 + i);
+                    return [1, '...', ...rightRange];
+                }
+                if (showLeftDots && showRightDots) {
+                    let middleRange = Array.from({ length: rightSibling - leftSibling + 1 }, (_, i) => leftSibling + i);
+                    return [1, '...', ...middleRange, '...', pageCount];
+                }
+                return [];
+            }
+
+            function displayPageRows(filteredRows) {
+                allRows.forEach(row => row.style.display = 'none');
+                const start = (currentPage - 1) * rowsPerPage;
+                filteredRows.slice(start, start + rowsPerPage).forEach(row => row.style.display = '');
+            }
+
+            // --- INITIAL RENDER ---
+            render();
+        });
+    </script>
+
+</body>
+
+</html>

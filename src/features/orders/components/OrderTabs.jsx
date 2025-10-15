@@ -7,13 +7,13 @@ const OrderTabs = ({ activeTab, onTabChange, orderStats = {} }) => {
             id: 'all',
             label: 'All Orders',
             icon: Package,
-            count: orderStats.total || 0
+            count: orderStats?.total || 0 // Add null-safe operator
         },
         {
             id: 'pending',
             label: 'Pending',
             icon: Clock,
-            count: orderStats.pending || 0,
+            count: orderStats?.pending || 0, // Add null-safe operator
             color: 'text-orange-600'
         },
         {

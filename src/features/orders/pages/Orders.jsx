@@ -1,232 +1,177 @@
-// pages/Orders.jsx
+// pages/OrdersPage.jsx
 import { useState, useEffect } from 'react';
-import DashboardLayout from '../../../layouts/DashboardLayout';
 import OrderTabs from '../components/OrderTabs';
 import OrdersList from '../components/OrdersList';
 import OrderDetails from '../components/OrderDetails';
 import OrderAnalytics from '../components/OrderAnalytics';
 import InvoiceModal from '../components/InvoiceModal';
-import orderService from '../api/orderService';
+import { orderService } from '../api/orderService';
+import DashboardLayout from '../../../layouts/DashboardLayout'; // Import your dashboard layout
 
+const OrdersPage = () => {
+  const [activeTab, setActiveTab] = useState('all');
+  const [orders, setOrders] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orderStats, setOrderStats] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [filters, setFilters] = useState({});
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [invoiceOrder, setInvoiceOrder] = useState(null);
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    last_page: 1,
+    per_page: 20,
+    total: 0
+  });
 
-const Orders = () => {
-    const [activeTab, setActiveTab] = useState('all');
-    const [orders, setOrders] = useState([]);
-    const [orderStats, setOrderStats] = useState({});
-    const [selectedOrder, setSelectedOrder] = useState(null);
-    const [showOrderDetails, setShowOrderDetails] = useState(false);
-    const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-    const [invoiceOrder, setInvoiceOrder] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isStatsLoading, setIsStatsLoading] = useState(true);
-    const [isOrderLoading, setIsOrderLoading] = useState(false);
-    const [isInvoiceLoading, setIsInvoiceLoading] = useState(false);
-    const [currentFilters, setCurrentFilters] = useState({ status: 'all' });
+  // Fetch orders when tab, filters, or page changes
+  useEffect(() => {
+    fetchOrders();
+  }, [activeTab, filters, pagination.current_page]);
 
-    // Load initial data
-    useEffect(() => {
-        loadOrderStats();
-        loadOrders();
-    }, []);
+  const fetchOrders = async () => {
+    try {
+      setIsLoading(true);
+      const apiFilters = {
+        ...filters,
+        status: activeTab === 'all' ? '' : activeTab,
+        page: pagination.current_page
+      };
 
-    // Load orders when tab changes
-    useEffect(() => {
-        const filters = { ...currentFilters, status: activeTab === 'all' ? 'all' : activeTab };
-        setCurrentFilters(filters);
-        loadOrders(filters);
-    }, [activeTab]);
+      const response = await orderService.getOrders(apiFilters);
+      setOrders(response.orders);
+      setOrderStats(response.stats);
+      setPagination(response.pagination);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      // You might want to show an error message to the user
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const loadOrderStats = async () => {
-        try {
-            setIsStatsLoading(true);
-            const response = await orderService.getOrderStats();
-            setOrderStats(response.data);
-        } catch (error) {
-            console.error('Failed to load order stats:', error);
-        } finally {
-            setIsStatsLoading(false);
-        }
-    };
+  const handleViewDetails = async (orderId) => {
+    try {
+      setIsLoading(true);
+      const order = await orderService.getOrder(orderId);
+      setSelectedOrder(order);
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const loadOrders = async (filters = currentFilters) => {
-        try {
-            setIsLoading(true);
-            const response = await orderService.getOrders(filters);
-            setOrders(response.data);
-        } catch (error) {
-            console.error('Failed to load orders:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  const handleUpdateStatus = async (orderId, status) => {
+    try {
+      await orderService.updateOrderStatus(orderId, status);
 
-    const handleViewDetails = async (orderId) => {
-        try {
-            setIsOrderLoading(true);
-            setShowOrderDetails(true);
-            const response = await orderService.getOrderById(orderId);
-            setSelectedOrder(response.data);
-        } catch (error) {
-            console.error('Failed to load order details:', error);
-        } finally {
-            setIsOrderLoading(false);
-        }
-    };
+      // Update local state
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId ? { ...order, status } : order
+        )
+      );
 
-    const handleUpdateStatus = async (orderId, newStatus) => {
-        try {
-            setIsOrderLoading(true);
-            const response = await orderService.updateOrderStatus(orderId, newStatus);
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder(prev => ({ ...prev, status }));
+      }
 
-            // Update the selected order if it's the one being updated
-            if (selectedOrder && selectedOrder.id === orderId) {
-                setSelectedOrder(response.data);
-            }
+      // Refetch orders to get updated counts
+      fetchOrders();
+    } catch (error) {
+      console.error('Error updating order status:', error);
+    }
+  };
 
-            // Refresh orders list and stats
-            await Promise.all([
-                loadOrders(),
-                loadOrderStats()
-            ]);
+  const handlePrintInvoice = async (orderId) => {
+    try {
+      const order = await orderService.getOrder(orderId);
+      setInvoiceOrder(order);
+      setShowInvoice(true);
+    } catch (error) {
+      console.error('Error fetching order for invoice:', error);
+    }
+  };
 
-        } catch (error) {
-            console.error('Failed to update order status:', error);
-        } finally {
-            setIsOrderLoading(false);
-        }
-    };
+  const handleApplyFilters = (newFilters) => {
+    setFilters(newFilters);
+    // Reset to first page when filters change
+    setPagination(prev => ({ ...prev, current_page: 1 }));
+  };
 
-    const handlePrintInvoice = async (orderId) => {
-        try {
-            setIsInvoiceLoading(true);
-            setShowInvoiceModal(true);
-            const response = await orderService.generateInvoice(orderId);
-            setInvoiceOrder(response.data);
-        } catch (error) {
-            console.error('Failed to generate invoice:', error);
-            setShowInvoiceModal(false);
-        } finally {
-            setIsInvoiceLoading(false);
-        }
-    };
+  const handlePageChange = (page) => {
+    setPagination(prev => ({ ...prev, current_page: page }));
+  };
 
-    const handleExportOrders = async () => {
-        try {
-            await orderService.exportOrders(currentFilters);
-        } catch (error) {
-            console.error('Failed to export orders:', error);
-        }
-    };
+  const handleExportOrders = () => {
+    // Implement export functionality
+    console.log('Export orders');
+  };
 
-    const handleApplyFilters = (filters) => {
-        setCurrentFilters(filters);
-        loadOrders(filters);
-    };
+  const handleBackToList = () => {
+    setSelectedOrder(null);
+  };
 
-    const handleBackToOrders = () => {
-        setShowOrderDetails(false);
-        setSelectedOrder(null);
-        // Refresh orders in case status was updated
-        loadOrders();
-        loadOrderStats();
-    };
-
-    const handleCloseInvoice = () => {
-        setShowInvoiceModal(false);
-        setInvoiceOrder(null);
-    };
-
-    const renderTabContent = () => {
-        if (showOrderDetails) {
-            return (
-                <OrderDetails
-                    order={selectedOrder}
-                    onBack={handleBackToOrders}
-                    onUpdateStatus={handleUpdateStatus}
-                    onPrintInvoice={handlePrintInvoice}
-                    isLoading={isOrderLoading}/>
-            );
-        }
-
-        switch (activeTab) {
-            case 'analytics':
-                return (
-                    <OrderAnalytics
-                        orderStats={orderStats}
-                        isLoading={isStatsLoading}
-                    />
-                );
-            default:
-                return (
-                    <OrdersList
-                        orders={orders}
-                        isLoading={isLoading}
-                        onViewDetails={handleViewDetails}
-                        onUpdateStatus={handleUpdateStatus}
-                        onPrintInvoice={handlePrintInvoice}
-                        onExportOrders={handleExportOrders}
-                        onApplyFilters={handleApplyFilters}
-                        currentFilters={currentFilters}
-                    />
-                );
-        }
-    };
-
+  if (selectedOrder) {
     return (
-        <DashboardLayout>
-            {/* Page Header */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Orders Management</h1>
-                    <p className="text-gray-600">
-                        {showOrderDetails
-                            ? `Order Details - ${selectedOrder?.orderNumber || ''}`
-                            : 'Track and manage all customer orders'
-                        }
-                    </p>
-                </div>
-
-                {!showOrderDetails && (
-                    <div className="flex items-center space-x-4">
-                        <div className="text-right">
-                            <div className="text-sm text-gray-600">Total Revenue</div>
-                            <div className="text-xl font-bold text-gray-900">
-                                ₦{(orderStats.totalRevenue || 0).toLocaleString()}
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-sm text-gray-600">Total Orders</div>
-                            <div className="text-xl font-bold text-gray-900">
-                                {orderStats.total || 0}
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Tab Navigation - Hide when viewing order details */}
-            {!showOrderDetails && (
-                <OrderTabs
-                    activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                    orderStats={orderStats}
-                />
-            )}
-
-            {/* Main Content */}
-            <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
-                {renderTabContent()}
-            </div>
-
-            {/* Invoice Modal */}
-            <InvoiceModal
-                isOpen={showInvoiceModal}
-                onClose={handleCloseInvoice}
-                order={invoiceOrder}
-                isLoading={isInvoiceLoading}
-            />
-        </DashboardLayout>
+      <DashboardLayout> {/* Wrap in dashboard layout */}
+        <div className="p-6">
+          <OrderDetails
+            order={selectedOrder}
+            onBack={handleBackToList}
+            onUpdateStatus={handleUpdateStatus}
+            onPrintInvoice={handlePrintInvoice}
+            isLoading={isLoading}
+          />
+        </div>
+      </DashboardLayout>
     );
+  }
+
+  return (
+    <DashboardLayout> {/* Wrap in dashboard layout */}
+      <div className="p-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Orders Management</h1>
+          <p className="text-gray-600">Manage and track your customer orders</p>
+        </div>
+
+        <OrderTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          orderStats={orderStats || {}}
+        />
+
+        {activeTab === 'analytics' ? (
+          <OrderAnalytics
+            orderStats={orderStats}
+            isLoading={!orderStats}
+          />
+        ) : (
+          <OrdersList
+            orders={orders}
+            isLoading={isLoading}
+            onViewDetails={handleViewDetails}
+            onUpdateStatus={handleUpdateStatus}
+            onPrintInvoice={handlePrintInvoice}
+            onExportOrders={handleExportOrders}
+            onApplyFilters={handleApplyFilters}
+            onPageChange={handlePageChange}
+            pagination={pagination}
+            currentFilters={filters}
+          />
+        )}
+
+        <InvoiceModal
+          isOpen={showInvoice}
+          onClose={() => setShowInvoice(false)}
+          order={invoiceOrder}
+          isLoading={!invoiceOrder}
+        />
+      </div>
+    </DashboardLayout>
+  );
 };
 
-export default Orders;
+export default OrdersPage;

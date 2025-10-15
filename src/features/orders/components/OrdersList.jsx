@@ -1,6 +1,6 @@
 // components/OrdersList.jsx
 import { useState } from 'react';
-import { Search, Filter, Download, Calendar, X } from 'lucide-react';
+import { Search, Filter, Download, Calendar, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Button from '../../../shared/components/Button';
 import { LoadingSpinner } from '../../../shared/components/Loader';
 import OrderCard from './OrderCard';
@@ -13,6 +13,8 @@ const OrdersList = ({
     onPrintInvoice,
     onExportOrders,
     onApplyFilters,
+    onPageChange,
+    pagination,
     currentFilters = {}
 }) => {
     const [searchTerm, setSearchTerm] = useState(currentFilters.search || '');
@@ -52,6 +54,60 @@ const OrdersList = ({
     };
 
     const hasActiveFilters = Object.values({ ...filters, search: searchTerm }).some(value => value !== '');
+
+    // Pagination functions
+    const handlePreviousPage = () => {
+        if (pagination.current_page > 1) {
+            onPageChange(pagination.current_page - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (pagination.current_page < pagination.last_page) {
+            onPageChange(pagination.current_page + 1);
+        }
+    };
+
+    const handlePageClick = (page) => {
+        onPageChange(page);
+    };
+
+    // Generate page numbers for pagination
+    const getPageNumbers = () => {
+        const pages = [];
+        const totalPages = pagination.last_page;
+        const currentPage = pagination.current_page;
+
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            if (currentPage <= 4) {
+                for (let i = 1; i <= 5; i++) {
+                    pages.push(i);
+                }
+                pages.push('...');
+                pages.push(totalPages);
+            } else if (currentPage >= totalPages - 3) {
+                pages.push(1);
+                pages.push('...');
+                for (let i = totalPages - 4; i <= totalPages; i++) {
+                    pages.push(i);
+                }
+            } else {
+                pages.push(1);
+                pages.push('...');
+                for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                    pages.push(i);
+                }
+                pages.push('...');
+                pages.push(totalPages);
+            }
+        }
+
+        return pages;
+    };
 
     if (isLoading) {
         return (
@@ -240,33 +296,89 @@ const OrdersList = ({
                     )}
                 </div>
             ) : (
-                <div className="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="bg-gray-50 border-b border-gray-200">
-                                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Order</th>
-                                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Customer</th>
-                                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Date</th>
-                                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Status</th>
-                                    <th className="text-right py-4 px-6 text-sm font-semibold text-gray-700">Amount</th>
-                                    <th className="text-center py-4 px-6 text-sm font-semibold text-gray-700">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {orders.map((order) => (
-                                    <OrderCard
-                                        key={order.id}
-                                        order={order}
-                                        onViewDetails={onViewDetails}
-                                        onUpdateStatus={onUpdateStatus}
-                                        onPrintInvoice={onPrintInvoice}
-                                    />
-                                ))}
-                            </tbody>
-                        </table>
+                <>
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-gray-50 border-b border-gray-200">
+                                        <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Order</th>
+                                        <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Customer</th>
+                                        <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Date</th>
+                                        <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Status</th>
+                                        <th className="text-right py-4 px-6 text-sm font-semibold text-gray-700">Amount</th>
+                                        <th className="text-center py-4 px-6 text-sm font-semibold text-gray-700">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {orders.map((order) => (
+                                        <OrderCard
+                                            key={order.id}
+                                            order={order}
+                                            onViewDetails={onViewDetails}
+                                            onUpdateStatus={onUpdateStatus}
+                                            onPrintInvoice={onPrintInvoice}
+                                        />
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
+
+                    {/* Pagination */}
+                    {pagination.last_page > 1 && (
+                        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-4">
+                            <div className="flex items-center justify-between">
+                                <div className="text-sm text-gray-700">
+                                    Showing {pagination.from || 1} to {pagination.to || orders.length} of {pagination.total} results
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    {/* Previous Button */}
+                                    <button
+                                        onClick={handlePreviousPage}
+                                        disabled={pagination.current_page === 1}
+                                        className={`p-2 rounded-lg border ${pagination.current_page === 1
+                                                ? 'text-gray-400 border-gray-300 cursor-not-allowed'
+                                                : 'text-gray-600 border-gray-300 hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                    </button>
+
+                                    {/* Page Numbers */}
+                                    {getPageNumbers().map((page, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => typeof page === 'number' && handlePageClick(page)}
+                                            className={`px-3 py-1 rounded-lg text-sm font-medium ${page === pagination.current_page
+                                                    ? 'bg-brand-500 text-white'
+                                                    : page === '...'
+                                                        ? 'text-gray-500 cursor-default'
+                                                        : 'text-gray-600 hover:bg-gray-50 border border-gray-300'
+                                                }`}
+                                            disabled={page === '...'}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+
+                                    {/* Next Button */}
+                                    <button
+                                        onClick={handleNextPage}
+                                        disabled={pagination.current_page === pagination.last_page}
+                                        className={`p-2 rounded-lg border ${pagination.current_page === pagination.last_page
+                                                ? 'text-gray-400 border-gray-300 cursor-not-allowed'
+                                                : 'text-gray-600 border-gray-300 hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </>
             )}
 
             {/* Click outside handler for filters */}

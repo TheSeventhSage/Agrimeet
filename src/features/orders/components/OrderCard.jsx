@@ -1,90 +1,93 @@
 // components/OrderCard.jsx
-import { MoreVertical, Eye, Printer, Edit3 } from 'lucide-react';
+import { Eye, Edit, Printer } from 'lucide-react';
 import Button from '../../../shared/components/Button';
 import { STATUS_CONFIG } from '../api/orderService';
 
-const OrderCard = ({ order, onViewDetails, onPrintInvoice }) => {
+const OrderCard = ({ order, onViewDetails, onUpdateStatus, onPrintInvoice }) => {
+  const statusConfig = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
+  
+  const formatCurrency = (amount) => {
+    return `₦${amount?.toLocaleString() || '0'}`;
+  };
 
-    const statusConfig = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
 
-    const formatCurrency = (amount) => {
-        return `₦${amount.toLocaleString()}`;
-    };
+  const getPaymentStatusColor = (status) => {
+    return status === 'paid' 
+      ? 'bg-green-100 text-green-800' 
+      : 'bg-yellow-100 text-yellow-800';
+  };
 
-    const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        });
-    };
+  return (
+    <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+      {/* Order Number */}
+      <td className="py-4 px-6">
+        <div>
+          <div className="font-medium text-gray-900">{order.orderNumber}</div>
+          {!order.read && (
+            <span className="inline-block w-2 h-2 bg-blue-500 rounded-full ml-1"></span>
+          )}
+        </div>
+      </td>
 
-    return (
-        <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-            {/* Order Number */}
-            <td className="py-4 px-6">
-                <div>
-                    <p className="font-semibold text-gray-900">{order.orderNumber}</p>
-                    <p className="text-sm text-gray-500">{order.items.length} item{order.items.length > 1 ? 's' : ''}</p>
-                </div>
-            </td>
+      {/* Customer */}
+      <td className="py-4 px-6">
+        <div className="text-gray-900 font-medium">{order.customer.name}</div>
+        <div className="text-gray-600 text-sm">{order.customer.phone}</div>
+      </td>
 
-            {/* Customer */}
-            <td className="py-4 px-6">
-                <div>
-                    <p className="font-medium text-gray-900">{order.customer.name}</p>
-                    <p className="text-sm text-gray-500">{order.customer.email}</p>
-                </div>
-            </td>
+      {/* Date */}
+      <td className="py-4 px-6 text-gray-700">
+        {formatDate(order.orderDate)}
+      </td>
 
-            {/* Date */}
-            <td className="py-4 px-6">
-                <div>
-                    <p className="text-gray-900">{formatDate(order.orderDate)}</p>
-                    {order.trackingNumber && (
-                        <p className="text-xs text-gray-500 font-mono">{order.trackingNumber}</p>
-                    )}
-                </div>
-            </td>
+      {/* Status */}
+      <td className="py-4 px-6">
+        <div className="flex flex-col space-y-2">
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}>
+            {statusConfig.label}
+          </span>
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentStatusColor(order.paymentStatus)}`}>
+            {order.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
+          </span>
+        </div>
+      </td>
 
-            {/* Status */}
-            <td className="py-4 px-6">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}>
-                    <span className={`w-2 h-2 rounded-full mr-1.5 ${statusConfig.badgeColor}`}></span>
-                    {statusConfig.label}
-                </span>
-            </td>
+      {/* Amount */}
+      <td className="py-4 px-6 text-right">
+        <div className="text-gray-900 font-semibold">
+          {formatCurrency(order.total)}
+        </div>
+      </td>
 
-            {/* Amount */}
-            <td className="py-4 px-6 text-right">
-                <div>
-                    <p className="font-semibold text-gray-900">{formatCurrency(order.total)}</p>
-                    <p className="text-sm text-gray-500">{order.paymentMethod}</p>
-                </div>
-            </td>
-
-            {/* Actions */}
-            <td className="py-4 px-6">
-                <div className="flex items-center justify-center space-x-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onViewDetails(order.id)}
-                    >
-                        <Eye className="w-4 h-4" />
-                    </Button>
-
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onPrintInvoice(order.id)}
-                    >
-                        <Printer className="w-4 h-4" />
-                    </Button>
-                </div>
-            </td>
-        </tr>
-    );
+      {/* Actions */}
+      <td className="py-4 px-6">
+        <div className="flex items-center justify-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onViewDetails(order.id)}
+          >
+            <Eye className="w-4 h-4" />
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPrintInvoice(order.id)}
+          >
+            <Printer className="w-4 h-4" />
+          </Button>
+        </div>
+      </td>
+    </tr>
+  );
 };
 
 export default OrderCard;
