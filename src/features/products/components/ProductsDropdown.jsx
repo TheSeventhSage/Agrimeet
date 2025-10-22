@@ -17,18 +17,18 @@ const ProductsDropdown = () => {
     }, []);
 
     const handleAddProduct = () => {
-        window.location.hash = '/products/add';
+        window.location.href = '/products/add';
         setIsOpen(false);
     };
 
     const handleViewProducts = () => {
-        window.location.hash = '/products';
+        window.location.href = '/products';
         setIsOpen(false);
     };
 
     const handleEditProduct = () => {
         // For now, navigate to a sample edit page - in real app, this would need product ID
-        window.location.hash = '/products/edit/1';
+        window.location.href = '/products/edit/1';
         setIsOpen(false);
     };
 

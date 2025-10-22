@@ -20,7 +20,8 @@ import {
     getVendorStats,
     getTopWeeklyProducts,
     getRecentWeeklyOrders,
-    getTopWeeklyTransactions
+    getTopWeeklyTransactions,
+    getUserProfile,
 } from '../api/dashboardApi'; // Adjust path if needed
 
 // --- Helper Functions ---
@@ -61,12 +62,11 @@ const getStatusColor = (status) => {
 const Dashboard = () => {
     const { user: authUser } = useAuth();
 
-    // --- State Management ---
+    // --- Stats State Management ---
     const [stats, setStats] = useState(null);
     const [topProducts, setTopProducts] = useState([]);
     const [recentOrders, setRecentOrders] = useState([]);
     const [topTransactions, setTopTransactions] = useState([]);
-
     const [isLoading, setIsLoading] = useState({
         stats: true,
         products: true,
@@ -75,11 +75,21 @@ const Dashboard = () => {
     });
     const [isInitialLoading, setIsInitialLoading] = useState(true);
 
+    // --- User Profile State Management ---
+    const [userProfile, setUserProfile] = useState(() => storageManager.getUserData());
+
     // --- Data Fetching ---
     useEffect(() => {
+        if (!authUser && !userProfile.data.id) {
+            return;
+        }
+
+        // Get user ID from authContext or from stored user data.
+        const userId = authUser.id || userProfile.data.id;
+
         const fetchDashboardData = async () => {
             try {
-                const [statsData, productsData, ordersData, transactionsData] = await Promise.all([
+                const [statsData, productsData, ordersData, transactionsData, profileData,] = await Promise.all([
                     getVendorStats().catch(err => {
                         console.error('Error fetching vendor stats:', err);
                         showError('Failed to load dashboard stats.');
@@ -103,13 +113,24 @@ const Dashboard = () => {
                         showError('Failed to load top transactions.');
                         setIsLoading(prev => ({ ...prev, transactions: false }));
                         return [];
-                    })
+                    }),
+                    getUserProfile(userId).catch(err => {
+                        console.error('Error fetching user profile:', err);
+                        // Don't show a blocking error, as other data might load
+                        showError('Could not refresh user profile.');
+                        return null; // Dont block dashboard
+                    }),
                 ]);
 
                 if (statsData) setStats(statsData);
                 if (productsData) setTopProducts(productsData);
                 if (ordersData) setRecentOrders(ordersData);
                 if (transactionsData) setTopTransactions(transactionsData);
+
+                if (profileData) {
+                    storageManager.setUserData(profileData);
+                    setUserProfile(profileData); // Update state to re-render with new data
+                }
 
             } catch (error) {
                 console.error("An unexpected error occurred:", error);
@@ -135,7 +156,6 @@ const Dashboard = () => {
         return <PageLoader message="Loading your dashboard..." />;
     }
 
-    const userProfile = storageManager.getUserData();
     const displayName = userProfile?.data?.first_name || authUser?.name || 'User';
     const storeName = userProfile?.data?.seller?.store_name;
 
@@ -297,21 +317,21 @@ const Dashboard = () => {
                 <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <button onClick={() => window.location.hash = '/products/add'} className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <button onClick={() => window.location.href = '/products/add'} className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                             <div className="p-2 bg-brand-100 rounded-lg"><Plus className="w-5 h-5 text-brand-600" /></div>
                             <div className="text-left">
                                 <p className="font-medium text-gray-900">Add Product</p>
                                 <p className="text-sm text-gray-600">List a new agricultural product</p>
                             </div>
                         </button>
-                        <button onClick={() => window.location.hash = '/products'} className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <button onClick={() => window.location.href = '/products'} className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                             <div className="p-2 bg-blue-100 rounded-lg"><Eye className="w-5 h-5 text-blue-600" /></div>
                             <div className="text-left">
                                 <p className="font-medium text-gray-900">View Products</p>
                                 <p className="text-sm text-gray-600">Manage your product listings</p>
                             </div>
                         </button>
-                        <button onClick={() => window.location.hash = '/orders'} className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <button onClick={() => window.location.href = '/orders'} className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                             <div className="p-2 bg-green-100 rounded-lg"><ShoppingCart className="w-5 h-5 text-green-600" /></div>
                             <div className="text-left">
                                 <p className="font-medium text-gray-900">View Orders</p>

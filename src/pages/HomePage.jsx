@@ -39,8 +39,8 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [categories, setCategories] = useState([]);
-  const [fetchingCategories, setFetchingCategories] = useState(true);
+  // const [categories, setCategories] = useState([]);
+  // const [fetchingCategories, setFetchingCategories] = useState(true);
 
   // Products state
   const [products, setProducts] = useState([]);
@@ -81,21 +81,21 @@ const Home = () => {
   ];
 
   // Fetch categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setFetchingCategories(true);
-        const data = await api.getAllCategories();
-        setCategories(data);
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-      } finally {
-        setFetchingCategories(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchCategories = async () => {
+  //     try {
+  //       setFetchingCategories(true);
+  //       const data = await api.getAllCategories();
+  //       setCategories(data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch categories:", error);
+  //     } finally {
+  //       setFetchingCategories(false);
+  //     }
+  //   };
 
-    fetchCategories();
-  }, []);
+  //   fetchCategories();
+  // }, []);
 
   // Fetch products
   useEffect(() => {
@@ -235,7 +235,7 @@ const Home = () => {
               </button>
             </div>
 
-            <nav className="space-y-3">
+            {/* <nav className="space-y-3">
               {categories.map((cat) => (
                 <div
                   key={cat.id}
@@ -252,7 +252,7 @@ const Home = () => {
                   </div>
                 </div>
               ))}
-            </nav>
+            </nav> */}
           </div>
           <div className="flex-1" onClick={() => setIsMenuOpen(false)} />
         </div>

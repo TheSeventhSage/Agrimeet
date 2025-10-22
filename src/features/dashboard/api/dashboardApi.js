@@ -48,3 +48,17 @@ export const getRecentWeeklyOrders = () => {
 export const getTopWeeklyTransactions = () => {
     return apiClient('/seller/top_weekly_transactions');
 };
+
+/**
+ * Fetches the full profile for a given user.
+ * @param {number|string} userId - The ID of the user to fetch.
+ * @returns {Promise<any>} - A promise that resolves with the user profile data.
+ */
+export const getUserProfile = (userId) => {
+    if (!userId) {
+        // Return a rejected promise if no ID is provided
+        return Promise.reject(new Error('User ID is required to fetch profile.'));
+    }
+    // Assumes the endpoint is /user/{id} based on your documentation
+    return apiClient(`/buyer/users/${userId}`);
+};

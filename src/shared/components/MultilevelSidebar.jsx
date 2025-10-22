@@ -18,6 +18,8 @@ import {
     Edit,
     Menu,
     X,
+    MessageCircle,
+    Star,
     Users,
     Shield,
     FileCheck,
@@ -147,12 +149,6 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             path: '/orders'
         },
         {
-            key: 'messages',
-            label: 'Messages',
-            icon: MessageSquare,
-            path: '/messages'
-        },
-        {
             key: 'analytics',
             label: 'Analytics',
             icon: BarChart3,
@@ -163,6 +159,26 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             label: 'Payouts',
             icon: Wallet,
             path: '/payouts'
+        },
+        {
+            key: 'communication',
+            label: 'Communication',
+            icon: MessageCircle, // or MessagesSquare
+            hasSubmenu: true,
+            submenu: [
+                {
+                    key: 'messages',
+                    label: 'Messages',
+                    icon: MessageSquare,
+                    path: '/messages'
+                },
+                {
+                    key: 'reviews',
+                    label: 'Reviews',
+                    icon: Star, // or ThumbsUp
+                    path: '/reviews'
+                },
+            ],
         },
         {
             key: 'kyc',

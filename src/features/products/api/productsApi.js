@@ -30,35 +30,21 @@ const handleResponse = async (response) => {
 };
 
 // Get all products with pagination
-export const getProducts = async (page = 1, filters = {}) => {
+export const getProducts = async (page = 1) => {
     try {
         // Build query parameters
         const queryParams = new URLSearchParams({
             page: page.toString()
         });
 
-        // Add filter parameters if provided
-        if (filters.category) {
-            queryParams.append('category', filters.category);
-        }
-        if (filters.search) {
-            queryParams.append('search', filters.search);
-        }
-        if (filters.status) {
-            queryParams.append('status', filters.status);
-        }
-        if (filters.per_page) {
-            queryParams.append('per_page', filters.per_page);
-        }
-
-        const response = await fetch(`${BASE_URL}/seller/products?${queryParams}`, {
+        const response = await fetch(`${BASE_URL}/seller/products?${queryParams.toString()}`, {
             method: 'GET',
-            headers: getAuthHeaders()
+            headers: getAuthHeaders(),
         });
 
         return await handleResponse(response);
     } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error('Failed to fetch products:', error);
         throw error;
     }
 };
@@ -287,11 +273,12 @@ export const transformProductData = (apiProduct) => {
         category: apiProduct.category || 'Unknown',
         categoryId: apiProduct.category_id,
         status: apiProduct.status,
+        is_published: apiProduct.status === 'active', 
         slug: apiProduct.slug, // Using slug as SKU for now
         image: apiProduct?.thumbnail,
-        images: apiProduct.images?.map(img =>
-            `https://agrimeet.udehcoglobalfoodsltd.com/storage/${img.url}`
-        ) || [],
+        images: Array.isArray(apiProduct.images) 
+            ? apiProduct.images.filter(img => img && img.includes('http')) 
+            : [],
         rating: 4.5, // Default rating since not in API
         reviews: 0, // Default reviews since not in API
         unit: apiProduct.unit?.name || 'Unit',
