@@ -166,12 +166,12 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             icon: MessageCircle, // or MessagesSquare
             hasSubmenu: true,
             submenu: [
-                {
-                    key: 'messages',
-                    label: 'Messages',
-                    icon: MessageSquare,
-                    path: '/messages'
-                },
+                // {
+                //     key: 'messages',
+                //     label: 'Messages',
+                //     icon: MessageSquare,
+                //     path: '/messages'
+                // },
                 {
                     key: 'reviews',
                     label: 'Reviews',

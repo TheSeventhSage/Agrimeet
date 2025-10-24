@@ -1,5 +1,5 @@
 // contexts/AuthContext.jsx - Simplified
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import { getKYCStatus } from '../api/kyc.api';
@@ -38,44 +38,35 @@ export const AuthProvider = ({ children }) => {
         initAuth();
     }, []);
 
-    const login = async (credentials) => {
+    const login = async (formData) => {
         try {
-            const response = await authApi.login(credentials);
+            const response = await authApi.login(formData);
 
-            const userData = {
-                id: response.user_id || response.id,
-                // Handle both 'role' (string) and 'roles' (array) from API
-                roles: response.roles 
-                    ? (Array.isArray(response.roles) ? response.roles : [response.roles])
-                    : (response.role ? [response.role] : ['buyer']),
-                message: response.message,
-            };
-
+            // 1. Set user data and tokens (as it was before)
+            const userData = response.user_id || response.id;
+            const roles = response.roles
+                ? (Array.isArray(response.roles) ? response.roles : [response.roles])
+                : (response.role ? [response.role] : ['buyer']);
             storageManager.setUserData(userData);
+            storageManager.setTokens(response.access_token, response.refresh_token, roles);
+            storageManager.setVerificationStatus('verified'); // Or based on user data
 
-            if (response.access_token) {
-                storageManager.setTokens(response.access_token, response.refresh_token, response.roles);
-            }
-
-            // Set verification status based on response
-            const verificationStatus = response.access_token ? 'verified' : 'unverified';
-            storageManager.setVerificationStatus(verificationStatus);
-
+            // 2. Update context state
             setUser(userData);
-            setVerificationStatus(verificationStatus);
-            setIsAuthenticated(!!response.access_token);
+            setIsAuthenticated(true);
+            setVerificationStatus('verified'); // Or based on user data
 
-            showSuccess(response.message || 'Login successful');
+            showSuccess(response.message || 'Login successful!');
 
-            // Navigate based on user role
-            if (userData.roles.includes('admin')) {
-                // Admin users go to admin dashboard
-                navigate('/admin/dashboard');
-            } else if (userData.role === 'seller' || userData.roles.includes('seller')) {
-                // Sellers go to seller dashboard
-                navigate('/dashboard');
-            } else if (userData.role === 'buyer' || userData.roles.includes('buyer')) {
-                // Check KYC status for buyer role
+            // --- 3. NEW ADVANCED REDIRECT LOGIC ---
+            // Check roles and navigate
+            if (roles.includes('admin')) {
+                // You mentioned admin dashboard, adjust path if needed
+                navigate('/admin-dashboard', { replace: true });
+            } else if (roles.includes('seller')) {
+                // Seller dashboard
+                navigate('/dashboard', { replace: true });
+            } else if (roles.includes('buyer')) {
                 try {
                     const kycStatusResponse = await getKYCStatus();
                     setKycStatus(kycStatusResponse?.status);
@@ -87,6 +78,10 @@ export const AuthProvider = ({ children }) => {
                         navigate('/kyc-pending');
                     } else {
                         navigate('/kyc-register');
+                        // Buyer redirect logic
+                        const redirectPath = location.state?.from || sessionStorage.getItem('redirectAfterLogin') || '/';
+                        sessionStorage.removeItem('redirectAfterLogin'); // Clean up
+                        navigate(redirectPath, { replace: true });
                     }
                 } catch (error) {
                     // If KYC check fails, navigate to dashboard anyway
@@ -95,15 +90,90 @@ export const AuthProvider = ({ children }) => {
                 }
             } else {
                 // Default fallback
-                navigate('/dashboard');
+                navigate('/', { replace: true });
             }
 
-            return response;
+            // --- END NEW LOGIC ---
+
+            return userData; // Return user data for Login.jsx if needed
+
         } catch (error) {
-            showError(error.message || 'Login failed. Please try again.');
-            throw error;
+            // Error handling (as it was before)
+            if (error.status === 401) {
+                showError('Invalid email or password.');
+            } else {
+                showError(error.message || 'Login failed. Please try again.');
+            }
+            throw error; // Re-throw error for Login.jsx to catch
         }
     };
+
+    // const login = async (credentials) => {
+    //     try {
+    //         const response = await authApi.login(credentials);
+
+    //         const userData = {
+    //             id: response.user_id || response.id,
+    //             // Handle both 'role' (string) and 'roles' (array) from API
+    //             roles: response.roles 
+    //                 ? (Array.isArray(response.roles) ? response.roles : [response.roles])
+    //                 : (response.role ? [response.role] : ['buyer']),
+    //             message: response.message,
+    //         };
+
+    //         storageManager.setUserData(userData);
+
+    //         if (response.access_token) {
+    //             storageManager.setTokens(response.access_token, response.refresh_token, response.roles);
+    //         }
+
+    //         // Set verification status based on response
+    //         const verificationStatus = response.access_token ? 'verified' : 'unverified';
+    //         storageManager.setVerificationStatus(verificationStatus);
+
+    //         setUser(userData);
+    //         setVerificationStatus(verificationStatus);
+    //         setIsAuthenticated(!!response.access_token);
+
+    //         showSuccess(response.message || 'Login successful');
+
+    //         // Navigate based on user role
+    //         if (userData.roles.includes('admin')) {
+    //             // Admin users go to admin dashboard
+    //             navigate('/admin/dashboard');
+    //         } else if (userData.roles.includes('seller')) {
+    //             // Sellers go to seller dashboard
+    //             navigate('/dashboard');
+    //         } else if (userData.roles.includes('buyer')) {
+    //             // Check KYC status for buyer role
+    //             try {
+    //                 const kycStatusResponse = await getKYCStatus();
+    //                 setKycStatus(kycStatusResponse?.status);
+
+    //                 // Handle navigation based on KYC status
+    //                 if (kycStatusResponse.status === 'verified' || kycStatusResponse.status === 'approved') {
+    //                     navigate('/dashboard');
+    //                 } else if (kycStatusResponse.status === 'not_submitted' || kycStatusResponse.status === 'pending') {
+    //                     navigate('/kyc-pending');
+    //                 } else {
+    //                     navigate('/kyc-register');
+    //                 }
+    //             } catch (error) {
+    //                 // If KYC check fails, navigate to dashboard anyway
+    //                 console.error('KYC status check failed:', error);
+    //                 navigate('/dashboard');
+    //             }
+    //         } else {
+    //             // Default fallback
+    //             navigate('/dashboard');
+    //         }
+
+    //         return response;
+    //     } catch (error) {
+    //         showError(error.message || 'Login failed. Please try again.');
+    //         throw error;
+    //     }
+    // };
 
     const register = async (userData) => {
         try {
@@ -114,7 +184,7 @@ export const AuthProvider = ({ children }) => {
                 email: response.email,
                 phone_number: response.phone_number,
                 // Handle both 'role' (string) and 'roles' (array) from API
-                roles: response.roles 
+                roles: response.roles
                     ? (Array.isArray(response.roles) ? response.roles : [response.roles])
                     : (response.role ? [response.role] : ['buyer']),
                 role: response.role || (response.roles ? response.roles[0] : 'buyer'),

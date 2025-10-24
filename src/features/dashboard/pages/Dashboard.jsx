@@ -80,12 +80,12 @@ const Dashboard = () => {
 
     // --- Data Fetching ---
     useEffect(() => {
-        if (!authUser && !userProfile.data.id) {
+        if (!authUser && !userProfile.user_data) {
             return;
         }
 
         // Get user ID from authContext or from stored user data.
-        const userId = authUser.id || userProfile.data.id;
+        const userId = authUser.id || userProfile.user_data;
 
         const fetchDashboardData = async () => {
             try {

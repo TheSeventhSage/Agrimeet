@@ -7,6 +7,7 @@ import { LoadingSpinner } from '../shared/components/Loader';
 // Lazy load all components
 /** Home page */
 const HomePage = lazy(() => import('../pages/HomePage'));
+const PublicProductDetails = lazy(() => import('../pages/ProductDetailsPage'));
 const BuyerApp = lazy(() => import('../pages/BuyerAppRedirect'));
 const HelpSupport = lazy(() => import('../pages/HelpSupport'));
 const AppDemo = lazy(() => import('../Add.demo'));
@@ -57,6 +58,7 @@ export default function Router() {
                 <Route path="/test" element={<AppDemo />} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/index" element={<HomePage />} />
+                <Route path="/details/:productId" element={<PublicProductDetails />} />
                 <Route path="/product/download" element={<BuyerApp />} />
 
                 {/* Auth routes */}
