@@ -42,8 +42,7 @@ export const AuthProvider = ({ children }) => {
         try {
             const response = await authApi.login(formData);
 
-            // 1. Set user data and tokens (as it was before)
-            const userData = response.user_id || response.id;
+            const userData = response;
             const roles = response.roles
                 ? (Array.isArray(response.roles) ? response.roles : [response.roles])
                 : (response.role ? [response.role] : ['buyer']);
@@ -51,15 +50,20 @@ export const AuthProvider = ({ children }) => {
             storageManager.setTokens(response.access_token, response.refresh_token, roles);
             storageManager.setVerificationStatus('verified'); // Or based on user data
 
-            // 2. Update context state
             setUser(userData);
             setIsAuthenticated(true);
             setVerificationStatus('verified'); // Or based on user data
 
             showSuccess(response.message || 'Login successful!');
 
-            // --- 3. NEW ADVANCED REDIRECT LOGIC ---
-            // Check roles and navigate
+            const redirectPath = sessionStorage.getItem('redirectAfterLogin') || location.state?.from?.pathname;
+
+            if (redirectPath) {
+                sessionStorage.removeItem('redirectAfterLogin'); // Clean up
+                navigate(redirectPath, { replace: true }); // Go back to the previous page
+                return userData; // Exit the function early
+            }
+
             if (roles.includes('admin')) {
                 // You mentioned admin dashboard, adjust path if needed
                 navigate('/admin-dashboard', { replace: true });
@@ -74,14 +78,15 @@ export const AuthProvider = ({ children }) => {
                     // Handle navigation based on KYC status
                     if (kycStatusResponse.status === 'verified' || kycStatusResponse.status === 'approved') {
                         navigate('/dashboard');
-                    } else if (kycStatusResponse.status === 'not_submitted' || kycStatusResponse.status === 'pending') {
+                    } else if (kycStatusResponse.status === 'pending') {
                         navigate('/kyc-pending');
                     } else {
+                        // Catches 'not_submitted', 'rejected', etc.
                         navigate('/kyc-register');
-                        // Buyer redirect logic
-                        const redirectPath = location.state?.from || sessionStorage.getItem('redirectAfterLogin') || '/';
-                        sessionStorage.removeItem('redirectAfterLogin'); // Clean up
-                        navigate(redirectPath, { replace: true });
+
+                        // --- REMOVED ---
+                        // The old, misplaced redirect logic was here.
+                        // It's now handled by the new block at the top.
                     }
                 } catch (error) {
                     // If KYC check fails, navigate to dashboard anyway

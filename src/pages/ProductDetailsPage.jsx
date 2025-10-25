@@ -10,11 +10,9 @@ import {
     AlertCircle,
     CheckCircle,
     Package,
-    User,
     Tag,
     MessageSquare,
     Store,
-    Search,
     Facebook,
     Twitter,
     Instagram,
@@ -25,15 +23,13 @@ import {
 } from 'lucide-react';
 
 // API and Auth
-import { api } from './api/home.api.js'; // Adjust path as needed
+import { api } from './api/home.api.js'; 
 import { storageManager } from './utils/storageManager';
-import { performRedirect, ROUTES } from './utils/routingManager'
 // Utils (assuming you have these from other files)
 import { LogoLightIcon } from "../shared/components/Logo";
-import { showSuccess, showError } from '../shared/utils/alert'; // Adjust path
-import Button from '../shared/components/Button'; // Adjust path
-
-// --- Helper Components ---
+import { showSuccess, showError } from '../shared/utils/alert'; 
+import Button from '../shared/components/Button'; 
+import Navbar from './components/Navbar';
 
 /**
  * A reusable loading spinner
@@ -536,63 +532,8 @@ export default function ProductDetailsPage() {
 
     return (
         <>
-            <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-100 shadow-xs">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between py-4 lg:py-6">
-                        <div className="flex items-center">
-                            <div className="relative">
-                                <div className="w-12 h-12 bg-linear-to-r from-green-600 to-green-700 rounded-2xl flex items-center justify-center shadow-lg">
-                                    <LogoLightIcon className="w-7 h-7 text-white" />
-                                </div>
-                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-50 rounded-full border-2 border-white"></div>
-                            </div>
-                            <div className="ml-4">
-                                <h1 className="text-2xl font-bold text-gray-900">AgriMeet</h1>
-                                <p className="text-xs text-gray-500 -mt-1">
-                                    Farm Fresh Marketplace
-                                </p>
-                            </div>
-                        </div>
+            <Navbar />
 
-                        <div className="flex-1 max-w-2xl mx-8 hidden sm:block">
-                            <div className="relative group">
-                                <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-green-600 transition-colors" />
-                                <input
-                                    type="text"
-                                    placeholder="Search premium produce, organic products..."
-                                    className="w-full pl-14 pr-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-green-600 focus:bg-white focus:outline-hidden transition-all text-gray-900 placeholder-gray-500"
-                                    // value={searchQuery}
-                                    // onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex items-center space-x-3">
-                            <button
-                                className="hidden lg:flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all cursor-pointer"
-                                onClick={() => performRedirect(ROUTES.LOGIN)}
-                            >
-                                <User className="w-5 h-5" />
-                                <span className="text-sm font-medium">Account</span>
-                            </button>
-
-                            <button
-                                className="relative flex items-center gap-2 px-2 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all cursor-pointer"
-                                onClick={() => performRedirect(ROUTES.REGISTER)}
-                            >
-                                Get Started
-                            </button>
-
-                            {/* <button
-                                onClick={() => setIsMenuOpen(true)}
-                                className="p-2 sm:hidden rounded-lg hover:bg-gray-100"
-                            >
-                                <Menu className="w-6 h-6 text-gray-700" />
-                            </button> */}
-                        </div>
-                    </div>
-                </div>
-            </header>
             <main className="bg-gray-50/50">
                 <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
                     {/* -- Breadcrumbs -- */}

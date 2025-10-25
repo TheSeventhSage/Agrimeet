@@ -58,10 +58,19 @@ export const api = {
         }
     },
 
-    async getAllProducts(page = 1, perPage = 12) {
+    async getAllProducts(page = 1, perPage = 12, filters = {}) {
+        const url = new URL(`${BASE_URL}/allproducts`);
+        url.searchParams.append('page', String(page));
+        url.searchParams.append('per_page', String(perPage));
+
+        // Add our new status filter if it exists
+        if (filters.status) {
+            url.searchParams.append('status', filters.status);
+        }
+
         try {
             const response = await fetch(
-                `${BASE_URL}/allproducts?page=${page}&per_page=${perPage}`,
+                url.toString(),
                 {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
