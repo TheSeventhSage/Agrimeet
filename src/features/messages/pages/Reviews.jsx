@@ -47,6 +47,7 @@ const Reviews = () => {
                 page: pagination.current_page,
                 rating: filterRating
             });
+            console.log(response);
 
             setReviews(response.data);
             setStats({
@@ -151,9 +152,9 @@ const Reviews = () => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-gray-600 mb-1">Average Rating</p>
-                                <p className="text-3xl font-bold text-gray-900">{stats.average_rating.toFixed(1)}</p>
+                                <p className="text-3xl font-bold text-gray-900">{Number(stats.average_rating).toFixed(1)}</p>
                                 <div className="flex items-center gap-1 mt-2">
-                                    {renderStars(Math.round(stats.average_rating))}
+                                    {renderStars(Math.round(Number(stats.average_rating)))}
                                 </div>
                             </div>
                             <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -301,11 +302,11 @@ const Reviews = () => {
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-start gap-3">
                                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                                            {getInitials(review.user?.name || review.buyer_name)}
+                                            {getInitials(review.user?.first_name || review.buyer_name)}
                                         </div>
                                         <div>
                                             <h3 className="font-semibold text-gray-900">
-                                                {review.user?.name || review.buyer_name || 'Anonymous'}
+                                                {review.user?.first_name || review.buyer_name || 'Anonymous'}
                                             </h3>
                                             <div className="flex items-center gap-2 mt-1">
                                                 <div className="flex items-center gap-0.5">

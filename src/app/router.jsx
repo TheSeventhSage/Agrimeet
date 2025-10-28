@@ -33,6 +33,7 @@ const EditVariant = lazy(() => import('../features/products/pages/EditVariant'))
 const Analytics = lazy(() => import('../features/analytics/page/Analytics'));
 const Messages = lazy(() => import('../features/messages/pages/Messages'));
 const Reviews = lazy(() => import('../features/messages/pages/Reviews'));
+const Notifications = lazy(() => import('../features/messages/pages/Notifications'));
 const KYCPage = lazy(() => import('../features/kyc/pages/KycVerify'));
 const KYCStatusPage = lazy(() => import('../features/kyc/pages/KycVerified'));
 const Payouts = lazy(() => import('../features/payouts/pages/Payouts'));
@@ -85,6 +86,7 @@ export default function Router() {
                 {/* Messages */}
                 <Route path="/messages" element={<ProtectedRoutes allowedRoles={['seller']}><Messages /></ProtectedRoutes>} />
                 <Route path="/reviews" element={<ProtectedRoutes allowedRoles={['seller']}><Reviews /></ProtectedRoutes>} />
+                <Route path="/notifications" element={<ProtectedRoutes allowedRoles={['seller']}><Notifications /></ProtectedRoutes>} />
                 {/* Analytics */}
                 <Route path="/analytics" element={<ProtectedRoutes allowedRoles={['seller']}><Analytics /></ProtectedRoutes>} />
                 {/* KYC routes */}

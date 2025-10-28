@@ -79,7 +79,7 @@ const NotificationDropdown = () => {
     };
 
     return (
-        <div className="relative" ref={dropdownRef}>
+        <div ref={dropdownRef}>
             {/* Notification Bell Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -95,7 +95,7 @@ const NotificationDropdown = () => {
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
+                <div className="absolute right-[20px] mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b border-gray-200">
                         <h3 className="font-semibold text-gray-900">Notifications</h3>

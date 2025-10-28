@@ -48,7 +48,7 @@ export const LogoDark = () => {
     return (
         <Link to={"/"}>
             <div
-                className="grid items-start rounded-md text-white  sm:w-[30%] w-[70%] md:hidden h-16 overflow-hidden"
+                className="grid items-start rounded-md text-white sm:w-[50%] w-[90%] md:hidden h-16 overflow-hidden"
                 aria-label="Agrimeet"
                 title="Agrimeet"
             >

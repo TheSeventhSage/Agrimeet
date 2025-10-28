@@ -158,6 +158,56 @@ const calculateOrderStats = (orders) => {
 
 export const orderService = {
   // Get all orders with pagination and filters
+  async getAllOrders(filters = {}) {
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+
+      const queryParams = new URLSearchParams();
+
+      // Always include page parameter
+      queryParams.append('page', filters.page || '1');
+
+      const response = await fetch(
+        `${API_BASE_URL}/seller/orders/all`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Authentication failed');
+        }
+        if (response.status === 404) {
+          throw new Error('No seller found for authenticated user');
+        }
+        throw new Error(`Failed to fetch orders: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Transform API data to match frontend format
+      const transformedOrders = data.data.map(transformOrderData);
+      const stats = calculateOrderStats(transformedOrders);
+
+      return {
+        orders: transformedOrders,
+        stats: stats,
+        pagination: data.meta,
+        links: data.links
+      };
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      throw error;
+    }
+  },
+
   async getOrders(filters = {}) {
     try {
       const token = getAuthToken();
@@ -168,36 +218,36 @@ export const orderService = {
       const queryParams = new URLSearchParams();
 
       // Add status filters based on API parameters
-      const statusFilters = mapStatusToApiFilters(filters.status || 'all');
-      Object.entries(statusFilters).forEach(([key, value]) => {
-        queryParams.append(key, value);
-      });
+      // const statusFilters = mapStatusToApiFilters(filters.status || 'all');
+      // Object.entries(statusFilters).forEach(([key, value]) => {
+      //   queryParams.append(key, value);
+      // });
 
-      // Add other filters
-      if (filters.search) {
-        queryParams.append('search', filters.search);
-      }
-      if (filters.dateFrom) {
-        queryParams.append('date_from', filters.dateFrom);
-      }
-      if (filters.dateTo) {
-        queryParams.append('date_to', filters.dateTo);
-      }
-      if (filters.paymentMethod) {
-        queryParams.append('payment_method', filters.paymentMethod);
-      }
-      if (filters.minAmount) {
-        queryParams.append('min_amount', filters.minAmount);
-      }
-      if (filters.maxAmount) {
-        queryParams.append('max_amount', filters.maxAmount);
-      }
+      // // Add other filters
+      // if (filters.search) {
+      //   queryParams.append('search', filters.search);
+      // }
+      // if (filters.dateFrom) {
+      //   queryParams.append('date_from', filters.dateFrom);
+      // }
+      // if (filters.dateTo) {
+      //   queryParams.append('date_to', filters.dateTo);
+      // }
+      // if (filters.paymentMethod) {
+      //   queryParams.append('payment_method', filters.paymentMethod);
+      // }
+      // if (filters.minAmount) {
+      //   queryParams.append('min_amount', filters.minAmount);
+      // }
+      // if (filters.maxAmount) {
+      //   queryParams.append('max_amount', filters.maxAmount);
+      // }
 
       // Always include page parameter
       queryParams.append('page', filters.page || '1');
 
       const response = await fetch(
-        `${API_BASE_URL}/seller/orders?${queryParams.toString()}`,
+        `${API_BASE_URL}/seller/orders`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,

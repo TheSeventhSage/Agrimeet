@@ -21,7 +21,7 @@ import {
     MessageCircle,
     Star,
     Users,
-    Shield,
+    Bell,
     FileCheck,
     DollarSign,
     AlertTriangle,
@@ -178,6 +178,12 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                     icon: Star, // or ThumbsUp
                     path: '/reviews'
                 },
+                {
+                    key: 'notifications',
+                    label: 'Notifications',
+                    icon: Bell,
+                    path: '/notifications'
+                },
             ],
         },
         {
@@ -215,7 +221,7 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             {/* Mobile Overlay */}
             {isMobileOpen && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                    className="fixed inset-0 bg-[rgba(0,0,0,.8)] z-40 lg:hidden"
                     onClick={onMobileMenuToggle}
                 />
             )}
@@ -229,8 +235,10 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                 shadow-xl lg:shadow-none
             `}>
                 {/* Mobile Header */}
-                <div className="lg:hidden flex items-center justify-between p-4 border-b border-brand-800">
-                    <h1 className="text-lg font-bold text-brand-400">Agrimeet</h1>
+                <div className="lg:hidden flex items-center justify-between p-4 border-b border-brand-100">
+                    <div className="pe-4 py-1 lg:hidden">
+                        <LogoMerge classNameMain="py-0 w-full gap-1" />
+                    </div>
                     <button
                         onClick={onMobileMenuToggle}
                         className="p-2 hover:bg-sidebar-800 rounded-lg transition-colors"

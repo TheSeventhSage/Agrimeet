@@ -5,7 +5,7 @@ import UserDropdown from './UserDropdown';
 
 const Header = ({ onMobileMenuToggle }) => {
     return (
-        <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+        <div className="relative bg-white border-b border-gray-200 px-4 lg:px-6">
             <div className="flex items-center justify-between">
                 {/* Mobile Menu Button & Logo */}
                 <div className="flex items-center gap-3">
