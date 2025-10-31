@@ -13,46 +13,46 @@ const Wallet = () => {
 
     // Mock data - in real app, this would come from API context or store
     const [walletData, setWalletData] = useState({
-        balance: 12500.75,
+        balance: 0,
         currency: 'NGN',
-        pendingBalance: 2450.00,
-        totalEarnings: 89250.30
+        pendingBalance: 0,
+        totalEarnings: 0
     });
 
     const [bankAccounts, setBankAccounts] = useState([
-        {
-            id: 1,
-            bankName: 'Guaranty Trust Bank',
-            accountNumber: '•••• •••• •••• 1234',
-            accountName: 'John Doe',
-            isDefault: true
-        },
-        {
-            id: 2,
-            bankName: 'First Bank',
-            accountNumber: '•••• •••• •••• 5678',
-            accountName: 'John Doe',
-            isDefault: false
-        }
+        // {
+        //     id: 1,
+        //     bankName: 'Guaranty Trust Bank',
+        //     accountNumber: '•••• •••• •••• 1234',
+        //     accountName: 'John Doe',
+        //     isDefault: true
+        // },
+        // {
+        //     id: 2,
+        //     bankName: 'First Bank',
+        //     accountNumber: '•••• •••• •••• 5678',
+        //     accountName: 'John Doe',
+        //     isDefault: false
+        // }
     ]);
 
     const [payoutHistory, setPayoutHistory] = useState([
-        {
-            id: 1,
-            date: '2024-01-15',
-            amount: 5000.00,
-            status: 'completed',
-            bankAccount: 'GTB •••• 1234',
-            reference: 'PAY-2024-0015'
-        },
-        {
-            id: 2,
-            date: '2024-01-10',
-            amount: 7500.00,
-            status: 'processing',
-            bankAccount: 'First Bank •••• 5678',
-            reference: 'PAY-2024-0010'
-        }
+        // {
+        //     id: 1,
+        //     date: '2024-01-15',
+        //     amount: 5000.00,
+        //     status: 'completed',
+        //     bankAccount: 'GTB •••• 1234',
+        //     reference: 'PAY-2024-0015'
+        // },
+        // {
+        //     id: 2,
+        //     date: '2024-01-10',
+        //     amount: 7500.00,
+        //     status: 'processing',
+        //     bankAccount: 'First Bank •••• 5678',
+        //     reference: 'PAY-2024-0010'
+        // }
     ]);
 
     const handleWithdraw = async (amount, bankAccountId) => {

@@ -7,6 +7,7 @@ import { LoadingSpinner } from '../shared/components/Loader';
 // Lazy load all components
 /** Home page */
 const HomePage = lazy(() => import('../pages/HomePage'));
+const Search = lazy(() => import('../pages/SearchResultsPage'));
 const PublicProductDetails = lazy(() => import('../pages/ProductDetailsPage'));
 const BuyerApp = lazy(() => import('../pages/BuyerAppRedirect'));
 const HelpSupport = lazy(() => import('../pages/HelpSupport'));
@@ -40,7 +41,7 @@ const Payouts = lazy(() => import('../features/payouts/pages/Payouts'));
 const Orders = lazy(() => import('../features/orders/pages/Orders'));
 /** Admin pages */
 const AdminDashboard = lazy(() => import('../features/admin/pages/AdminDashboard'));
-const UserManagement = lazy(() => import('../features/admin/pages/UserManagement'));
+const UserManagement = lazy(() => import('../features/admin/userManagement/pages/UserManagement'));
 const SellerApproval = lazy(() => import('../features/admin/pages/SellerApproval'));
 const ProductModeration = lazy(() => import('../features/admin/pages/ProductModeration'));
 const TransactionOversight = lazy(() => import('../features/admin/pages/TransactionOversight'));
@@ -56,6 +57,7 @@ export default function Router() {
             <Routes>
                 {/* Home routes */}
                 <Route path="/" element={<HomePage />} />
+                <Route path="/search" element={<Search />} />
                 <Route path="/test" element={<AppDemo />} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/index" element={<HomePage />} />

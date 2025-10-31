@@ -26,6 +26,7 @@ const Navbar = () => {
   // --- Auth state logic is now inside the Navbar ---
   const [authState, setAuthState] = useState({
     isAuthenticated: false,
+    user: {},
     userName: '',
     isSeller: false,
   });
@@ -35,7 +36,7 @@ const Navbar = () => {
       const isAuthenticated = storageManager.hasActiveSession();
       if (isAuthenticated) {
         const userData = storageManager.getUserData();
-        console.log(userData.data.first_name)
+        console.log(userData)
         const tokens = storageManager.getTokens();
 
         const userRoles = tokens?.role
@@ -48,14 +49,17 @@ const Navbar = () => {
 
         const isSeller = userRoles.includes('seller');
         console.log(isSeller);
-        const name = isSeller ? userData?.user || userData?.data.first_name + ' ' + userData?.data.last_name : userData?.data.first_name + ' ' + userData?.data.last_name;
+        const name = isSeller ? userData?.user || userData?.data.first_name + ' ' + userData?.data.last_name : userData.roles.includes('admin') ? 'Admin' : '';
         console.log(name)
 
         setAuthState({
           isAuthenticated: true,
           userName: name || 'Dashboard',
           isSeller: isSeller,
+          user: userData,
         });
+
+
       }
     };
     checkAuth();
@@ -75,6 +79,8 @@ const Navbar = () => {
     }
   };
 
+  console.log(authState);
+
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Categories', path: '/categories' },
@@ -88,6 +94,8 @@ const Navbar = () => {
     { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
     { icon: Linkedin, href: 'https://linkedin.com', label: 'LinkedIn' },
   ];
+
+  // const user =/ user
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -116,8 +124,11 @@ const Navbar = () => {
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <div className="w-12 h-12 bg-linear-to-r from-green-600 to-green-700 rounded-2xl flex items-center justify-center shadow-lg">
-            <LogoLightIcon className="w-7 h-7 text-white" />
+          <div className="flex items-center gap-2">
+            <div className="w-12 h-12 bg-linear-to-r from-green-600 to-green-700 rounded-2xl flex items-center justify-center shadow-lg">
+              <LogoLightIcon className="w-7 h-7 text-white" />
+            </div>
+            <h3 className="sm:block hidden text-3xl font-bold text-gray-900">Agrimeet</h3>
           </div>
 
           {/* Search Bar (Desktop) */}
@@ -155,7 +166,7 @@ const Navbar = () => {
                 </button>
               ) : (
                 <button
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => authState.user.roles.includes('seller') ? navigate('/dashboard') : authState.user.roles.includes('admin') ? navigate('/admin/dashboard') : navigate('/')}
                   className="text-gray-900 font-semibold hover:text-green-600 transition-colors flex items-center gap-2"
                 >
                   <User className="w-4 h-4" />
@@ -197,8 +208,11 @@ const Navbar = () => {
             <div className="p-6">
               {/* Header */}
               <div className="flex justify-between items-center mb-8">
-                <div className="w-12 h-12 bg-linear-to-r from-green-600 to-green-700 rounded-2xl flex items-center justify-center shadow-lg">
-                  <LogoLightIcon className="w-7 h-7 text-white" />
+                <div className="flex items-center gap-2">
+                  <div className="w-12 h-12 bg-linear-to-r from-green-600 to-green-700 rounded-2xl flex items-center justify-center shadow-lg">
+                    <LogoLightIcon className="w-7 h-7 text-white" />
+                  </div>
+                  <h3 className="block text-2xl font-bold text-gray-900">Agrimeet</h3>
                 </div>
                 <button onClick={() => setIsMenuOpen(false)}>
                   <X className="w-6 h-6 text-gray-700" />
@@ -232,7 +246,7 @@ const Navbar = () => {
                 {authState.isAuthenticated ? (
                   <button
                     onClick={() => {
-                      navigate('/dashboard');
+                      authState.user.roles.includes('seller') ? navigate('/dashboard') : authState.user.roles.includes('admin')?  navigate('/admin/dashboard') : navigate('/');
                       setIsMenuOpen(false);
                     }}
                     className="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-2xl hover:bg-green-700 transition-all flex items-center justify-center gap-2 shadow-md"

@@ -1,68 +1,106 @@
-import { storageManager } from '../../../pages/utils/storageManager';
-
-const API_BASE_URL = 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
-
-// --- Sweet Console Logging Helper ---
-const createLogger = (endpoint) => ({
-    log: (message, data = '') => console.log(`[API:${endpoint}] ${message}`, data),
-    info: (message, data = '') => console.info(`[API:${endpoint}] ${message}`, data),
-    error: (message, error = '') => console.error(`[API:${endpoint}] ${message}`, error),
-    group: (label) => console.groupCollapsed(`[API:${endpoint}] ${label}`),
-    groupEnd: () => console.groupEnd(),
-});
+import { api } from '../../../shared/utils/apiClient';
 
 /**
- * A centralized API client with enhanced debugging and error handling.
- * @param {string} endpoint - The API endpoint to call.
- * @returns {Promise<any>} - A promise that resolves with the JSON response.
- * @throws {Error} - Throws a detailed error if any step fails.
+ * Get vendor KPI stats.
+ * API: /seller/vendor_stats
+ * @param {object} filters - { day_of_week, month, year, last_days }
+ * @returns {Promise} - Stats data
  */
-const apiClient = async (endpoint) => {
-    const logger = createLogger(endpoint);
-    logger.group(`Initiating Request`);
-
+export const getVendorStats = async (filters = {}) => {
     try {
-        logger.log("Fetching auth token...");
-        const token = storageManager.getAccessToken();
-        if (!token) {
-            // This is a critical error that stops the request before it starts.
-            throw new Error('Authentication token not found in storage.');
-        }
-        logger.info("Auth token found.");
-
-        const url = `${API_BASE_URL}${endpoint}`;
-        const headers = {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        };
-
-        logger.log("Executing fetch...", { url, headers });
-        const response = await fetch(url, { headers });
-        logger.log("Response received.", { status: response.status, ok: response.ok });
-
-        if (!response.ok) {
-            // Try to parse error message from API, otherwise use status text.
-            const errorBody = await response.json().catch(() => ({ message: response.statusText }));
-            throw new Error(errorBody.message || `Request failed with status ${response.status}`);
-        }
-
-        const data = await response.json();
-        logger.info("Request successful, returning data.", data);
-        logger.groupEnd();
-        return data;
-
-    } catch (err) {
-        logger.error("Request failed!", err.message);
-        logger.groupEnd();
-        // Re-throw the error so the component's .catch() block can handle it.
-        throw err;
+        const response = await api.get('/seller/vendor_stats', {
+            searchParams: filters,
+        });
+        return response;
+    } catch (error) {
+        console.error('Error fetching vendor stats:', error);
+        throw error;
     }
 };
 
-// --- Exported API Functions (No changes here) ---
-export const getVendorAllStats = () => apiClient('/seller/vendor_allstats');
-export const getWeeklyRevenue = () => apiClient('/seller/weekly_revenue');
-export const getTopCategories = () => apiClient('/seller/top_categories');
-export const getPopularProducts = () => apiClient('/seller/popular_products');
-export const getWeeklyOutOfStockProducts = () => apiClient('/seller/weekly_out_of_stock_products');
+/**
+ * Get top 3 sold products with daily breakdown.
+ * API: /seller/sold_products
+ * @param {object} filters - { day_of_week, month, year, last_days }
+ * @returns {Promise} - Sold products data
+ */
+export const getSoldProducts = async (filters = {}) => {
+    try {
+        const response = await api.get('/seller/sold_products', {
+            searchParams: filters,
+        });
+        return response;
+    } catch (error) {
+        console.error('Error fetching sold products:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get top purchased categories.
+ * API: /seller/purchased_catgeory
+ * @param {object} filters - { day_of_week, month, year, last_days }
+ * @returns {Promise} - Top categories data
+ */
+export const getPurchasedCategories = async (filters = {}) => {
+    try {
+        const response = await api.get('/seller/purchased_catgeory', {
+            searchParams: filters,
+        });
+        return response;
+    } catch (error) {
+        console.error('Error fetching purchased categories:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get top 4 best-selling categories with monthly breakdown.
+ * API: /seller/top_categories
+ * @param {object} filters - { day_of_week, month, year, last_days }
+ * @returns {Promise} - Top 4 categories with monthly data
+ */
+export const getTopCategories = async (filters = {}) => {
+    try {
+        const response = await api.get('/seller/top_categories', {
+            searchParams: filters,
+        });
+        return response;
+    } catch (error) {
+        console.error('Error fetching top categories:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get all popular products with analytics.
+ * API: /seller/popular_products
+ * @param {object} filters - { year, month, day, rating, product_name, order }
+ * @returns {Promise} - Popular products data
+ */
+export const getPopularProducts = async (filters = {}) => {
+    try {
+        const response = await api.get('/seller/popular_products', {
+            searchParams: filters,
+        });
+        return response;
+    } catch (error) {
+        console.error('Error fetching popular products:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get weekly out-of-stock products.
+ * API: /seller/weekly_out_of_stock_products
+ * @returns {Promise} - Out-of-stock products data
+ */
+export const getWeeklyOutOfStockProducts = async () => {
+    try {
+        const response = await api.get('/seller/weekly_out_of_stock_products');
+        return response;
+    } catch (error) {
+        console.error('Error fetching weekly out-of-stock products:', error);
+        throw error;
+    }
+};

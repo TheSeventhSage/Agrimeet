@@ -142,12 +142,12 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                 },
             ],
         },
-        {
-            key: 'orders',
-            label: 'Orders',
-            icon: ShoppingCart,
-            path: '/orders'
-        },
+        // {
+        //     key: 'orders',
+        //     label: 'Orders',
+        //     icon: ShoppingCart,
+        //     path: '/orders'
+        // },
         {
             key: 'analytics',
             label: 'Analytics',

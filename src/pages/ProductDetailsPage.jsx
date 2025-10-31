@@ -352,7 +352,7 @@ const ReviewCard = ({ review, onLike, onUnlike }) => {
                     <p className="text-sm text-gray-700 mt-3">{review.review_comment}</p>
 
                     {/* Like/Unlike buttons */}
-                    <div className="flex items-center gap-4 mt-4">
+                    {/* <div className="flex items-center gap-4 mt-4">
                         <button
                             onClick={onLike}
                             className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-green-600 transition-colors focus:outline-none"
@@ -366,7 +366,7 @@ const ReviewCard = ({ review, onLike, onUnlike }) => {
                         >
                             <ThumbsDown className="w-4 h-4" />
                         </button>
-                    </div>
+                    </div> */}
 
                     {/* Seller Reply */}
                     {review.review_reply && (
@@ -541,7 +541,7 @@ export default function ProductDetailsPage() {
 
                     {/* -- Product Overview Section -- */}
                     <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8 mb-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                        <div className="grid grid-cols-1 items-center md:grid-cols-2 gap-8 md:gap-12">
                             <ProductGallery images={product.images} productName={product.name} />
                             <ProductInfo product={product} />
                         </div>
@@ -561,17 +561,17 @@ export default function ProductDetailsPage() {
                         {product.variants && product.variants.length > 0 && (
                             <div className="mt-8">
                                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                                    Available Sizes / Variants
+                                    Available Variants
                                 </h3>
                                 <div className="overflow-x-auto rounded-lg border border-gray-200">
                                     <table className="min-w-full divide-y divide-gray-200">
                                         <thead className="bg-gray-50">
                                             <tr>
                                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Variant
+                                                    Id
                                                 </th>
                                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Unit
+                                                    Sku
                                                 </th>
                                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                     Stock
@@ -585,7 +585,7 @@ export default function ProductDetailsPage() {
                                             {product.variants.map((variant) => (
                                                 <tr key={variant.id}>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                        {variant.name}
+                                                        {variant.id}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                                         {variant.sku}
@@ -636,8 +636,8 @@ export default function ProductDetailsPage() {
                                             <ReviewCard
                                                 key={review.id}
                                                 review={review}
-                                                onLike={() => handleLike(review.id)}
-                                                onUnlike={() => handleUnlike(review.id)}
+                                                // onLike={() => handleLike(review.id)}
+                                                // onUnlike={() => handleUnlike(review.id)}
                                             />
                                         ))}
                                     </div>

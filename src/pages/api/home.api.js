@@ -63,19 +63,20 @@ export const api = {
         url.searchParams.append('page', String(page));
         url.searchParams.append('per_page', String(perPage));
 
-        // Add our new status filter if it exists
-        if (filters.status) {
-            url.searchParams.append('status', filters.status);
-        }
+        // --- NEW DYNAMIC FILTER BLOCK ---
+        // Iterates over the filters object and adds any valid filter to the URL
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+                url.searchParams.append(key, String(value));
+            }
+        });
+        // --- END NEW BLOCK ---
 
         try {
-            const response = await fetch(
-                url.toString(),
-                {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                }
-            );
+            const response = await fetch(url.toString(), {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
             return handleResponse(response);
         } catch (error) {
             console.error('Error fetching products:', error);

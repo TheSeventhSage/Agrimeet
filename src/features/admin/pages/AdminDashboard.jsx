@@ -8,215 +8,284 @@ import {
     TrendingUp,
     AlertCircle,
     CheckCircle,
-    Clock,
-    Eye,
+    XCircle,
     ArrowUpRight,
     FileCheck,
     MessageSquare,
-    XCircle
+    Loader2
 } from 'lucide-react';
-import { storageManager } from '../../../pages/utils/storageManager';
-import { getUserProfile } from '../../../pages/api/profile.api';
+
+// Import from the existing admin.api.js file
+import { adminApi, getErrorMessage } from '../api/admin.api';
 
 const AdminDashboard = () => {
-    const [stats, setStats] = useState({});
-    const [recentActivities, setRecentActivities] = useState([]);
+    // State management
+    const [platformStats, setPlatformStats] = useState({});
+    const [consolidatedStats, setConsolidatedStats] = useState({});
+    const [recentOrders, setRecentOrders] = useState([]);
+    const [topProducts, setTopProducts] = useState([]);
+    const [weeklyRevenue, setWeeklyRevenue] = useState([]); // This is for the chart (not implemented)
+
+    // --- NEW STATES to hold all API data ---
+    const [weeklyTotals, setWeeklyTotals] = useState({}); // For total_revenue, total_transactions, etc.
+    const [topTransactions, setTopTransactions] = useState([]);
+    const [outOfStockProducts, setOutOfStockProducts] = useState([]);
+    const [ordersByState, setOrdersByState] = useState([]);
+    // --- END NEW STATES ---
+
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [profileData, setProfileData] = useState(null);
 
+    // Load all dashboard data on mount
     useEffect(() => {
         loadDashboardData();
     }, []);
 
+    /**
+     * Fetch all dashboard data concurrently
+     * Uses Promise.allSettled to handle independent failures gracefully
+     */
     const loadDashboardData = async () => {
         try {
             setIsLoading(true);
             setError(null);
 
-            // Get user data from storage to get the userId
-            const userData = storageManager.getUserData();
+            // Fetch all data in parallel
+            const results = await Promise.allSettled([
+                adminApi.getPlatformStats(),
+                adminApi.getConsolidatedStats(),
+                adminApi.getRecentWeeklyOrders(),
+                adminApi.getTopWeeklyProducts(),
+                adminApi.getWeeklyRevenue(),
+                // --- ADDED NEW API CALLS ---
+                adminApi.getWeeklyTotalRevenue(),
+                adminApi.getWeeklyTransactions(),
+                adminApi.getWeeklyProductsSold(),
+                adminApi.getTopWeeklyTransactions(),
+                adminApi.getWeeklyOutOfStock(),
+                adminApi.getWeeklyOrdersByState()
+                // --- END NEW API CALLS ---
+            ]);
 
-            if (!userData || !userData.id) {
-                throw new Error('No user data found. Please log in again.');
+            // Extract data from settled promises
+            const [
+                platformStatsRes,
+                consolidatedStatsRes,
+                recentOrdersRes,
+                topProductsRes,
+                weeklyRevenueRes,
+                // --- NEW RESPONSE VARS ---
+                weeklyTotalRevenueRes,
+                weeklyTransactionsRes,
+                weeklyProductsSoldRes,
+                topTransactionsRes,
+                outOfStockRes,
+                ordersByStateRes
+                // --- END NEW RESPONSE VARS ---
+            ] = results;
+
+            // Set platform stats (core metrics)
+            if (platformStatsRes.status === 'fulfilled') {
+                setPlatformStats(platformStatsRes.value || {});
             }
 
-            setStats({
-                        totalUsers: userData.total_users || 0,
-                        userGrowth: userData.user_growth || '+0%',
-                        activeProducts: userData.active_products || 0,
-                        productGrowth: userData.product_growth || '+0%',
-                        totalRevenue: userData.total_revenue || 0,
-                        revenueGrowth: userData.revenue_growth || '+0%',
-                        totalOrders: userData.total_orders || 0,
-                        orderGrowth: userData.order_growth || '+0%',
-                        pendingKyc: userData.pending_kyc || 0,
-                        pendingProducts: userData.pending_products || 0,
-                        openDisputes: userData.open_disputes || 0,
-                        activeToday: userData.active_today || 0,
-                        avgOrderValue: userData.avg_order_value || 0,
-                        conversionRate: userData.conversion_rate || 0,
-                        activeSellers: userData.active_sellers || 0,
-                        completionRate: userData.completion_rate || 0
-                    });
-    
-                    // Set recent activities if available
-                    if (userData.recent_activities) {
-                        setRecentActivities(userData.recent_activities);
-                    }
+            // Set consolidated stats (additional metrics)
+            if (consolidatedStatsRes.status === 'fulfilled') {
+                setConsolidatedStats(consolidatedStatsRes.value || {});
+            }
 
-            // Fetch profile data
-            // const response = await getUserProfile(userData.id);
+            // Set recent orders (activity feed)
+            if (recentOrdersRes.status === 'fulfilled') {
+                setRecentOrders(Array.isArray(recentOrdersRes.value) ? recentOrdersRes.value : []);
+            }
 
-            // // Store profile data in storage manager
-            // if (response?.data) {
-            //     storageManager.setUserData(response.data);
-            //     setProfileData(response.data);
+            // Set top products
+            if (topProductsRes.status === 'fulfilled') {
+                setTopProducts(Array.isArray(topProductsRes.value) ? topProductsRes.value : []);
+            }
 
-            //     // Map profile data to stats
-            //     // Adjust these mappings based on your actual API response structure
-            //     setStats({
-            //         totalUsers: response.data.total_users || 0,
-            //         userGrowth: response.data.user_growth || '+0%',
-            //         activeProducts: response.data.active_products || 0,
-            //         productGrowth: response.data.product_growth || '+0%',
-            //         totalRevenue: response.data.total_revenue || 0,
-            //         revenueGrowth: response.data.revenue_growth || '+0%',
-            //         totalOrders: response.data.total_orders || 0,
-            //         orderGrowth: response.data.order_growth || '+0%',
-            //         pendingKyc: response.data.pending_kyc || 0,
-            //         pendingProducts: response.data.pending_products || 0,
-            //         openDisputes: response.data.open_disputes || 0,
-            //         activeToday: response.data.active_today || 0,
-            //         avgOrderValue: response.data.avg_order_value || 0,
-            //         conversionRate: response.data.conversion_rate || 0,
-            //         activeSellers: response.data.active_sellers || 0,
-            //         completionRate: response.data.completion_rate || 0
-            //     });
+            // Set weekly revenue data (for charts)
+            if (weeklyRevenueRes.status === 'fulfilled') {
+                setWeeklyRevenue(Array.isArray(weeklyRevenueRes.value) ? weeklyRevenueRes.value : []);
+            }
 
-            //     // Set recent activities if available
-            //     if (response.data.recent_activities) {
-            //         setRecentActivities(response.data.recent_activities);
-            //     }
-            // }
+            // --- SET NEW STATES FROM API CALLS ---
+            // Combine weekly totals into one object
+            const totals = {};
+            if (weeklyTotalRevenueRes.status === 'fulfilled') {
+                totals.total_revenue = weeklyTotalRevenueRes.value.total_revenue || 0;
+            }
+            if (weeklyTransactionsRes.status === 'fulfilled') {
+                totals.total_transactions = weeklyTransactionsRes.value.total_transactions || 0;
+            }
+            if (weeklyProductsSoldRes.status === 'fulfilled') {
+                totals.total_products_sold = weeklyProductsSoldRes.value.total_products_sold || 0;
+            }
+            setWeeklyTotals(totals);
+
+            // Set top transactions
+            if (topTransactionsRes.status === 'fulfilled') {
+                setTopTransactions(Array.isArray(topTransactionsRes.value) ? topTransactionsRes.value : []);
+            }
+
+            // Set out of stock products
+            if (outOfStockRes.status === 'fulfilled') {
+                setOutOfStockProducts(Array.isArray(outOfStockRes.value) ? outOfStockRes.value : []);
+            }
+
+            // Set orders by state
+            if (ordersByStateRes.status === 'fulfilled') {
+                setOrdersByState(Array.isArray(ordersByStateRes.value) ? ordersByStateRes.value : []);
+            }
+            // --- END SET NEW STATES ---
+
+            // Check if all critical requests failed
+            const allFailed = results.every(result => result.status === 'rejected');
+            if (allFailed) {
+                throw new Error('Failed to load dashboard data');
+            }
+
         } catch (err) {
             console.error('Error loading dashboard data:', err);
-            setError(err.message || 'Failed to load dashboard data');
-
-            // If token expired or invalid, clear storage and redirect
-            if (err.message.includes('401') || err.message.includes('unauthorized')) {
-                storageManager.clearAll();
-            }
+            setError(getErrorMessage(err));
         } finally {
             setIsLoading(false);
         }
     };
 
+    /**
+     * Calculate derived metrics from API data
+     */
+    const getDerivedMetrics = () => {
+        const totalRevenue = platformStats.total_revenue || 0;
+        const totalOrders = platformStats.total_orders || 0;
+        const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+        return {
+            avgOrderValue,
+            totalRevenue,
+            totalOrders,
+            totalUsers: platformStats.total_users || 0,
+            totalProducts: platformStats.total_products || 0,
+            // From consolidated stats
+            pendingOrders: consolidatedStats.pending_orders || 0,
+            completedOrders: consolidatedStats.completed_orders || 0,
+            activeSellers: consolidatedStats.active_sellers || 0,
+            conversionRate: consolidatedStats.conversion_rate || 0
+        };
+    };
+
+    const metrics = getDerivedMetrics();
+
+    /**
+     * Main dashboard stat cards configuration
+     */
     const mainStats = [
         {
             title: 'Total Users',
-            value: (stats.totalUsers || 0).toLocaleString(),
-            change: stats.userGrowth || '+0%',
-            changeType: 'positive',
+            value: metrics.totalUsers.toLocaleString(),
             icon: Users,
             color: 'bg-blue-500',
             link: '/admin/users'
         },
         {
             title: 'Active Products',
-            value: (stats.activeProducts || 0).toLocaleString(),
-            change: stats.productGrowth || '+0%',
-            changeType: 'positive',
+            value: metrics.totalProducts.toLocaleString(),
             icon: Package,
             color: 'bg-green-500',
             link: '/admin/products'
         },
         {
             title: 'Total Revenue',
-            value: `$${(stats.totalRevenue || 0).toLocaleString()}`,
-            change: stats.revenueGrowth || '+0%',
-            changeType: 'positive',
+            value: `₦${metrics.totalRevenue.toLocaleString()}`,
             icon: DollarSign,
             color: 'bg-purple-500',
             link: '/admin/transactions'
         },
         {
             title: 'Total Orders',
-            value: (stats.totalOrders || 0).toLocaleString(),
-            change: stats.orderGrowth || '+0%',
-            changeType: 'positive',
+            value: metrics.totalOrders.toLocaleString(),
             icon: ShoppingCart,
             color: 'bg-orange-500',
             link: '/admin/transactions'
         }
     ];
 
-    const actionCards = [
-        {
-            title: 'Pending KYC',
-            value: stats.pendingKyc || 0,
-            description: 'Sellers awaiting verification',
-            icon: FileCheck,
-            iconColor: 'text-yellow-600',
-            bgColor: 'bg-yellow-50',
-            link: '/admin/seller-approval',
-            action: 'Review Now'
-        },
-        {
-            title: 'Pending Products',
-            value: stats.pendingProducts || 0,
-            description: 'Products awaiting moderation',
-            icon: Package,
-            iconColor: 'text-blue-600',
-            bgColor: 'bg-blue-50',
-            link: '/admin/products',
-            action: 'Moderate'
-        },
-        {
-            title: 'Open Disputes',
-            value: stats.openDisputes || 0,
-            description: 'Disputes requiring attention',
-            icon: AlertCircle,
-            iconColor: 'text-red-600',
-            bgColor: 'bg-red-50',
-            link: '/admin/disputes',
-            action: 'Resolve'
-        },
-        {
-            title: 'Active Users Today',
-            value: stats.activeToday || 0,
-            description: 'Users online today',
-            icon: Users,
-            iconColor: 'text-green-600',
-            bgColor: 'bg-green-50',
-            link: '/admin/users',
-            action: 'View All'
-        }
-    ];
+    /**
+     * Action cards for quick navigation
+     */
+    // const actionCards = [
+    //     {
+    //         title: 'Pending Orders',
+    //         value: metrics.pendingOrders,
+    //         description: 'Orders awaiting processing',
+    //         icon: ShoppingCart,
+    //         iconColor: 'text-yellow-600',
+    //         bgColor: 'bg-yellow-50',
+    //         link: '/admin/orders?status=pending',
+    //         action: 'Process Now'
+    //     },
+    //     {
+    //         title: 'Completed Orders',
+    //         value: metrics.completedOrders,
+    //         description: 'Successfully fulfilled orders',
+    //         icon: CheckCircle,
+    //         iconColor: 'text-green-600',
+    //         bgColor: 'bg-green-50',
+    //         link: '/admin/orders?status=completed',
+    //         action: 'View All'
+    //     },
+    //     {
+    //         title: 'Active Sellers',
+    //         value: metrics.activeSellers,
+    //         description: 'Sellers with active listings',
+    //         icon: Users,
+    //         iconColor: 'text-blue-600',
+    //         bgColor: 'bg-blue-50',
+    //         link: '/admin/sellers',
+    //         action: 'View Sellers'
+    //     },
+    //     {
+    //         title: 'Top Products',
+    //         value: topProducts.length,
+    //         description: 'Best performing products',
+    //         icon: TrendingUp,
+    //         iconColor: 'text-purple-600',
+    //         bgColor: 'bg-purple-50',
+    //         link: '/admin/products?sort=top',
+    //         action: 'View Products'
+    //     }
+    // ];
 
+    /**
+     * Quick stats for the dashboard (UPDATED to use live weekly data)
+     */
     const quickStats = [
         {
-            label: 'Avg Order Value',
-            value: `$${(stats.avgOrderValue || 0).toFixed(2)}`,
+            label: 'Weekly Revenue',
+            value: `₦${(weeklyTotals.total_revenue || 0).toLocaleString()}`,
             icon: DollarSign
         },
         {
-            label: 'Conversion Rate',
-            value: `${(stats.conversionRate || 0).toFixed(1)}%`,
+            label: 'Weekly Orders',
+            value: (weeklyTotals.total_transactions || 0).toLocaleString(),
+            icon: ShoppingCart
+        },
+        {
+            label: 'Weekly Products Sold',
+            value: (weeklyTotals.total_products_sold || 0).toLocaleString(),
+            icon: Package
+        },
+        {
+            label: 'Avg Order Value (All Time)',
+            value: `₦${metrics.avgOrderValue.toFixed(2)}`,
             icon: TrendingUp
-        },
-        {
-            label: 'Active Sellers',
-            value: stats.activeSellers || 0,
-            icon: Users
-        },
-        {
-            label: 'Completed Orders',
-            value: `${(stats.completionRate || 0).toFixed(1)}%`,
-            icon: CheckCircle
         }
     ];
 
+    /**
+     * Get icon component for activity type
+     */
     const getActivityIcon = (type) => {
         const icons = {
             user: Users,
@@ -229,6 +298,9 @@ const AdminDashboard = () => {
         return icons[type] || AlertCircle;
     };
 
+    /**
+     * Get color classes for activity type
+     */
     const getActivityColor = (type) => {
         const colors = {
             user: 'bg-blue-100 text-blue-600',
@@ -241,11 +313,26 @@ const AdminDashboard = () => {
         return colors[type] || 'bg-gray-100 text-gray-600';
     };
 
-    // Error state
+    /**
+     * Render loading skeleton
+     */
+    const LoadingSkeleton = () => (
+        <div className="flex items-center justify-center" style={{ minHeight: '60vh' }}>
+            <div className="text-center">
+                <Loader2 className="w-16 h-16 text-brand-600 mx-auto mb-4 animate-spin" />
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Loading Dashboard</h2>
+                <p className="text-gray-600">Please wait while we fetch your data...</p>
+            </div>
+        </div>
+    );
+
+    /**
+     * Render error state
+     */
     if (error) {
         return (
             <DashboardLayout>
-                <div className="flex items-center justify-center min-h-screen">
+                <div className="flex items-center justify-center" style={{ minHeight: '60vh' }}>
                     <div className="text-center">
                         <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
                         <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Dashboard</h2>
@@ -262,6 +349,17 @@ const AdminDashboard = () => {
         );
     }
 
+    /**
+     * Render loading state
+     */
+    if (isLoading) {
+        return (
+            <DashboardLayout>
+                <LoadingSkeleton />
+            </DashboardLayout>
+        );
+    }
+
     return (
         <DashboardLayout>
             <div className="space-y-6">
@@ -269,7 +367,7 @@ const AdminDashboard = () => {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
                     <p className="text-gray-600 mt-2">
-                        Welcome back{profileData?.name ? `, ${profileData.name}` : ''}! Here's your platform overview
+                        Welcome back! Here's your platform overview
                     </p>
                 </div>
 
@@ -281,24 +379,8 @@ const AdminDashboard = () => {
                                 <div className="flex-1">
                                     <p className="text-sm font-medium text-gray-600">{stat.title}</p>
                                     <p className="text-2xl font-bold text-gray-900 mt-2">
-                                        {isLoading ? (
-                                            <span className="inline-block h-8 w-20 bg-gray-200 animate-pulse rounded"></span>
-                                        ) : (
-                                            stat.value
-                                        )}
+                                        {stat.value}
                                     </p>
-                                    <div className="flex items-center mt-2">
-                                        {isLoading ? (
-                                            <span className="inline-block h-4 w-16 bg-gray-200 animate-pulse rounded"></span>
-                                        ) : (
-                                            <>
-                                                <span className={`text-sm font-medium ${stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'}`}>
-                                                    {stat.change}
-                                                </span>
-                                                <span className="text-sm text-gray-500 ml-1">from last month</span>
-                                            </>
-                                        )}
-                                    </div>
                                 </div>
                                 <div className={`p-3 rounded-lg ${stat.color}`}>
                                     <stat.icon className="w-6 h-6 text-white" />
@@ -307,7 +389,6 @@ const AdminDashboard = () => {
                             <button
                                 onClick={() => window.location.href = stat.link}
                                 className="mt-4 text-brand-600 hover:text-brand-700 text-sm font-medium flex items-center gap-1"
-                                disabled={isLoading}
                             >
                                 View Details
                                 <ArrowUpRight className="w-4 h-4" />
@@ -317,19 +398,15 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Action Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {actionCards.map((card, index) => (
                         <div key={index} className={`${card.bgColor} rounded-xl p-6 hover:shadow-md transition-shadow`}>
                             <div className="flex items-start justify-between mb-4">
-                                <div className={`p-3 rounded-lg bg-white`}>
+                                <div className="p-3 rounded-lg bg-white">
                                     <card.icon className={`w-6 h-6 ${card.iconColor}`} />
                                 </div>
                                 <span className="text-3xl font-bold text-gray-900">
-                                    {isLoading ? (
-                                        <span className="inline-block h-9 w-12 bg-white/50 animate-pulse rounded"></span>
-                                    ) : (
-                                        card.value
-                                    )}
+                                    {card.value}
                                 </span>
                             </div>
                             <h3 className="text-lg font-semibold text-gray-900 mb-1">{card.title}</h3>
@@ -337,17 +414,16 @@ const AdminDashboard = () => {
                             <button
                                 onClick={() => window.location.href = card.link}
                                 className="w-full px-4 py-2 bg-white text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                                disabled={isLoading}
                             >
                                 {card.action}
                             </button>
                         </div>
                     ))}
-                </div>
+                </div> */}
 
-                {/* Quick Stats */}
+                {/* Quick Stats (NOW SHOWS LIVE WEEKLY DATA) */}
                 <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Statistics</h2>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Statistics (This Week)</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {quickStats.map((stat, index) => (
                             <div key={index} className="flex items-center gap-4">
@@ -357,11 +433,7 @@ const AdminDashboard = () => {
                                 <div>
                                     <p className="text-sm text-gray-600">{stat.label}</p>
                                     <p className="text-2xl font-bold text-gray-900">
-                                        {isLoading ? (
-                                            <span className="inline-block h-8 w-16 bg-gray-200 animate-pulse rounded"></span>
-                                        ) : (
-                                            stat.value
-                                        )}
+                                        {stat.value}
                                     </p>
                                 </div>
                             </div>
@@ -369,35 +441,46 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                {/* Two Column Layout */}
+                {/* Two Column Layout (Existing) */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Recent Activities */}
+                    {/* Recent Weekly Orders */}
                     <div className="lg:col-span-2 bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-semibold text-gray-900">Recent Activities</h2>
-                            <button className="text-brand-600 hover:text-brand-700 text-sm font-medium">
+                            <h2 className="text-xl font-semibold text-gray-900">Recent Weekly Orders</h2>
+                            <button
+                                onClick={() => window.location.href = '/admin/orders'}
+                                className="text-brand-600 hover:text-brand-700 text-sm font-medium"
+                            >
                                 View All
                             </button>
                         </div>
                         <div className="space-y-4">
-                            {isLoading ? (
-                                <div className="flex items-center justify-center py-8">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
-                                </div>
-                            ) : recentActivities.length > 0 ? (
-                                recentActivities.slice(0, 6).map((activity, index) => {
-                                    const Icon = getActivityIcon(activity.type);
+                            {recentOrders.length > 0 ? (
+                                recentOrders.slice(0, 6).map((order, index) => {
+                                    const Icon = getActivityIcon('order');
                                     return (
                                         <div key={index} className="flex items-start gap-4 pb-4 border-b border-gray-100 last:border-b-0">
-                                            <div className={`p-2 rounded-lg ${getActivityColor(activity.type)}`}>
+                                            <div className={`p-2 rounded-lg ${getActivityColor('order')}`}>
                                                 <Icon className="w-5 h-5" />
                                             </div>
                                             <div className="flex-1">
-                                                <p className="text-sm font-medium text-gray-900">{activity.title || 'Activity'}</p>
-                                                <p className="text-sm text-gray-600">{activity.description || 'No description'}</p>
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    {activity.time || new Date(activity.created_at || Date.now()).toLocaleString()}
+                                                <p className="text-sm font-medium text-gray-900">
+                                                    Order #{order.order_number}
                                                 </p>
+                                                <p className="text-sm text-gray-600">
+                                                    {order.user?.first_name} {order.user?.last_name} - ₦{(order.total_amount || 0).toLocaleString()}
+                                                </p>
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    {new Date(order.created_at).toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className={`inline-block px-2 py-1 text-xs font-medium rounded ${order.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                                    order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                        'bg-gray-100 text-gray-700'
+                                                    }`}>
+                                                    {order.status || 'N/A'}
+                                                </span>
                                             </div>
                                         </div>
                                     );
@@ -405,69 +488,156 @@ const AdminDashboard = () => {
                             ) : (
                                 <div className="text-center py-8">
                                     <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                    <p className="text-gray-600">No recent activities</p>
+                                    <p className="text-gray-600">No recent orders this week</p>
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    {/* Platform Health */}
+                    {/* --- MODIFIED SECTION: Top Weekly Products (Table) --- */}
                     <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-6">Platform Health</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-6">Top Weekly Products</h2>
+
+                        {topProducts.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className="bg-gray-50 border-b border-gray-200">
+                                            <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase tracking-wider">Rank</th>
+                                            <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase tracking-wider">Product</th>
+                                            <th className="px-4 py-3 text-xs font-medium text-gray-600 uppercase tracking-wider text-right">Sold</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {topProducts.slice(0, 10).map((product, index) => ( // Show top 10
+                                            <tr key={index} className="hover:bg-gray-50">
+                                                <td className="px-4 py-3 text-sm font-bold text-gray-900">
+                                                    #{index + 1}
+                                                </td>
+                                                <td className="px-4 py-3 text-sm font-medium text-gray-800">
+                                                    {product.product?.name || 'Product'}
+                                                </td>
+                                                <td className="px-4 py-3 text-sm font-medium text-gray-800 text-right">
+                                                    {product.total_sold || 0}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="text-center py-8">
+                                <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                <p className="text-gray-600">No product data available</p>
+                            </div>
+                        )}
+                    </div>
+                    {/* --- END MODIFIED SECTION --- */}
+
+                </div>
+                {/* END Two Column Layout */}
+
+                {/* --- NEW SECTION: Top Transactions & Low Stock --- */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Top Weekly Transactions */}
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-6">Top Weekly Transactions</h2>
                         <div className="space-y-4">
-                            <div>
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-gray-700">Server Status</span>
-                                    <CheckCircle className="w-5 h-5 text-green-500" />
+                            {topTransactions.length > 0 ? (
+                                topTransactions.slice(0, 5).map((order, index) => (
+                                    <div key={index} className="flex items-start gap-4 pb-4 border-b border-gray-100 last:border-b-0">
+                                        <div className={`p-2 rounded-lg ${getActivityColor('transaction')}`}>
+                                            <DollarSign className="w-5 h-5" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium text-gray-900">
+                                                Order #{order.order_number}
+                                            </p>
+                                            <p className="text-sm text-gray-600">
+                                                {order.user?.first_name} {order.user?.last_name}
+                                            </p>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                {new Date(order.created_at).toLocaleString()}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-lg font-bold text-gray-900">
+                                                ₦{(order.total_amount || 0).toLocaleString()}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-8">
+                                    <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-600">No top transactions this week</p>
                                 </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '98%' }}></div>
-                                </div>
-                                <p className="text-xs text-gray-600 mt-1">98% Uptime</p>
-                            </div>
+                            )}
+                        </div>
+                    </div>
 
-                            <div>
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-gray-700">API Response</span>
-                                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    {/* Weekly Out of Stock */}
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-6">Low/Out of Stock Products</h2>
+                        <div className="space-y-4">
+                            {outOfStockProducts.length > 0 ? (
+                                outOfStockProducts.slice(0, 5).map((product, index) => (
+                                    <div key={index} className="flex items-start gap-4 pb-4 border-b border-gray-100 last:border-b-0">
+                                        <div className={`p-2 rounded-lg ${getActivityColor('product')}`}>
+                                            <Package className="w-5 h-5" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium text-gray-900">
+                                                {product.name || 'Product'}
+                                            </p>
+                                            <p className="text-xs text-red-600 font-medium mt-1">
+                                                Stock: {product.stock_quantity || 0} (Threshold: {product.low_stock_threshold || 0})
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => window.location.href = `/admin/products/edit/${product.id}`}
+                                            className="text-brand-600 hover:text-brand-700 text-sm font-medium"
+                                        >
+                                            Manage
+                                        </button>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-8">
+                                    <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
+                                    <p className="text-gray-600">All products are in stock</p>
                                 </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '95%' }}></div>
-                                </div>
-                                <p className="text-xs text-gray-600 mt-1">Average: 120ms</p>
-                            </div>
-
-                            <div>
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-gray-700">Database</span>
-                                    <CheckCircle className="w-5 h-5 text-green-500" />
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '92%' }}></div>
-                                </div>
-                                <p className="text-xs text-gray-600 mt-1">Optimal Performance</p>
-                            </div>
-
-                            <div>
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-gray-700">Payment Gateway</span>
-                                    <CheckCircle className="w-5 h-5 text-green-500" />
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '100%' }}></div>
-                                </div>
-                                <p className="text-xs text-gray-600 mt-1">All Systems Operational</p>
-                            </div>
-
-                            <div className="pt-4 border-t border-gray-200">
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-gray-600">Last Updated</span>
-                                    <span className="font-medium text-gray-900">{new Date().toLocaleTimeString()}</span>
-                                </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>
+                {/* --- END NEW SECTION --- */}
+
+                {/* --- NEW SECTION: Orders by State --- */}
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-6">Weekly Orders by State</h2>
+                    {ordersByState.length > 0 ? (
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            {ordersByState.map((state, index) => (
+                                <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                                    <p className="text-sm font-medium text-gray-700 truncate">
+                                        {state.address_state || 'Unknown'}
+                                    </p>
+                                    <p className="text-2xl font-bold text-gray-900 mt-1">
+                                        {state.total_orders}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8">
+                            <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-600">No regional order data this week</p>
+                        </div>
+                    )}
+                </div>
+                {/* --- END NEW SECTION --- */}
+
 
                 {/* Quick Actions */}
                 <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">

@@ -177,7 +177,11 @@ const Home = () => {
 
         {/* Products Section */}
         <div className="space-y-8" id="products">
-          <ProductsList />
+          <ProductsList
+            filters={{ status: "active" }}
+            title="All Products"
+            description="Premium quality products from verified farmers"
+          />
         </div>
       </div>
 

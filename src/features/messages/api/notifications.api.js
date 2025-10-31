@@ -14,7 +14,7 @@ export const getSellerNotifications = async (page = 1, perPage = 15) => {
                 per_page: perPage,
             },
         });
-        return response.data;
+        return response;
     } catch (error) {
         console.error('Error fetching seller notifications:', error);
         throw error;
@@ -28,8 +28,8 @@ export const getSellerNotifications = async (page = 1, perPage = 15) => {
  */
 export const markNotificationAsRead = async (id) => {
     try {
-        const response = await api.put(`/notifications/${id}/mark-as-read`);
-        return response.data;
+        const response = await api.post(`/notifications/${id}/mark-as-read`);
+        return response;
     } catch (error) {
         console.error(`Error marking notification ${id} as read:`, error);
         throw error;
@@ -42,8 +42,8 @@ export const markNotificationAsRead = async (id) => {
  */
 export const markAllNotificationsAsRead = async () => {
     try {
-        const response = await api.put('/notifications/mark-all-read');
-        return response.data;
+        const response = await api.post('/notifications/mark-all-read');
+        return response;
     } catch (error) {
         console.error('Error marking all notifications as read:', error);
         throw error;
@@ -58,7 +58,7 @@ export const markAllNotificationsAsRead = async () => {
 export const deleteNotification = async (id) => {
     try {
         const response = await api.delete(`/notifications/${id}`);
-        return response.data;
+        return response;
     } catch (error) {
         console.error(`Error deleting notification ${id}:`, error);
         throw error;
@@ -80,7 +80,7 @@ export const getNotificationsByType = async (type, page = 1, perPage = 15) => {
                 per_page: perPage,
             },
         });
-        return response.data;
+        return response;
     } catch (error) {
         console.error(`Error fetching ${type} notifications:`, error);
         throw error;

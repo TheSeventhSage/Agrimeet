@@ -55,10 +55,10 @@ const WalletOverview = ({ data }) => {
 
             {/* Quick Actions */}
             <div className="flex space-x-4 pt-6 border-t border-gray-200">
-                <Button>
+                {/* <Button>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Bank Account
-                </Button>
+                </Button> */}
                 <Button variant="outline">
                     <Download className="w-4 h-4 mr-2" />
                     Export Statements

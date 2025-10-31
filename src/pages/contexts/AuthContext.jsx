@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }) => {
 
             if (roles.includes('admin')) {
                 // You mentioned admin dashboard, adjust path if needed
-                navigate('/admin-dashboard', { replace: true });
+                navigate('/admin/dashboard', { replace: true });
             } else if (roles.includes('seller')) {
                 // Seller dashboard
                 navigate('/dashboard', { replace: true });

@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { api } from "../api/home.api"; // Note the adjusted import path
 import {
     Package,
-    Heart,
+    Store,
     MapPin,
     ChevronLeft,
     ChevronRight,
@@ -135,11 +135,6 @@ const ProductsList = () => {
                                                 )}
                                             </div>
 
-                                            {/* Wishlist Button */}
-                                            <button className="absolute top-4 right-4 z-10 p-2 bg-white/80 backdrop-blur-xs rounded-full hover:bg-white shadow-xs transition-all">
-                                                <Heart className="w-4 h-4 text-gray-600 hover:text-red-500" />
-                                            </button>
-
                                             {/* Image */}
                                             <div className="relative mb-6 rounded-2xl overflow-hidden bg-gray-50">
                                                 <img
@@ -153,37 +148,42 @@ const ProductsList = () => {
 
                                             {/* Content */}
                                             <div className="space-y-3">
-                                                <div>
-                                                    <h3 className="font-bold text-gray-900 text-lg mb-1">
-                                                        {product.name}
-                                                    </h3>
-                                                    <p className="text-sm text-gray-500 flex items-center gap-1">
-                                                        <MapPin className="w-3 h-3" />
-                                                        {product.seller?.store_name || "Local Farm"}
-                                                    </p>
-                                                    <p className="text-xs text-gray-400 mt-1">
-                                                        {/* FIX: Changed from `product?.category` to `product.category?.name` 
-                              based on your API sample showing category as an object.
-                            */}
-                                                        {product?.category || "General"}
-                                                    </p>
-                                                </div>
-
-                                                {/* Price & Stock */}
                                                 <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-2xl font-bold text-green-600">
-                                                            ${product.discount_price || product.base_price}
-                                                        </span>
-                                                        {product.discount_price &&
-                                                            Number(product.discount_price) <
-                                                            Number(product.base_price) && (
-                                                                <span className="text-sm text-gray-400 line-through">
-                                                                    ${product.base_price}
-                                                                </span>
-                                                            )}
+                                                    <div>
+                                                        <h3 className="font-bold text-gray-900 text-lg mb-1">
+                                                            {product.name}
+                                                        </h3>
+                                                        <div className="flex items-center gap-[5px]">
+                                                            <span className="text-2xl font-bold text-green-600">
+                                                                ${product.discount_price || product.base_price}
+                                                            </span>
+                                                            {product.discount_price &&
+                                                                Number(product.discount_price) <
+                                                                Number(product.base_price) && (
+                                                                    <span className="text-xs text-gray-400 line-through">
+                                                                        ${product.base_price}
+                                                                    </span>
+                                                                )}
+                                                        </div>
+                                                        <p className="text-xs text-gray-400 mt-1">
+                                                            {/* FIX: Changed from `product?.category` to `product.category?.name` 
+                                                            based on your API sample showing category as an object.
+                                                        */}
+                                                            {product?.category || "General"}
+                                                        </p>
                                                     </div>
-                                                    <div className="text-right">
+
+                                                    <div className=" items-center justify-between">
+                                                        <p className="text-sm text-right text-gray-500 flex items-center justify-end gap-1">
+                                                            <MapPin className="w-3 h-3" />
+                                                            {product.seller?.city || "Location"}
+                                                        </p>
+                                                        <p className="text-sm text-right text-gray-500 flex items-center justify-end gap-1">
+                                                            <Store className="w-3 h-3" />
+                                                            {product.seller?.store_name.length > 7 ? product.seller?.store_name.slice(0, 9).replaceAll(' ', '') + '...' : product.seller?.store_name || "Local Farm"}
+                                                        </p>
+
+                                                        {/* <div className="text-right">
                                                         <div
                                                             className={`text-xs font-medium ${isAvailable
                                                                     ? "text-green-600"
@@ -192,15 +192,19 @@ const ProductsList = () => {
                                                         >
                                                             {isAvailable ? "In Stock" : "Out of Stock"}
                                                         </div>
+                                                    </div> */}
                                                     </div>
                                                 </div>
 
-                                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                {/* Price & Stock */}
+
+
+                                                {/* <div className="flex items-center gap-2 text-xs text-gray-500">
                                                     <span>
                                                         {variantStock}{" "}
                                                         {product.unit?.symbol || "units"} available
                                                     </span>
-                                                </div>
+                                                </div> */}
 
                                                 {/* Action Button */}
                                                 <Link to={`/details/${product.id}`}>
@@ -244,8 +248,8 @@ const ProductsList = () => {
                                                     key={index}
                                                     onClick={() => handlePageChange(pageNumber)}
                                                     className={`w-10 h-10 rounded-xl font-semibold transition-all ${currentPage === pageNumber
-                                                            ? "bg-green-600 text-white shadow-lg"
-                                                            : "border border-gray-200 hover:bg-gray-50"
+                                                        ? "bg-green-600 text-white shadow-lg"
+                                                        : "border border-gray-200 hover:bg-gray-50"
                                                         }`}
                                                 >
                                                     {pageNumber}

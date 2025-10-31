@@ -45,8 +45,10 @@ const formatTimeAgo = (dateString) => {
 
 const getNotificationIcon = (type) => {
     const iconMap = {
+        new_order: ShoppingCart,
         order: ShoppingCart,
         orders: ShoppingCart,
+        seller_payment_confirmed: CreditCard,
         wallet: CreditCard,
         payment: CreditCard,
         stock: Package,
@@ -66,8 +68,10 @@ const getNotificationIcon = (type) => {
 
 const getNotificationColor = (type) => {
     const colorMap = {
+        new_order: 'bg-blue-100 text-blue-600',
         order: 'bg-blue-100 text-blue-600',
         orders: 'bg-blue-100 text-blue-600',
+        seller_payment_confirmed: 'bg-green-100 text-green-600',
         wallet: 'bg-green-100 text-green-600',
         payment: 'bg-green-100 text-green-600',
         stock: 'bg-purple-100 text-purple-600',
@@ -83,6 +87,22 @@ const getNotificationColor = (type) => {
     };
 
     return colorMap[type?.toLowerCase()] || 'bg-gray-100 text-gray-600';
+};
+
+const getNotificationTitle = (notification) => {
+    const notificationType = notification.data?.type || '';
+    const orderNumber = notification.data?.order_number || '';
+
+    switch (notificationType) {
+        case 'new_order':
+            return `New Order ${orderNumber}`;
+        case 'seller_payment_confirmed':
+            return `Payment Confirmed - ${orderNumber}`;
+        default:
+            return notificationType.split('_').map(word =>
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+    }
 };
 
 const Notifications = () => {
@@ -105,10 +125,12 @@ const Notifications = () => {
         try {
             const response = await getSellerNotifications(page, pagination.per_page);
 
-            if (response.success && response.data) {
-                setNotifications(response.data.notifications || []);
-                setUnreadCount(response.data.unread_count || 0);
-                setPagination(response.data.pagination || pagination);
+            const responseData = response.data;
+
+            if (responseData && responseData.success && responseData.data) {
+                setNotifications(responseData.data.notifications || []);
+                setUnreadCount(responseData.data.unread_count || 0);
+                setPagination(responseData.data.pagination || pagination);
             }
         } catch (error) {
             console.error('Error fetching notifications:', error);
@@ -132,19 +154,17 @@ const Notifications = () => {
     const handleMarkAsRead = async (notificationId) => {
         setActionLoading(notificationId);
         try {
-            await markNotificationAsRead(notificationId);
+            const response = await markNotificationAsRead(notificationId);
+            console.log('Mark as read response:', response);
 
-            // Optimistic update
-            setNotifications(prev =>
-                prev.map(notif =>
-                    notif.id === notificationId ? { ...notif, read: true } : notif
-                )
-            );
-            setUnreadCount(prev => Math.max(0, prev - 1));
+            // Refetch to get the updated data from server
+            await fetchNotifications(pagination.current_page);
             showSuccess('Notification marked as read');
         } catch (error) {
             console.error('Error marking notification as read:', error);
             showError('Failed to mark notification as read');
+            // Still refetch to sync with server state
+            await fetchNotifications(pagination.current_page);
         } finally {
             setActionLoading(null);
         }
@@ -155,17 +175,17 @@ const Notifications = () => {
 
         setActionLoading('mark-all');
         try {
-            await markAllNotificationsAsRead();
+            const response = await markAllNotificationsAsRead();
+            console.log('Mark all as read response:', response);
 
-            // Optimistic update
-            setNotifications(prev =>
-                prev.map(notif => ({ ...notif, read: true }))
-            );
-            setUnreadCount(0);
+            // Refetch to get the updated data from server
+            await fetchNotifications(pagination.current_page);
             showSuccess('All notifications marked as read');
         } catch (error) {
             console.error('Error marking all notifications as read:', error);
             showError('Failed to mark all notifications as read');
+            // Still refetch to sync with server state
+            await fetchNotifications(pagination.current_page);
         } finally {
             setActionLoading(null);
         }
@@ -176,20 +196,17 @@ const Notifications = () => {
 
         setActionLoading(notificationId);
         try {
-            await deleteNotification(notificationId);
+            const response = await deleteNotification(notificationId);
+            console.log('Delete notification response:', response);
 
-            // Optimistic update
-            const deletedNotification = notifications.find(n => n.id === notificationId);
-            setNotifications(prev => prev.filter(notif => notif.id !== notificationId));
-
-            if (deletedNotification && !deletedNotification.read) {
-                setUnreadCount(prev => Math.max(0, prev - 1));
-            }
-
+            // Refetch to get the updated data from server
+            await fetchNotifications(pagination.current_page);
             showSuccess('Notification deleted');
         } catch (error) {
             console.error('Error deleting notification:', error);
             showError('Failed to delete notification');
+            // Still refetch to sync with server state
+            await fetchNotifications(pagination.current_page);
         } finally {
             setActionLoading(null);
         }
@@ -215,14 +232,14 @@ const Notifications = () => {
         <DashboardLayout>
             <div className="space-y-6">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex justify-between flex-col gap-4 px-4 md:items-center md:flex-row md:px-2">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
                         <p className="text-gray-600 mt-2">
                             Stay updated with your business activities
                         </p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-wrap">
                         {unreadCount > 0 && (
                             <div className="flex items-center gap-2 px-4 py-2 bg-brand-50 rounded-lg">
                                 <Bell className="w-4 h-4 text-brand-600" />
@@ -235,10 +252,10 @@ const Notifications = () => {
                             <button
                                 onClick={handleMarkAllAsRead}
                                 disabled={actionLoading === 'mark-all'}
-                                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex  items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {actionLoading === 'mark-all' ? (
-                                    <LoadingSpinner size="sm" />
+                                    <LoadingSpinner size="sm" message='' />
                                 ) : (
                                     <CheckCircle className="w-4 h-4 text-gray-600" />
                                 )}
@@ -267,14 +284,16 @@ const Notifications = () => {
                     ) : notifications.length > 0 ? (
                         <div className="divide-y divide-gray-100">
                             {notifications.map((notification) => {
-                                const Icon = getNotificationIcon(notification.type);
-                                const colorClass = getNotificationColor(notification.type);
+                                const notifData = notification.data || {};
+                                const notifType = notifData.type || '';
+                                const Icon = getNotificationIcon(notifType);
+                                const colorClass = getNotificationColor(notifType);
+                                const isUnread = !notification.read_at;
 
                                 return (
                                     <div
                                         key={notification.id}
-                                        className={`p-6 hover:bg-gray-50 transition-colors ${!notification.read ? 'bg-blue-50/30' : ''
-                                            }`}
+                                        className={`p-6 hover:bg-gray-50 transition-colors ${isUnread ? 'bg-blue-50/30' : ''}`}
                                     >
                                         <div className="flex items-start gap-4">
                                             {/* Icon */}
@@ -284,27 +303,54 @@ const Notifications = () => {
 
                                             {/* Content */}
                                             <div className="flex-1 min-w-0">
-                                                <div className="flex items-start justify-between gap-4">
+                                                <div className="flex md:flex-row flex-col items-start justify-between gap-4">
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2 mb-1">
                                                             <h3 className="font-semibold text-gray-900">
-                                                                {notification.title ||
-                                                                    notification.type?.charAt(0).toUpperCase() +
-                                                                    notification.type?.slice(1) + ' Notification'}
+                                                                {getNotificationTitle(notification)}
                                                             </h3>
-                                                            {!notification.read && (
+                                                            {isUnread && (
                                                                 <span className="w-2 h-2 bg-brand-500 rounded-full flex-shrink-0"></span>
                                                             )}
                                                         </div>
                                                         <p className="text-gray-700 text-sm leading-relaxed mb-2">
-                                                            {notification.message || notification.content || 'No message available'}
+                                                            {notifData.message || 'No message available'}
                                                         </p>
+
+                                                        {/* Display products if available */}
+                                                        {notifData.products && notifData.products.length > 0 && (
+                                                            <div className="flex flex-wrap gap-2 mb-2">
+                                                                {notifData.products.map((product, idx) => (
+                                                                    <div key={idx} className="flex items-center gap-2 bg-gray-100 rounded-lg px-2 py-1">
+                                                                        {product.thumbnail && (
+                                                                            <img
+                                                                                src={product.thumbnail}
+                                                                                alt={product.name}
+                                                                                className="w-6 h-6 rounded object-cover"
+                                                                            />
+                                                                        )}
+                                                                        <span className="text-xs text-gray-700">
+                                                                            {product.name} {product.variant_name ? `(${product.variant_name})` : ''} × {product.quantity}
+                                                                        </span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+
                                                         <div className="flex items-center gap-3 text-xs text-gray-500">
                                                             <span>{formatTimeAgo(notification.created_at)}</span>
-                                                            {notification.type && (
+                                                            {notifType && (
                                                                 <>
                                                                     <span>•</span>
-                                                                    <span className="capitalize">{notification.type}</span>
+                                                                    <span className="capitalize">
+                                                                        {notifType.replace(/_/g, ' ')}
+                                                                    </span>
+                                                                </>
+                                                            )}
+                                                            {notifData.customer_name && (
+                                                                <>
+                                                                    <span>•</span>
+                                                                    <span>Customer: {notifData.customer_name}</span>
                                                                 </>
                                                             )}
                                                         </div>
@@ -312,7 +358,7 @@ const Notifications = () => {
 
                                                     {/* Action Buttons */}
                                                     <div className="flex items-center gap-2 flex-shrink-0">
-                                                        {!notification.read && (
+                                                        {isUnread && (
                                                             <button
                                                                 onClick={() => handleMarkAsRead(notification.id)}
                                                                 disabled={actionLoading === notification.id}
