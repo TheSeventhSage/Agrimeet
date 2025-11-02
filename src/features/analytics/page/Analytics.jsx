@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { subDays } from 'date-fns';
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import KpiCards from '../components/KpiCards'; // New component
-import AnalyticsHeader from '../components/AnalyticsHeader'; // New component
-import RevenueChart from '../components/RevenueChart'; // New component
-import CategoryChart from '../components/CategoryChart'; // New component
-import ProductsTable from '../components/ProductsTable'; // New component
-import LowStockWidget from '../components/LowStockWidget'; // New component
+import KpiCards from '../components/KpiCards';
+import AnalyticsHeader from '../components/AnalyticsHeader';
+import RevenueChart from '../components/RevenueChart';
+import CategoryChart from '../components/CategoryChart';
+import ProductsTable from '../components/ProductsTable';
+import LowStockWidget from '../components/LowStockWidget';
+import TopCategoriesChart from '../components/TopCategoriesChart';
+import RevenueGrowthChart from '../components/RevenueGrowthChart';
 
 /**
  * Utility to format date filters for the API
@@ -33,6 +35,11 @@ const Analytics = () => {
     // This object will be passed to all queries
     const apiFilters = formatDateFilter(dateRange);
 
+    const revenueGrowthFilters = {
+        filter: 'month', // Use 'month' filter
+        months: 12,      // To show last 12 months
+    };
+
     return (
         <DashboardLayout>
             <div className="space-y-6">
@@ -46,15 +53,27 @@ const Analytics = () => {
                 <KpiCards filters={apiFilters} />
 
                 {/* Charts Section */}
+                {/* Main Revenue Chart */}
+                <div className="lg:col-span-3">
+                    <RevenueChart filters={apiFilters} />
+                </div>
+                {/* Top Categories Chart */}
+                <div className="lg:col-span-2">
+                    <CategoryChart filters={apiFilters} />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Monthly Revenue Growth Chart (New) */}
+                    <div>
+                        <RevenueGrowthChart filters={revenueGrowthFilters} />
+                    </div>
+
+                    {/* Top Categories Over Time (Existing) */}
+                    <div>
+                        <TopCategoriesChart filters={apiFilters} />
+                    </div>
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                    {/* Main Revenue Chart */}
-                    <div className="lg:col-span-3">
-                        <RevenueChart filters={apiFilters} />
-                    </div>
-                    {/* Top Categories Chart */}
-                    <div className="lg:col-span-2">
-                        <CategoryChart filters={apiFilters} />
-                    </div>
                 </div>
 
                 {/* Other Widgets */}

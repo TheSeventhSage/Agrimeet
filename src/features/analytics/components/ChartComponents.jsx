@@ -3,7 +3,7 @@ import { LoadingSpinner } from '../../../shared/components/Loader';
 
 // Main container for all charts
 export const ChartContainer = ({ title, children, isLoading }) => (
-    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 h-full">
+    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-4 md:p-6 h-full">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
         <div className="h-full">
             {isLoading ? (

@@ -84,9 +84,9 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
         },
         {
             key: 'seller-approval',
-            label: 'Seller Approval',
+            label: 'Seller Management',
             icon: FileCheck,
-            path: '/admin/seller-approval'
+            path: '/admin/seller'
         },
         {
             key: 'product-moderation',
@@ -296,10 +296,10 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                 <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-50">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-brand-500 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-medium text-white">{user?.data?.first_name?.charAt(0) + user?.data?.first_name?.charAt(1).toUpperCase()   || 'User' }</span>
+                            <span className="text-sm font-medium text-white">{user?.data?.first_name?.charAt(0) + user?.data?.first_name?.charAt(1).toUpperCase()   || 'SA' }</span>
                         </div>
                         <div>
-                            <p className="text-sm font-medium">{user?.data?.first_name || 'User'}</p>
+                            <p className="text-sm font-medium">{user?.data?.first_name || user.user || 'User'}</p>
                             <p className="text-xs text-gray-400">
                                 {isAdmin ? 'Admin' : isSeller ? 'Seller' : 'User'}
                             </p>

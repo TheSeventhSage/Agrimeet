@@ -42,7 +42,7 @@ const Orders = lazy(() => import('../features/orders/pages/Orders'));
 /** Admin pages */
 const AdminDashboard = lazy(() => import('../features/admin/pages/AdminDashboard'));
 const UserManagement = lazy(() => import('../features/admin/userManagement/pages/UserManagement'));
-const SellerApproval = lazy(() => import('../features/admin/pages/SellerApproval'));
+const SellerManagement = lazy(() => import('../features/admin/sellerManagement/pages/SellerManagement'));
 const ProductModeration = lazy(() => import('../features/admin/pages/ProductModeration'));
 const TransactionOversight = lazy(() => import('../features/admin/pages/TransactionOversight'));
 const DisputeManagement = lazy(() => import('../features/admin/pages/DisputeManagement'));
@@ -103,7 +103,7 @@ export default function Router() {
                 <Route path="/admin" element={<ProtectedRoutes allowedRoles={['admin']}><AdminDashboard /></ProtectedRoutes>} />
                 <Route path="/admin/dashboard" element={<ProtectedRoutes allowedRoles={['admin']}><AdminDashboard /></ProtectedRoutes>} />
                 <Route path="/admin/users" element={<ProtectedRoutes allowedRoles={['admin']}><UserManagement /></ProtectedRoutes>} />
-                <Route path="/admin/seller-approval" element={<ProtectedRoutes allowedRoles={['admin']}><SellerApproval /></ProtectedRoutes>} />
+                <Route path="/admin/seller" element={<ProtectedRoutes allowedRoles={['admin']}><SellerManagement /></ProtectedRoutes>} />
                 <Route path="/admin/products" element={<ProtectedRoutes allowedRoles={['admin']}><ProductModeration /></ProtectedRoutes>} />
                 <Route path="/admin/transactions" element={<ProtectedRoutes allowedRoles={['admin']}><TransactionOversight /></ProtectedRoutes>} />
                 <Route path="/admin/disputes" element={<ProtectedRoutes allowedRoles={['admin']}><DisputeManagement /></ProtectedRoutes>} />

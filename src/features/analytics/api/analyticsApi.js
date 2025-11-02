@@ -104,3 +104,21 @@ export const getWeeklyOutOfStockProducts = async () => {
         throw error;
     }
 };
+
+/**
+ * Get monthly revenue growth trends.
+ * API: /seller/revenue_growth
+ * @param {object} filters - { filter, months, days }
+ * @returns {Promise} - Monthly revenue data
+ */
+export const getRevenueGrowth = async (filters = {}) => {
+    try {
+        const response = await api.get('/seller/revenue_growth', {
+            searchParams: filters,
+        });
+        return response;
+    } catch (error) {
+        console.error('Error fetching revenue growth:', error);
+        throw error;
+    }
+};

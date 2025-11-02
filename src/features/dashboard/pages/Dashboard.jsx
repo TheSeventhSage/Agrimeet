@@ -176,13 +176,13 @@ const Dashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {statsCards.map((stat, index) => (
                         <div key={index} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
+                            <div className={`p-3 rounded-lg w-fit ml-auto ${stat.color}`}>
+                                <stat.icon className="w-6 h-6 text-white" />
+                            </div>
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-600">{stat.title}</p>
                                     <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</p>
-                                </div>
-                                <div className={`p-3 rounded-lg ${stat.color}`}>
-                                    <stat.icon className="w-6 h-6 text-white" />
                                 </div>
                             </div>
                         </div>
@@ -317,21 +317,21 @@ const Dashboard = () => {
                 <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <button onClick={() => window.location.href = '/products/add'} className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <button onClick={() => window.location.href = '/products/add'} className="cursor-pointer flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                             <div className="p-2 bg-brand-100 rounded-lg"><Plus className="w-5 h-5 text-brand-600" /></div>
                             <div className="text-left">
                                 <p className="font-medium text-gray-900">Add Product</p>
                                 <p className="text-sm text-gray-600">List a new agricultural product</p>
                             </div>
                         </button>
-                        <button onClick={() => window.location.href = '/products'} className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <button onClick={() => window.location.href = '/products'} className="cursor-pointer flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                             <div className="p-2 bg-blue-100 rounded-lg"><Eye className="w-5 h-5 text-blue-600" /></div>
                             <div className="text-left">
                                 <p className="font-medium text-gray-900">View Products</p>
                                 <p className="text-sm text-gray-600">Manage your product listings</p>
                             </div>
                         </button>
-                        <button onClick={() => window.location.href = '/orders'} className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <button onClick={() => window.location.href = '/orders'} className="cursor-pointer flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                             <div className="p-2 bg-green-100 rounded-lg"><ShoppingCart className="w-5 h-5 text-green-600" /></div>
                             <div className="text-left">
                                 <p className="font-medium text-gray-900">View Orders</p>

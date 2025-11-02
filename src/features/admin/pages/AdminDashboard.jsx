@@ -374,7 +374,11 @@ const AdminDashboard = () => {
                 {/* Main Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {mainStats.map((stat, index) => (
-                        <div key={index} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                        <div key={index} className="flex gap-2 flex-col bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
+
+                            <div className={`p-3 rounded-lg w-fit ml-auto ${stat.color}`}>
+                                <stat.icon className="w-6 h-6 text-white" />
+                            </div>
                             <div className="flex items-center justify-between">
                                 <div className="flex-1">
                                     <p className="text-sm font-medium text-gray-600">{stat.title}</p>
@@ -382,17 +386,13 @@ const AdminDashboard = () => {
                                         {stat.value}
                                     </p>
                                 </div>
-                                <div className={`p-3 rounded-lg ${stat.color}`}>
-                                    <stat.icon className="w-6 h-6 text-white" />
-                                </div>
+                                <button
+                                    onClick={() => window.location.href = stat.link}
+                                    className="mt-4 text-brand-600 hover:text-brand-700 text-sm font-medium flex items-center gap-1"
+                                >
+                                    <ArrowUpRight className="w-4 h-4" />
+                                </button>
                             </div>
-                            <button
-                                onClick={() => window.location.href = stat.link}
-                                className="mt-4 text-brand-600 hover:text-brand-700 text-sm font-medium flex items-center gap-1"
-                            >
-                                View Details
-                                <ArrowUpRight className="w-4 h-4" />
-                            </button>
                         </div>
                     ))}
                 </div>

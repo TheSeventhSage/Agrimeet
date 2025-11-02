@@ -32,8 +32,8 @@ const CategoryChart = ({ filters }) => {
 
     const chartData = (response?.data || [])
         .map((cat) => ({
-            name: cat.category_name,
-            Revenue: Number(cat.total_amount || 0),
+            name: cat.name,
+            Revenue: Number(cat.total_revenue || 0),
         }))
         .sort((a, b) => a.Revenue - b.Revenue);
 

@@ -9,7 +9,7 @@ const UserDropdown = () => {
     const { logout } = useAuth();
 
     const user = storageManager.getUserData();
-    // console.log(user)
+    console.log(user.roles)
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -43,8 +43,8 @@ const UserDropdown = () => {
                     <User className="w-5 h-5 text-white" />
                 </div>
                 <div className="hidden md:block text-left">
-                    <p className="text-sm font-medium text-gray-900">{user?.data?.first_name || 'User'}</p>
-                    <p className="text-xs text-gray-500">{user?.data?.roles?.includes('seller') ? 'Seller' : 'Inactive'}</p>
+                    <p className="text-sm font-medium text-gray-900">{user?.data?.first_name || user.user || 'User'}</p>
+                    <p className="text-xs text-gray-500">{user?.data?.roles?.includes('seller') ? 'Seller' : user?.data?.roles?.includes('admin') || user?.roles.includes('admin') ? 'Admin' : 'Inactive'}</p>
                 </div>
                 <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -59,10 +59,10 @@ const UserDropdown = () => {
                                 <User className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-gray-900">{user?.data?.first_name || 'User'}</h3>
-                                <p className="text-sm text-gray-500">{user?.data?.email}</p>
+                                <h3 className="font-semibold text-gray-900">{user?.data?.first_name || user.user || 'User'}</h3>
+                                <p className="text-sm text-gray-500">{user?.data?.roles?.includes('seller') ? user?.data?.email : 'Platform Admin'}</p>
                                 <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full mt-1">
-                                    {user?.data?.roles?.includes('seller') ? 'Seller' : 'Inactive'}
+                                    {user?.data?.roles?.includes('seller') ? 'Seller' : user?.data?.roles?.includes('admin') || user?.roles.includes('admin') ? 'Admin' : 'Inactive'}
                                 </span>
                             </div>
                         </div>

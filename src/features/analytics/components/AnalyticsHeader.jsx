@@ -19,7 +19,7 @@ const AnalyticsHeader = ({ dateRange, onDateRangeChange }) => {
                 </p>
             </div>
             <div className="flex items-center gap-2">
-                <Popover>
+                {/* <Popover>
                     <PopoverTrigger asChild>
                         <Button
                             variant="outline"
@@ -49,7 +49,7 @@ const AnalyticsHeader = ({ dateRange, onDateRangeChange }) => {
                             numberOfMonths={2}
                         />
                     </PopoverContent>
-                </Popover>
+                </Popover> */}
 
                 <Button variant="outline" className="gap-2">
                     <Download className="w-4 h-4" /> Export CSV
