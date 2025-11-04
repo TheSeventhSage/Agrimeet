@@ -29,8 +29,8 @@ const SellerManagement = () => {
 
     const [filters, setFilters] = useState({
         search_global: '',
-        status: 'all',
-        business_type: 'all',
+        status: '',
+        business_type: '',
         page: 1
     });
 
@@ -211,7 +211,7 @@ const SellerManagement = () => {
                         <div className="lg:col-span-2 bg-white rounded-xl shadow-xs border border-gray-100 p-12 text-center">
                             <Store className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-600">No sellers found</p>
-                            {(filters.search_global || filters.status !== 'all' || filters.business_type !== 'all') && (
+                            {(filters.search_global || filters.status !== '' || filters.business_type !== '') && (
                                 <p className="text-sm text-gray-500 mt-2">
                                     Try adjusting your filters
                                 </p>

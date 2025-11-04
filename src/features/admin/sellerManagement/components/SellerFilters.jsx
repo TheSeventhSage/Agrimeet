@@ -57,7 +57,7 @@ const SellerFilters = ({ filters, onFilterChange, businessTypes = [] }) => {
                 {/* KYC Status Filter */}
                 <div>
                     <select
-                        value={filters.status || 'all'}
+                        value={filters.status || ''}
                         onChange={(e) => onFilterChange({ ...filters, status: e.target.value, page: 1 })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                     >
@@ -71,7 +71,7 @@ const SellerFilters = ({ filters, onFilterChange, businessTypes = [] }) => {
                 {/* Business Type Filter */}
                 <div>
                     <select
-                        value={filters.business_type || 'all'}
+                        value={filters.business_type || ''}
                         onChange={(e) => onFilterChange({ ...filters, business_type: e.target.value, page: 1 })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
                     >

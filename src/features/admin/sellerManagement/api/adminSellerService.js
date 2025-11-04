@@ -37,8 +37,14 @@ export const getAllSellers = async (page = 1, perPage = 20, filters = {}) => {
             params.sortOrder = filters.sortOrder;
         }
 
-        const response = await api.get(`/admin/allsellers?${params.toString()}`, {
-            config: params,
+        const response = await api.get(`/admin/allsellers`, {
+            params: {
+                type: filters.business_type,
+                status: filters.status,
+                search: filters.search_global,
+                page,
+                per_page: perPage,
+            },
         });
         return response;
     } catch (error) {
