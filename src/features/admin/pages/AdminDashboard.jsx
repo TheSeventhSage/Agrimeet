@@ -12,7 +12,8 @@ import {
     ArrowUpRight,
     FileCheck,
     MessageSquare,
-    Loader2
+    Loader2,
+    Tag
 } from 'lucide-react';
 
 // Import from the existing admin.api.js file
@@ -24,13 +25,16 @@ const AdminDashboard = () => {
     const [consolidatedStats, setConsolidatedStats] = useState({});
     const [recentOrders, setRecentOrders] = useState([]);
     const [topProducts, setTopProducts] = useState([]);
-    const [weeklyRevenue, setWeeklyRevenue] = useState([]); // This is for the chart (not implemented)
-
-    // --- NEW STATES to hold all API data ---
-    const [weeklyTotals, setWeeklyTotals] = useState({}); // For total_revenue, total_transactions, etc.
+    const [weeklyRevenue, setWeeklyRevenue] = useState([]);
+    const [weeklyTotals, setWeeklyTotals] = useState({});
     const [topTransactions, setTopTransactions] = useState([]);
     const [outOfStockProducts, setOutOfStockProducts] = useState([]);
     const [ordersByState, setOrdersByState] = useState([]);
+
+    // --- NEW STATES ---
+    const [monthlyRevenue, setMonthlyRevenue] = useState([]);
+    const [topCategories, setTopCategories] = useState([]);
+    const [soldProducts, setSoldProducts] = useState([]);
     // --- END NEW STATES ---
 
     const [isLoading, setIsLoading] = useState(true);
@@ -57,13 +61,16 @@ const AdminDashboard = () => {
                 adminApi.getRecentWeeklyOrders(),
                 adminApi.getTopWeeklyProducts(),
                 adminApi.getWeeklyRevenue(),
-                // --- ADDED NEW API CALLS ---
                 adminApi.getWeeklyTotalRevenue(),
                 adminApi.getWeeklyTransactions(),
                 adminApi.getWeeklyProductsSold(),
                 adminApi.getTopWeeklyTransactions(),
                 adminApi.getWeeklyOutOfStock(),
-                adminApi.getWeeklyOrdersByState()
+                adminApi.getWeeklyOrdersByState(),
+                // --- NEW API CALLS ---
+                adminApi.getMonthlyRevenue({ filter: 'month', months: 6 }), // Last 6 months
+                adminApi.getTopCategories({ last_days: 30 }), // Last 30 days
+                adminApi.getSoldProducts({ last_days: 30 }) // Last 30 days
                 // --- END NEW API CALLS ---
             ]);
 
@@ -74,27 +81,28 @@ const AdminDashboard = () => {
                 recentOrdersRes,
                 topProductsRes,
                 weeklyRevenueRes,
-                // --- NEW RESPONSE VARS ---
                 weeklyTotalRevenueRes,
                 weeklyTransactionsRes,
                 weeklyProductsSoldRes,
                 topTransactionsRes,
                 outOfStockRes,
-                ordersByStateRes
-                // --- END NEW RESPONSE VARS ---
+                ordersByStateRes,
+                monthlyRevenueRes,
+                topCategoriesRes,
+                soldProductsRes
             ] = results;
 
-            // Set platform stats (core metrics)
+            // Set platform stats
             if (platformStatsRes.status === 'fulfilled') {
                 setPlatformStats(platformStatsRes.value || {});
             }
 
-            // Set consolidated stats (additional metrics)
+            // Set consolidated stats
             if (consolidatedStatsRes.status === 'fulfilled') {
                 setConsolidatedStats(consolidatedStatsRes.value || {});
             }
 
-            // Set recent orders (activity feed)
+            // Set recent orders
             if (recentOrdersRes.status === 'fulfilled') {
                 setRecentOrders(Array.isArray(recentOrdersRes.value) ? recentOrdersRes.value : []);
             }
@@ -104,13 +112,12 @@ const AdminDashboard = () => {
                 setTopProducts(Array.isArray(topProductsRes.value) ? topProductsRes.value : []);
             }
 
-            // Set weekly revenue data (for charts)
+            // Set weekly revenue data
             if (weeklyRevenueRes.status === 'fulfilled') {
                 setWeeklyRevenue(Array.isArray(weeklyRevenueRes.value) ? weeklyRevenueRes.value : []);
             }
 
-            // --- SET NEW STATES FROM API CALLS ---
-            // Combine weekly totals into one object
+            // Combine weekly totals
             const totals = {};
             if (weeklyTotalRevenueRes.status === 'fulfilled') {
                 totals.total_revenue = weeklyTotalRevenueRes.value.total_revenue || 0;
@@ -136,6 +143,22 @@ const AdminDashboard = () => {
             // Set orders by state
             if (ordersByStateRes.status === 'fulfilled') {
                 setOrdersByState(Array.isArray(ordersByStateRes.value) ? ordersByStateRes.value : []);
+            }
+
+            // --- SET NEW STATES ---
+            // Set monthly revenue
+            if (monthlyRevenueRes.status === 'fulfilled') {
+                setMonthlyRevenue(Array.isArray(monthlyRevenueRes.value) ? monthlyRevenueRes.value : []);
+            }
+
+            // Set top categories
+            if (topCategoriesRes.status === 'fulfilled') {
+                setTopCategories(Array.isArray(topCategoriesRes.value) ? topCategoriesRes.value : []);
+            }
+
+            // Set sold products
+            if (soldProductsRes.status === 'fulfilled') {
+                setSoldProducts(Array.isArray(soldProductsRes.value) ? soldProductsRes.value : []);
             }
             // --- END SET NEW STATES ---
 
@@ -167,7 +190,6 @@ const AdminDashboard = () => {
             totalOrders,
             totalUsers: platformStats.total_users || 0,
             totalProducts: platformStats.total_products || 0,
-            // From consolidated stats
             pendingOrders: consolidatedStats.pending_orders || 0,
             completedOrders: consolidatedStats.completed_orders || 0,
             activeSellers: consolidatedStats.active_sellers || 0,
@@ -212,53 +234,7 @@ const AdminDashboard = () => {
     ];
 
     /**
-     * Action cards for quick navigation
-     */
-    // const actionCards = [
-    //     {
-    //         title: 'Pending Orders',
-    //         value: metrics.pendingOrders,
-    //         description: 'Orders awaiting processing',
-    //         icon: ShoppingCart,
-    //         iconColor: 'text-yellow-600',
-    //         bgColor: 'bg-yellow-50',
-    //         link: '/admin/orders?status=pending',
-    //         action: 'Process Now'
-    //     },
-    //     {
-    //         title: 'Completed Orders',
-    //         value: metrics.completedOrders,
-    //         description: 'Successfully fulfilled orders',
-    //         icon: CheckCircle,
-    //         iconColor: 'text-green-600',
-    //         bgColor: 'bg-green-50',
-    //         link: '/admin/orders?status=completed',
-    //         action: 'View All'
-    //     },
-    //     {
-    //         title: 'Active Sellers',
-    //         value: metrics.activeSellers,
-    //         description: 'Sellers with active listings',
-    //         icon: Users,
-    //         iconColor: 'text-blue-600',
-    //         bgColor: 'bg-blue-50',
-    //         link: '/admin/sellers',
-    //         action: 'View Sellers'
-    //     },
-    //     {
-    //         title: 'Top Products',
-    //         value: topProducts.length,
-    //         description: 'Best performing products',
-    //         icon: TrendingUp,
-    //         iconColor: 'text-purple-600',
-    //         bgColor: 'bg-purple-50',
-    //         link: '/admin/products?sort=top',
-    //         action: 'View Products'
-    //     }
-    // ];
-
-    /**
-     * Quick stats for the dashboard (UPDATED to use live weekly data)
+     * Quick stats for the dashboard
      */
     const quickStats = [
         {
@@ -311,6 +287,14 @@ const AdminDashboard = () => {
             transaction: 'bg-orange-100 text-orange-600'
         };
         return colors[type] || 'bg-gray-100 text-gray-600';
+    };
+
+    /**
+     * Get month name from month number
+     */
+    const getMonthName = (month) => {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return months[month - 1] || '';
     };
 
     /**
@@ -375,7 +359,6 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {mainStats.map((stat, index) => (
                         <div key={index} className="flex gap-2 flex-col bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
-
                             <div className={`p-3 rounded-lg w-fit ml-auto ${stat.color}`}>
                                 <stat.icon className="w-6 h-6 text-white" />
                             </div>
@@ -397,31 +380,7 @@ const AdminDashboard = () => {
                     ))}
                 </div>
 
-                {/* Action Cards */}
-                {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {actionCards.map((card, index) => (
-                        <div key={index} className={`${card.bgColor} rounded-xl p-6 hover:shadow-md transition-shadow`}>
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="p-3 rounded-lg bg-white">
-                                    <card.icon className={`w-6 h-6 ${card.iconColor}`} />
-                                </div>
-                                <span className="text-3xl font-bold text-gray-900">
-                                    {card.value}
-                                </span>
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-1">{card.title}</h3>
-                            <p className="text-sm text-gray-600 mb-4">{card.description}</p>
-                            <button
-                                onClick={() => window.location.href = card.link}
-                                className="w-full px-4 py-2 bg-white text-gray-900 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                            >
-                                {card.action}
-                            </button>
-                        </div>
-                    ))}
-                </div> */}
-
-                {/* Quick Stats (NOW SHOWS LIVE WEEKLY DATA) */}
+                {/* Quick Stats */}
                 <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Statistics (This Week)</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -441,7 +400,119 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                {/* Two Column Layout (Existing) */}
+                {/* --- NEW SECTION: Monthly Revenue Trend --- */}
+                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-6">Monthly Revenue (Last 6 Months)</h2>
+                    {monthlyRevenue.length > 0 ? (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                            {monthlyRevenue.map((item, index) => (
+                                <div key={index} className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4 text-center">
+                                    <p className="text-sm font-medium text-purple-700">
+                                        {getMonthName(item.month)} {item.year}
+                                    </p>
+                                    <p className="text-xl font-bold text-purple-900 mt-2">
+                                        ₦{(item.total_amount || 0).toLocaleString()}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8">
+                            <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-600">No monthly revenue data available</p>
+                        </div>
+                    )}
+                </div>
+                {/* --- END NEW SECTION --- */}
+
+                {/* --- NEW SECTION: Top Categories & Best Sellers --- */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Top Categories */}
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-semibold text-gray-900">Top Categories (Last 30 Days)</h2>
+                            <Tag className="w-5 h-5 text-gray-400" />
+                        </div>
+                        {topCategories.length > 0 ? (
+                            <div className="space-y-4">
+                                {topCategories.map((category, index) => (
+                                    <div key={index} className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-b-0">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-100 text-brand-600 font-bold text-sm">
+                                                {index + 1}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">
+                                                    {category.category_name || 'Category'}
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                    ID: {category.category_id}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-lg font-bold text-gray-900">
+                                                ₦{(category.total_amount || 0).toLocaleString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8">
+                                <Tag className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                <p className="text-gray-600">No category data available</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Best Selling Products */}
+                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-semibold text-gray-900">Best Sellers (Last 30 Days)</h2>
+                            <TrendingUp className="w-5 h-5 text-gray-400" />
+                        </div>
+                        {soldProducts.length > 0 ? (
+                            <div className="space-y-4">
+                                {soldProducts.map((product, index) => (
+                                    <div key={index} className="flex items-start gap-3 pb-4 border-b border-gray-100 last:border-b-0">
+                                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-600 font-bold text-sm flex-shrink-0">
+                                            {index + 1}
+                                        </div>
+                                        {product.product_photo && (
+                                            <img 
+                                                src={product.product_photo} 
+                                                alt={product.product_name}
+                                                className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                                            />
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-gray-900 truncate">
+                                                {product.product_name || 'Product'}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                                {product.sales_count || 0} sales
+                                            </p>
+                                        </div>
+                                        <div className="text-right flex-shrink-0">
+                                            <p className="text-sm font-bold text-gray-900">
+                                                ₦{(product.total_amount || 0).toLocaleString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8">
+                                <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                <p className="text-gray-600">No product sales data available</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                {/* --- END NEW SECTION --- */}
+
+                {/* Two Column Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Recent Weekly Orders */}
                     <div className="lg:col-span-2 bg-white rounded-xl shadow-xs border border-gray-100 p-6">
@@ -494,10 +565,9 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
-                    {/* --- MODIFIED SECTION: Top Weekly Products (Table) --- */}
+                    {/* Top Weekly Products */}
                     <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-6">Top Weekly Products</h2>
-
                         {topProducts.length > 0 ? (
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
@@ -509,7 +579,7 @@ const AdminDashboard = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
-                                        {topProducts.slice(0, 10).map((product, index) => ( // Show top 10
+                                        {topProducts.slice(0, 10).map((product, index) => (
                                             <tr key={index} className="hover:bg-gray-50">
                                                 <td className="px-4 py-3 text-sm font-bold text-gray-900">
                                                     #{index + 1}
@@ -532,12 +602,9 @@ const AdminDashboard = () => {
                             </div>
                         )}
                     </div>
-                    {/* --- END MODIFIED SECTION --- */}
-
                 </div>
-                {/* END Two Column Layout */}
 
-                {/* --- NEW SECTION: Top Transactions & Low Stock --- */}
+                {/* Top Transactions & Low Stock */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Top Weekly Transactions */}
                     <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
@@ -611,9 +678,8 @@ const AdminDashboard = () => {
                         </div>
                     </div>
                 </div>
-                {/* --- END NEW SECTION --- */}
 
-                {/* --- NEW SECTION: Orders by State --- */}
+                {/* Orders by State */}
                 <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-6">Weekly Orders by State</h2>
                     {ordersByState.length > 0 ? (
@@ -636,8 +702,6 @@ const AdminDashboard = () => {
                         </div>
                     )}
                 </div>
-                {/* --- END NEW SECTION --- */}
-
 
                 {/* Quick Actions */}
                 <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">

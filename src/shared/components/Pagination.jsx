@@ -11,7 +11,7 @@ const Pagination = ({ pagination, onPageChange, itemsPerPage = 20 }) => {
             <div className="text-sm text-gray-700">
                 Showing <span className="font-medium">{from || 1}</span> to{' '}
                 <span className="font-medium">{to || 0}</span> of{' '}
-                <span className="font-medium">{total}</span> sellers
+                <span className="font-medium">{total}</span> results
             </div>
             <div className="flex items-center gap-2">
                 <button

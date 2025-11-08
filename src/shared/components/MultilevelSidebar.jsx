@@ -112,6 +112,12 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             icon: TrendingUp,
             path: '/admin/reports'
         },
+        {
+            key: 'settings',
+            label: 'Product Settings',
+            icon: Settings,
+            path: '/admin/settings'
+        },
     ];
 
     // Seller menu items
@@ -166,12 +172,12 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             icon: MessageCircle, // or MessagesSquare
             hasSubmenu: true,
             submenu: [
-                // {
-                //     key: 'messages',
-                //     label: 'Messages',
-                //     icon: MessageSquare,
-                //     path: '/messages'
-                // },
+                {
+                    key: 'messages',
+                    label: 'Messages',
+                    icon: MessageSquare,
+                    path: '/messages'
+                },
                 {
                     key: 'reviews',
                     label: 'Reviews',

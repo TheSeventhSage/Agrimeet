@@ -57,7 +57,7 @@ const Reviews = () => {
             });
             setPagination(response.pagination);
         } catch (error) {
-            showError(error.message || 'Failed to fetch reviews');
+            // showError(error.message || 'Failed to fetch reviews');
         } finally {
             setLoading(false);
         }

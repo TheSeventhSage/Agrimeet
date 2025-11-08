@@ -48,6 +48,7 @@ const TransactionOversight = lazy(() => import('../features/admin/pages/Transact
 const DisputeManagement = lazy(() => import('../features/admin/pages/DisputeManagement'));
 const ReportsAnalytics = lazy(() => import('../features/admin/pages/ReportsAnalytics'));
 const AdminDebug = lazy(() => import('../features/admin/pages/AdmiDebug'));
+const AdminSettings = lazy(() => import('../features/admin/settings/pages/Settings'));
 
 const NotFound = () => <div className="p-8">404 — Not found</div>;
 
@@ -108,6 +109,7 @@ export default function Router() {
                 <Route path="/admin/transactions" element={<ProtectedRoutes allowedRoles={['admin']}><TransactionOversight /></ProtectedRoutes>} />
                 <Route path="/admin/disputes" element={<ProtectedRoutes allowedRoles={['admin']}><DisputeManagement /></ProtectedRoutes>} />
                 <Route path="/admin/reports" element={<ProtectedRoutes allowedRoles={['admin']}><ReportsAnalytics /></ProtectedRoutes>} />
+                <Route path="/admin/settings" element={<ProtectedRoutes allowedRoles={['admin']}><AdminSettings /></ProtectedRoutes>} />
 
                 {/* 404 fallback */}
                 <Route path="/admin/debug" element={<ProtectedRoutes allowedRoles={[]}><AdminDebug /></ProtectedRoutes>} />
