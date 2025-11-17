@@ -46,8 +46,6 @@ const NotificationDropdown = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const unreadCount = notifications.filter(n => !n.read).length;
-
     const markAsRead = (id) => {
         setNotifications(prev =>
             prev.map(notification =>
@@ -86,11 +84,12 @@ const NotificationDropdown = () => {
                 className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
                 <Bell className="w-5 h-5" />
-                {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {unreadCount}
-                    </span>
-                )}
+
+                {/* The new element for the pulsing effect */}
+                <span className="absolute top-[5px] right-[7px] flex justify-center h-[10px] w-[10px] z-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
             </button>
 
             {/* Dropdown Menu */}
@@ -100,14 +99,12 @@ const NotificationDropdown = () => {
                     <div className="flex items-center justify-between p-4 border-b border-gray-200">
                         <h3 className="font-semibold text-gray-900">Notifications</h3>
                         <div className="flex items-center gap-2">
-                            {unreadCount > 0 && (
-                                <button
-                                    onClick={markAllAsRead}
-                                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                                >
-                                    Mark all read
-                                </button>
-                            )}
+                            <button
+                                onClick={markAllAsRead}
+                                className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                            >
+                                Mark all read
+                            </button>
                             <button
                                 onClick={() => setIsOpen(false)}
                                 className="p-1 hover:bg-gray-100 rounded-sm"

@@ -37,7 +37,7 @@ const UserDropdown = () => {
             {/* User Avatar Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
             >
                 <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
                     <User className="w-5 h-5 text-white" />
@@ -46,55 +46,61 @@ const UserDropdown = () => {
                     <p className="text-sm font-medium text-gray-900">{user?.data?.first_name || user.user || 'User'}</p>
                     <p className="text-xs text-gray-500">{user?.data?.roles?.includes('seller') ? 'Seller' : user?.data?.roles?.includes('admin') || user?.roles.includes('admin') ? 'Admin' : 'Inactive'}</p>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                {!user?.roles.includes('admin') && (
+                    <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                )
+                }
             </button>
 
             {/* Dropdown Menu */}
             {isOpen && (
                 <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
-                    {/* User Info Header */}
-                    <div className="p-4 border-b border-gray-200">
-                        <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
-                                <User className="w-6 h-6 text-white" />
+                    
+                    {!user?.roles.includes('admin') && (
+                        <div>
+                            {/* User Info Header */}
+                            <div className="p-4 border-b border-gray-200">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+                                        <User className="w-6 h-6 text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900">{user?.data?.first_name || user.user || 'User'}</h3>
+                                        <p className="text-sm text-gray-500">{user?.data?.roles?.includes('seller') ? user?.data?.email : 'Platform Admin'}</p>
+                                        <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full mt-1">
+                                            {user?.data?.roles?.includes('seller') ? 'Seller' : user?.data?.roles?.includes('admin') || user?.roles.includes('admin') ? 'Admin' : 'Inactive'}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="font-semibold text-gray-900">{user?.data?.first_name || user.user || 'User'}</h3>
-                                <p className="text-sm text-gray-500">{user?.data?.roles?.includes('seller') ? user?.data?.email : 'Platform Admin'}</p>
-                                <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full mt-1">
-                                    {user?.data?.roles?.includes('seller') ? 'Seller' : user?.data?.roles?.includes('admin') || user?.roles.includes('admin') ? 'Admin' : 'Inactive'}
-                                </span>
+
+                            <div className="py-2">
+                                <button
+                                    onClick={() => navigateTo('/profile')}
+                                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                >
+                                    <UserCircle className="w-4 h-4" />
+                                    My Profile
+                                </button>
+
+                                <button
+                                    onClick={() => navigateTo('/settings')}
+                                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                >
+                                    <Settings className="w-4 h-4" />
+                                    Settings
+                                </button>
+
+                                <button
+                                    onClick={() => navigateTo('/help-support')}
+                                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                >
+                                    <HelpCircle className="w-4 h-4" />
+                                    Help & Support
+                                </button>
                             </div>
                         </div>
-                    </div>
-
-                    {/* Menu Items */}
-                    <div className="py-2">
-                        <button
-                            onClick={() => navigateTo('/profile')}
-                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                            <UserCircle className="w-4 h-4" />
-                            My Profile
-                        </button>
-
-                        <button
-                            onClick={() => navigateTo('/settings')}
-                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                            <Settings className="w-4 h-4" />
-                            Settings
-                        </button>
-
-                        <button
-                            onClick={() => navigateTo('/help-support')}
-                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                            <HelpCircle className="w-4 h-4" />
-                            Help & Support
-                        </button>
-                    </div>
-
+                     )}
                     {/* Logout */}
                     <div className="border-t border-gray-200 py-2">
                         <button

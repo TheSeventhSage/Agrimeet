@@ -44,6 +44,17 @@ export const getErrorMessage = (error) => {
     return 'Something went wrong. Please try again.';
 };
 
+// Helper function to build query parameters
+const buildQueryParams = (params) => {
+    const query = new URLSearchParams();
+    for (const key in params) {
+        if (params[key] !== undefined && params[key] !== null) {
+            query.append(key, params[key]);
+        }
+    }
+    return query.toString();
+};
+
 // ------------------------------
 // Admin API Endpoints
 // ------------------------------
@@ -141,6 +152,53 @@ export const adminApi = {
     // Weekly orders by state
     async getWeeklyOrdersByState() {
         const res = await fetch(`${BASE_URL}/admin/admin-weekly-orders-by-state`, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+        return handleResponse(res);
+    },
+
+    // --- NEW ENDPOINTS ---
+
+    /**
+     * GET /admin/admin-sold-products
+     * Get top sold products with optional filters.
+     * @param {object} filters - { day_of_week, month, year, last_days }
+     */
+    async getSoldProducts(filters = {}) {
+        const params = buildQueryParams(filters);
+        const url = `${BASE_URL}/admin/admin-sold-products${params ? '?' + params : ''}`;
+        const res = await fetch(url, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+        return handleResponse(res);
+    },
+
+    /**
+     * GET /admin/admin-top-categories
+     * Get top selling categories with optional filters.
+     * @param {object} filters - { day_of_week, month, year, last_days }
+     */
+    async getTopCategories(filters = {}) {
+        const params = buildQueryParams(filters);
+        const url = `${BASE_URL}/admin/admin-top-categories${params ? '?' + params : ''}`;
+        const res = await fetch(url, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+        return handleResponse(res);
+    },
+
+    /**
+     * GET /admin/admin-monthly-revenue
+     * Get revenue by month with flexible filters.
+     * @param {object} filters - { filter: '24hours' | 'days' | 'last7days' | 'month' | 'year', months: number, days: number }
+     */
+    async getMonthlyRevenue(filters = {}) {
+        const params = buildQueryParams(filters);
+        const url = `${BASE_URL}/admin/admin-monthly-revenue${params ? '?' + params : ''}`;
+        const res = await fetch(url, {
             method: 'GET',
             headers: getAuthHeaders(),
         });
