@@ -9,7 +9,7 @@ const UserDropdown = () => {
     const { logout } = useAuth();
 
     const user = storageManager.getUserData();
-    console.log(user.data.roles)
+    // console.log(user.data.roles);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -46,7 +46,7 @@ const UserDropdown = () => {
                     <p className="text-sm font-medium text-gray-900">{user?.data?.first_name || user.user || 'User'}</p>
                     <p className="text-xs text-gray-500">{user?.data?.roles?.includes('seller') ? 'Seller' : user?.data?.roles?.includes('admin') || user?.roles.includes('admin') ? 'Admin' : 'Inactive'}</p>
                 </div>
-                {(!user?.data?.roles?.includes('admin') || !user?.roles?.includes('admin')) && (
+                {(!user?.data?.roles?.includes('admin') && !user?.roles?.includes('admin')) && (
                     <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                 )}
             </button>
@@ -55,7 +55,7 @@ const UserDropdown = () => {
             {isOpen && (
                 <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
                     
-                    {(!user?.data?.roles?.includes('admin') || !user?.roles?.includes('admin')) && (
+                    {(!user?.data?.roles?.includes('admin') && !user?.roles?.includes('admin')) && (
                         <div>
                             {/* User Info Header */}
                             <div className="p-4 border-b border-gray-200">
