@@ -1,5 +1,5 @@
 // api/seller/products.api.js
-import { storageManager } from '../../../pages/utils/storageManager';
+import { storageManager } from '../../../shared/utils/storageManager';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
 
@@ -273,11 +273,11 @@ export const transformProductData = (apiProduct) => {
         category: apiProduct.category || 'Unknown',
         categoryId: apiProduct.category_id,
         status: apiProduct.status,
-        is_published: apiProduct.status === 'active', 
+        is_published: apiProduct.status === 'active',
         slug: apiProduct.slug, // Using slug as SKU for now
         image: apiProduct?.thumbnail,
-        images: Array.isArray(apiProduct.images) 
-            ? apiProduct.images.filter(img => img && img.includes('http')) 
+        images: Array.isArray(apiProduct.images)
+            ? apiProduct.images.filter(img => img && img.includes('http'))
             : [],
         rating: 4.5, // Default rating since not in API
         reviews: 0, // Default reviews since not in API

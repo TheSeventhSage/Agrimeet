@@ -16,7 +16,7 @@ import {
   Linkedin,
 } from 'lucide-react';
 import { LogoLightIcon } from '../../shared/components/Logo';
-import { storageManager } from '../utils/storageManager';
+import { storageManager } from '../../shared/utils/storageManager';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,6 +29,7 @@ const Navbar = () => {
     user: {},
     userName: '',
     isSeller: false,
+    roles: [],
   });
 
   useEffect(() => {
@@ -45,7 +46,8 @@ const Navbar = () => {
             : [tokens.role]
           : tokens?.roles
             ? tokens.roles
-            : [];
+            : []
+          ;
 
         const isSeller = userRoles.includes('seller');
         console.log(isSeller);
@@ -57,6 +59,7 @@ const Navbar = () => {
           userName: name || 'Dashboard',
           isSeller: isSeller,
           user: userData,
+          roles: userRoles,
         });
 
 
@@ -203,7 +206,7 @@ const Navbar = () => {
 
       {/* Enhanced Mobile Menu (Drawer) */}
       {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+        <div className="md:hidden fixed inset-0 bg-[rgba(0,0,0,0.6)] z-50">
           <div className="fixed top-0 left-0 w-4/5 max-w-sm h-full bg-white shadow-xl overflow-y-auto z-60">
             <div className="p-6">
               {/* Header */}
@@ -246,7 +249,7 @@ const Navbar = () => {
                 {authState.isAuthenticated ? (
                   <button
                     onClick={() => {
-                      authState.user.roles.includes('seller') ? navigate('/dashboard') : authState.user.roles.includes('admin')?  navigate('/admin/dashboard') : navigate('/');
+                      (authState.roles.includes('seller') || authState.roles.includes('seller')) ? navigate('/dashboard') : authState.roles.includes('admin') ? navigate('/admin/dashboard') : navigate('/');
                       setIsMenuOpen(false);
                     }}
                     className="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-2xl hover:bg-green-700 transition-all flex items-center justify-center gap-2 shadow-md"

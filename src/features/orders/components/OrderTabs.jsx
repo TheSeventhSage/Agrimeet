@@ -1,52 +1,43 @@
 // components/OrderTabs.jsx
-import { Package, Clock, Truck, CheckCircle, BarChart3, FileText } from 'lucide-react';
+import { Package, AlertCircle, Clock, CheckCircle, List } from 'lucide-react';
 
-const OrderTabs = ({ activeTab, onTabChange, orderStats = {} }) => {
+const OrderTabs = ({ activeTab, onTabChange }) => {
     const tabs = [
         {
             id: 'all',
             label: 'All Orders',
-            icon: Package,
-            count: orderStats?.total || 0 // Add null-safe operator
+            icon: List,
+            color: 'text-gray-600'
         },
         {
-            id: 'pending',
-            label: 'Pending',
+            id: 'unpaid',
+            label: 'Unpaid',
+            icon: AlertCircle,
+            color: 'text-red-600'
+        },
+        {
+            id: 'unfulfilled',
+            label: 'Unfulfilled',
             icon: Clock,
-            count: orderStats?.pending || 0, // Add null-safe operator
-            color: 'text-orange-600'
+            color: 'text-yellow-600'
         },
         {
-            id: 'processing',
-            label: 'Processing',
+            id: 'open',
+            label: 'Open (Paid/Unfulfilled)',
             icon: Package,
-            count: orderStats.processing || 0,
-            color: 'text-purple-600'
-        },
-        {
-            id: 'shipped',
-            label: 'Shipped',
-            icon: Truck,
-            count: orderStats.shipped || 0,
             color: 'text-blue-600'
         },
         {
-            id: 'delivered',
-            label: 'Delivered',
+            id: 'closed',
+            label: 'Closed (Completed)',
             icon: CheckCircle,
-            count: orderStats.delivered || 0,
             color: 'text-green-600'
-        },
-        {
-            id: 'analytics',
-            label: 'Analytics',
-            icon: BarChart3
         }
     ];
 
     return (
-        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-1 mb-6 overflow-x-auto">
-            <div className="flex space-x-1 min-w-max">
+        <div className="border-b border-gray-200 mb-6 overflow-x-auto">
+            <div className="flex space-x-2 min-w-max pb-1">
                 {tabs.map((tab) => {
                     const IconComponent = tab.icon;
                     const isActive = activeTab === tab.id;
@@ -55,21 +46,13 @@ const OrderTabs = ({ activeTab, onTabChange, orderStats = {} }) => {
                         <button
                             key={tab.id}
                             onClick={() => onTabChange(tab.id)}
-                            className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${isActive
-                                    ? 'bg-linear-to-r from-brand-500 to-brand-600 text-white shadow-md transform scale-105'
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                            className={`flex items-center px-4 py-3 rounded-t-lg text-sm font-medium transition-all duration-200 whitespace-nowrap border-b-2 ${isActive
+                                ? 'border-brand-600 text-brand-600 bg-brand-50'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
-                            <IconComponent className={`w-4 h-4 mr-2 ${tab.color || ''}`} />
+                            <IconComponent className={`w-4 h-4 mr-2 ${isActive ? 'text-brand-600' : tab.color}`} />
                             <span>{tab.label}</span>
-                            {tab.count !== undefined && (
-                                <span className={`ml-2 px-2 py-0.5 text-xs rounded-full font-semibold ${isActive
-                                        ? 'bg-white bg-opacity-20 text-white'
-                                        : 'bg-gray-100 text-gray-600'
-                                    }`}>
-                                    {tab.count}
-                                </span>
-                            )}
                         </button>
                     );
                 })}

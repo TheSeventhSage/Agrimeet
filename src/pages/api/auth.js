@@ -1,5 +1,5 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
-import { storageManager } from '../utils/storageManager';
+import { storageManager } from '../../shared/utils/storageManager';
 import { showError } from '../../shared/utils/alert'; // ADD IMPORT
 
 // Token management (UNCHANGED)

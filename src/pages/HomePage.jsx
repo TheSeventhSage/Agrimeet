@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from 'react-router-dom'
 import {
   X,
   ArrowRight,
@@ -17,7 +18,8 @@ import {
   MapPin,
   Leaf,
 } from "lucide-react";
-import { performRedirect, ROUTES } from "./utils/routingManager";
+import { LogoLightIcon } from '../shared/components/Logo';
+import { performRedirect, ROUTES } from "../shared/utils/routingManager";
 import { images } from "../assets";
 import VideoModal from "./VideoModal";
 import ProductsList from "./components/ProductList";
@@ -258,7 +260,7 @@ const Home = () => {
             <div className="flex flex-col sm:flex-row gap-6 justify-center mb-8">
               <button
                 className="bg-white text-green-600 px-10 py-5 rounded-2xl font-bold text-lg hover:bg-green-50 transition-all transform hover:scale-105 shadow-2xl flex items-center justify-center gap-3 cursor-pointer"
-                onClick={() => performRedirect(ROUTES.KYC_REGISTER)}
+                onClick={() => performRedirect(ROUTES.REGISTER)}
               >
                 Start Selling Now
                 <ArrowRight className="w-6 h-6" />
@@ -295,9 +297,9 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-linear-to-r from-green-600 to-green-700 rounded-xl flex items-center justify-center text-white">
-                  <Leaf className="w-5 h-5" />
+              <div className="flex  flex-col justify-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-linear-to-r from-green-600 to-green-700 rounded-2xl flex items-center justify-center shadow-lg">
+                  <LogoLightIcon className="w-7 h-7 text-white" />
                 </div>
                 <div>
                   <h4 className="font-bold">AgriMeet</h4>
@@ -311,34 +313,34 @@ const Home = () => {
                 high-quality produce.
               </p>
               <div className="flex items-center gap-3 mt-4">
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   aria-label="Facebook"
-                  className="p-2 rounded-lg hover:bg-gray-100"
+                  className="p-1 rounded-lg hover:bg-gray-100"
                 >
                   <Facebook className="w-5 h-5 text-gray-600" />
-                </a>
-                <a
-                  href="#"
+                </Link>
+                <Link
+                  to="#"
                   aria-label="Twitter"
-                  className="p-2 rounded-lg hover:bg-gray-100"
+                  className="p-1 rounded-lg hover:bg-gray-100"
                 >
                   <Twitter className="w-5 h-5 text-gray-600" />
-                </a>
-                <a
-                  href="#"
+                </Link>
+                <Link
+                  to="#"
                   aria-label="Instagram"
-                  className="p-2 rounded-lg hover:bg-gray-100"
+                  className="p-1 rounded-lg hover:bg-gray-100"
                 >
                   <Instagram className="w-5 h-5 text-gray-600" />
-                </a>
-                <a
-                  href="#"
+                </Link>
+                <Link
+                  to="#"
                   aria-label="LinkedIn"
-                  className="p-2 rounded-lg hover:bg-gray-100"
+                  className="p-1 rounded-lg hover:bg-gray-100"
                 >
                   <Linkedin className="w-5 h-5 text-gray-600" />
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -346,25 +348,33 @@ const Home = () => {
               <h5 className="font-semibold mb-3">Marketplace</h5>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>
-                  <a href="#" className="hover:text-green-600">
+                  <a href="#products" className="hover:text-green-600">
                     Browse Products
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-green-600">
+                  <button className="hover:text-green-600" onClick={() => performRedirect(ROUTES.REGISTER)}>
                     Become a Seller
-                  </a>
+                  </button>
+                  {/* <Link to="/register" >
+                   
+                  </Link> */}
                 </li>
                 <li>
-                  <a href="#" className="hover:text-green-600">
+                  <Link to="/terms" className="hover:text-green-600">
+                    Terms & Conditions
+                  </Link>
+                </li>
+                {/* <li>
+                  <Link to="/pricing" className="hover:text-green-600">
                     Pricing
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-green-600">
+                  <Link to="/gift-cards" className="hover:text-green-600">
                     Gift Cards
-                  </a>
-                </li>
+                  </Link>
+                </li> */}
               </ul>
             </div>
 
@@ -372,24 +382,24 @@ const Home = () => {
               <h5 className="font-semibold mb-3">Support</h5>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>
-                  <a href="#" className="hover:text-green-600">
+                  <Link to="/help-support" className="hover:text-green-600">
                     Help Center
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-green-600">
-                    Shipping
-                  </a>
+                  <Link to="/privacy-policy" className="hover:text-green-600">
+                    Privacy
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-green-600">
-                    Returns
-                  </a>
+                  <Link to="/faqs" className="hover:text-green-600">
+                    FAQs
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-green-600">
+                  <Link to="/contact" className="hover:text-green-600">
                     Contact Us
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -413,20 +423,9 @@ const Home = () => {
             </div>
           </div>
 
-          <div className="border-t border-gray-100 mt-8 pt-8 text-sm text-gray-500 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="border-t border-gray-100 mt-8 pt-8 text-sm text-gray-500 flex flex-col md:flex-row items-center justify-center gap-4">
             <div>
               © {new Date().getFullYear()} AgriMeet. All rights reserved.
-            </div>
-            <div className="flex items-center gap-4">
-              <a href="#" className="hover:text-green-600">
-                Terms
-              </a>
-              <a href="#" className="hover:text-green-600">
-                Privacy
-              </a>
-              <a href="#" className="hover:text-green-600">
-                Security
-              </a>
             </div>
           </div>
         </div>

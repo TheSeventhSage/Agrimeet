@@ -1,6 +1,6 @@
 // shared/utils/apiClient.js
 import { createFetchClient } from '@zayne-labs/callapi'; // Changed from callApi to createFetchClient
-import { storageManager } from '../../pages/utils/storageManager';
+import { storageManager } from './storageManager';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
 

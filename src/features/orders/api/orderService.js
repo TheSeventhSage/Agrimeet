@@ -1,36 +1,26 @@
 // api/orderService.js
+import { storageManager } from "../../../shared/utils/storageManager.js";
+
 const API_BASE_URL = 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
-import { storageManager } from "../../../pages/utils/storageManager.js";
 
 export const STATUS_CONFIG = {
-  pending: {
-    label: 'Pending',
-    color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    badgeColor: 'bg-yellow-500'
-  },
-  processing: {
-    label: 'Processing',
-    color: 'bg-purple-100 text-purple-800 border-purple-200',
-    badgeColor: 'bg-purple-500'
-  },
-  shipped: {
-    label: 'Shipped',
-    color: 'bg-blue-100 text-blue-800 border-blue-200',
-    badgeColor: 'bg-blue-500'
-  },
-  delivered: {
-    label: 'Delivered',
-    color: 'bg-green-100 text-green-800 border-green-200',
-    badgeColor: 'bg-green-500'
-  },
-  cancelled: {
-    label: 'Cancelled',
-    color: 'bg-red-100 text-red-800 border-red-200',
-    badgeColor: 'bg-red-500'
-  }
+  // Payment Status Colors
+  paid: { label: 'Paid', color: 'bg-green-100 text-green-800 border-green-200' },
+  unpaid: { label: 'Unpaid', color: 'bg-red-100 text-red-800 border-red-200' },
+
+  // Fulfillment Status Colors
+  fulfilled: { label: 'Fulfilled', color: 'bg-green-100 text-green-800 border-green-200' },
+  unfulfilled: { label: 'Unfulfilled', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+
+  // Order Status Colors
+  pending: { label: 'Pending', color: 'bg-gray-100 text-gray-800 border-gray-200' },
+  processing: { label: 'Processing', color: 'bg-blue-100 text-blue-800 border-blue-200' },
+  processed: { label: 'Processed', color: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+  delivered: { label: 'Delivered', color: 'bg-green-100 text-green-800 border-green-200' },
+  cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-800 border-red-200' },
+  intransit: { label: 'In Transit', color: 'bg-orange-100 text-orange-800 border-orange-200' },
 };
 
-// Helper function to get auth token
 const getAuthToken = () => {
   try {
     return storageManager.getAccessToken();
@@ -40,323 +30,158 @@ const getAuthToken = () => {
   }
 };
 
-// Map frontend status to API status parameters
+// Strict mapping based on user documentation
 const mapStatusToApiFilters = (status) => {
   switch (status) {
-    case 'pending':
+    case 'unpaid':
       return { unpaid: 'true' };
-    case 'processing':
+    case 'unfulfilled':
       return { unfulfilled: 'true' };
-    case 'shipped':
-      return { open: 'true' };
-    case 'delivered':
-      return { closed: 'true' };
+    case 'open':
+      return { open: 'true' }; // Paid but not fulfilled
+    case 'closed':
+      return { closed: 'true' }; // Paid and fulfilled
     case 'all':
     default:
-      // Load all orders by setting all status filters to true
-      return {
-        unfulfilled: 'true',
-        unpaid: 'true',
-        open: 'true',
-        closed: 'true'
-      };
+      return {};
   }
 };
 
-// Transform API order to frontend format
 const transformOrderData = (apiOrder) => {
-  // Determine the status based on payment and fulfillment status
-  let status = 'pending';
-  if (apiOrder.payment_status === 'paid') {
-    if (apiOrder.fulfillment_status === 'unfulfilled') {
-      status = 'processing';
-    } else if (apiOrder.fulfillment_status === 'fulfilled') {
-      status = apiOrder.delivered_at ? 'delivered' : 'shipped';
-    }
-  }
-  if (apiOrder.cancelled_at) {
-    status = 'cancelled';
-  }
+  if (!apiOrder) return null;
 
   return {
     id: apiOrder.id,
     orderNumber: apiOrder.order_number,
-    status: status,
-    fulfillmentStatus: apiOrder.fulfillment_status,
-    paymentStatus: apiOrder.payment_status,
-    total: apiOrder.total_amount,
-    subtotal: apiOrder.total_amount - (apiOrder.delivery_price || 0),
-    shipping: apiOrder.delivery_price || 0,
-    tax: 0,
+
+    // Triple Status
+    paymentStatus: apiOrder.payment_status || 'unpaid',
+    orderStatus: apiOrder.order_status || 'pending',
+    fulfillmentStatus: apiOrder.fulfillment_status || 'unfulfilled',
+
     orderDate: apiOrder.created_at,
-    trackingNumber: apiOrder.tracking_number,
     paidAt: apiOrder.paid_at,
-    cancelledAt: apiOrder.cancelled_at,
-    deliveredAt: apiOrder.delivered_at,
 
-    // Customer data transformation
+    // Financials
+    totalAmount: parseFloat(apiOrder.total_amount || 0),
+    shippingAmount: parseFloat(apiOrder.shipping_amount || 0),
+    sellerEarnings: parseFloat(apiOrder.total_seller_earnings || 0),
+    commission: parseFloat(apiOrder.total_commission || 0),
+
+    // Customer Info
     customer: {
-      name: apiOrder.customer_fullname,
-      phone: apiOrder.customer_phone,
-      email: '', // API doesn't provide email
-    },
-
-    // Shipping address
-    shippingAddress: {
-      street: apiOrder.customer_address,
-      street2: apiOrder.customer_address_2,
+      name: apiOrder.customer_fullname || 'Guest Customer',
+      phone: apiOrder.customer_phone || 'N/A',
+      address: apiOrder.customer_address,
       city: apiOrder.customer_city,
       state: apiOrder.customer_state,
-      zipCode: apiOrder.customer_postal_code,
       country: apiOrder.customer_country,
-      isDefault: apiOrder.customer_default_delivery_address
     },
 
-    // Items transformation
-    items: apiOrder.items?.map(item => ({
+    // Shipping Info
+    trackingNumber: apiOrder.tracking_number,
+    courierName: apiOrder.courier_name,
+
+    // Items
+    items: Array.isArray(apiOrder.items) ? apiOrder.items.map(item => ({
       id: item.id,
       name: item.name,
-      price: item.unit_price,
       quantity: item.quantity,
-      total: item.total_price,
-      variantId: item.variant_id,
-      sellerId: item.seller_id,
-      thumbnail: item.thumbnail,
-      variantAttributes: item.variant_attributes || []
-    })) || [],
-
-    // Payment method (default to Card for paid orders)
-    paymentMethod: apiOrder.payment_status === 'paid' ? 'Card' : 'Pending',
-
-    notes: '',
-    read: apiOrder.read,
-    discountCode: apiOrder.discount_code
+      price: parseFloat(item.unit_price || 0),
+      total: parseFloat(item.total_price || 0),
+      image: item.thumbnail,
+      variant: item.variant_attributes
+    })) : []
   };
-};
-
-// Calculate order statistics from orders array
-const calculateOrderStats = (orders) => {
-  const stats = {
-    total: orders.length,
-    pending: 0,
-    processing: 0,
-    shipped: 0,
-    delivered: 0,
-    cancelled: 0,
-    totalRevenue: 0
-  };
-
-  orders.forEach(order => {
-    stats[order.status] = (stats[order.status] || 0) + 1;
-    if (order.paymentStatus === 'paid') {
-      stats.totalRevenue += order.total;
-    }
-  });
-
-  return stats;
 };
 
 export const orderService = {
-  // Get all orders with pagination and filters
-  async getAllOrders(filters = {}) {
+  async getOrders(params = {}) {
     try {
       const token = getAuthToken();
-      if (!token) {
-        throw new Error('Authentication token not found');
-      }
+      if (!token) throw new Error('Authentication token not found');
 
       const queryParams = new URLSearchParams();
 
-      // Always include page parameter
-      queryParams.append('page', filters.page || '1');
+      // Apply Tab Filter
+      if (params.status && params.status !== 'all') {
+        const statusFilters = mapStatusToApiFilters(params.status);
+        Object.entries(statusFilters).forEach(([key, value]) => {
+          queryParams.append(key, value);
+        });
+      }
 
-      const response = await fetch(
-        `${API_BASE_URL}/seller/orders/all`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+      // Apply Pagination
+      if (params.page) {
+        queryParams.append('page', params.page.toString());
+      }
+
+      const response = await fetch(`${API_BASE_URL}/seller/orders?${queryParams.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
         }
-      );
+      });
 
       if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error('Authentication failed');
-        }
-        if (response.status === 404) {
-          throw new Error('No seller found for authenticated user');
-        }
+        if (response.status === 401) throw new Error('Unauthorized');
         throw new Error(`Failed to fetch orders: ${response.status}`);
       }
 
-      const data = await response.json();
-
-      // Transform API data to match frontend format
-      const transformedOrders = data.data.map(transformOrderData);
-      const stats = calculateOrderStats(transformedOrders);
+      const jsonResponse = await response.json();
 
       return {
-        orders: transformedOrders,
-        stats: stats,
-        pagination: data.meta,
-        links: data.links
+        data: jsonResponse.data.map(transformOrderData),
+        meta: jsonResponse.meta
       };
+
     } catch (error) {
       console.error('Error fetching orders:', error);
       throw error;
     }
   },
 
-  async getOrders(filters = {}) {
+  async getOrderDetails(orderId) {
     try {
       const token = getAuthToken();
-      if (!token) {
-        throw new Error('Authentication token not found');
-      }
+      if (!token) throw new Error('Authentication token not found');
 
-      const queryParams = new URLSearchParams();
-
-      // Add status filters based on API parameters
-      // const statusFilters = mapStatusToApiFilters(filters.status || 'all');
-      // Object.entries(statusFilters).forEach(([key, value]) => {
-      //   queryParams.append(key, value);
-      // });
-
-      // // Add other filters
-      // if (filters.search) {
-      //   queryParams.append('search', filters.search);
-      // }
-      // if (filters.dateFrom) {
-      //   queryParams.append('date_from', filters.dateFrom);
-      // }
-      // if (filters.dateTo) {
-      //   queryParams.append('date_to', filters.dateTo);
-      // }
-      // if (filters.paymentMethod) {
-      //   queryParams.append('payment_method', filters.paymentMethod);
-      // }
-      // if (filters.minAmount) {
-      //   queryParams.append('min_amount', filters.minAmount);
-      // }
-      // if (filters.maxAmount) {
-      //   queryParams.append('max_amount', filters.maxAmount);
-      // }
-
-      // Always include page parameter
-      queryParams.append('page', filters.page || '1');
-
-      const response = await fetch(
-        `${API_BASE_URL}/seller/orders`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+      const response = await fetch(`${API_BASE_URL}/seller/orders/${orderId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
         }
-      );
+      });
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error('Authentication failed');
-        }
-        if (response.status === 404) {
-          throw new Error('No seller found for authenticated user');
-        }
-        throw new Error(`Failed to fetch orders: ${response.status}`);
-      }
+      if (!response.ok) throw new Error('Failed to fetch order details');
 
-      const data = await response.json();
+      const jsonResponse = await response.json();
+      return transformOrderData(jsonResponse.data);
 
-      // Transform API data to match frontend format
-      const transformedOrders = data.data.map(transformOrderData);
-      const stats = calculateOrderStats(transformedOrders);
-
-      return {
-        orders: transformedOrders,
-        stats: stats,
-        pagination: data.meta,
-        links: data.links
-      };
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      console.error('Error fetching order details:', error);
       throw error;
     }
   },
 
-  // Get single order details
-  async getOrder(orderId) {
+  async updateOrderStatus(orderId, data) {
     try {
       const token = getAuthToken();
-      if (!token) {
-        throw new Error('Authentication token not found');
-      }
+      const response = await fetch(`${API_BASE_URL}/seller/orders/${orderId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
 
-      const response = await fetch(
-        `${API_BASE_URL}/seller/orders/${orderId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Order not found');
-        }
-        throw new Error(`Failed to fetch order: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return transformOrderData(data.data);
+      if (!response.ok) throw new Error('Failed to update status');
+      return await response.json();
     } catch (error) {
-      console.error('Error fetching order:', error);
-      throw error;
-    }
-  },
-
-  // Update order status
-  async updateOrderStatus(orderId, status) {
-    try {
-      const token = getAuthToken();
-      if (!token) {
-        throw new Error('Authentication token not found');
-      }
-
-      const response = await fetch(
-        `${API_BASE_URL}/seller/orders/${orderId}/status`,
-        {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ status }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to update order status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error updating order status:', error);
-      throw error;
-    }
-  },
-
-  // Get order statistics (calculated from orders)
-  async getOrderStats(filters = {}) {
-    try {
-      // Get orders and calculate stats
-      const { stats } = await this.getOrders(filters);
-      return stats;
-    } catch (error) {
-      console.error('Error fetching order stats:', error);
       throw error;
     }
   }

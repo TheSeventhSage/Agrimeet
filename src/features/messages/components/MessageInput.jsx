@@ -33,7 +33,7 @@ const MessageInput = ({ onSendMessage, onTyping }) => {
     return (
         <div className="p-4 border-t border-gray-200 bg-white">
             <form onSubmit={handleSendMessage} className="flex items-end gap-3">
-                <button
+                {/* <button
                     type="button"
                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
@@ -44,7 +44,7 @@ const MessageInput = ({ onSendMessage, onTyping }) => {
                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                     <ImageIcon className="w-5 h-5 text-gray-600" />
-                </button>
+                </button> */}
                 <div className="flex-1 relative">
                     <Textarea
                         value={messageText}
@@ -59,12 +59,12 @@ const MessageInput = ({ onSendMessage, onTyping }) => {
                             }
                         }}
                     />
-                    <button
+                    {/* <button
                         type="button"
                         className="absolute right-3 bottom-2.5 p-1 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                         <Smile className="w-5 h-5 text-gray-600" />
-                    </button>
+                    </button> */}
                 </div>
                 <button
                     type="submit"

@@ -12,7 +12,7 @@ import Input from '../../../shared/components/Input';
 import AvatarUpload from '../../../shared/components/AvatarUpload';
 import Button from '../../../shared/components/Button';
 import { showSuccess, showError } from '../../../shared/utils/alert';
-import { storageManager } from '../../../pages/utils/storageManager';
+import { storageManager } from '../../../shared/utils/storageManager';
 import { updateUserProfile } from '../../../pages/api/profile.api';
 
 const Settings = () => {

@@ -15,7 +15,7 @@ import {
     MessageSquare,
 } from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import { storageManager } from '../../../pages/utils/storageManager';
+import { storageManager } from '../../../shared/utils/storageManager';
 import Button from '../../../shared/components/Button'; // Assuming you have a Button
 
 // Helper to format dates
@@ -110,7 +110,7 @@ const ViewProfile = () => {
             status: kycStatus,
             avatar: user.profile_photo,
             initials: getInitials(user.first_name, user.last_name),
-            bio: seller?.business_bio || seller?.business_type?.description ||  'No business biography provided.',
+            bio: seller?.business_bio || seller?.business_type?.description || 'No business biography provided.',
         }));
     }, []);
 

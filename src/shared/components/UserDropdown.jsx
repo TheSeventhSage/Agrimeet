@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User, ChevronDown, Settings, LogOut, UserCircle, HelpCircle, Shield } from 'lucide-react';
-import { useAuth } from '../../pages/contexts/AuthContext';
-import { storageManager } from '../../pages/utils/storageManager';
+import { useAuth } from '../contexts/AuthContext';
+import { storageManager } from '../utils/storageManager';
 
 const UserDropdown = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -54,7 +54,7 @@ const UserDropdown = () => {
             {/* Dropdown Menu */}
             {isOpen && (
                 <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
-                    
+
                     {(!user?.data?.roles?.includes('admin') && !user?.roles?.includes('admin')) && (
                         <div>
                             {/* User Info Header */}
@@ -99,7 +99,7 @@ const UserDropdown = () => {
                                 </button>
                             </div>
                         </div>
-                     )}
+                    )}
                     {/* Logout */}
                     <div className="border-t border-gray-200 py-2">
                         <button

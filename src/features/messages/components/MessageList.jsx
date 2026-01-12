@@ -1,16 +1,26 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import { Check, CheckCheck } from 'lucide-react';
 
 const MessageList = ({ messages, currentUserId }) => {
     const messagesEndRef = useRef(null);
 
+    // Sort messages: Oldest at the top (index 0), Newest at the bottom
+    // We use useMemo to prevent unnecessary sorting on every render
+    const sortedMessages = useMemo(() => {
+        if (!messages) return [];
+        return [...messages].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    }, [messages]);
+
+    console.log(messages)
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
+    // Scroll to bottom whenever the sorted messages change (e.g., new message sent/received)
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    }, [sortedMessages]);
 
     const formatTime = (timestamp) => {
         const date = new Date(timestamp);
@@ -24,12 +34,14 @@ const MessageList = ({ messages, currentUserId }) => {
     return (
         <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
             <div className="space-y-4">
-                {messages.length === 0 ? (
+                {sortedMessages.length === 0 ? (
                     <div className="text-center text-gray-500 py-8">
                         <p>No messages yet. Start the conversation!</p>
                     </div>
                 ) : (
-                    messages.map((message) => {
+                    sortedMessages.map((message) => {
+                        // Strict check: Compare message sender_id with the current logged-in user's ID
+                        // This accurately determines if the message is from "yourself" (the seller/vendor in this context)
                         const isOwnMessage = message.sender_id === currentUserId;
 
                         return (
@@ -39,8 +51,8 @@ const MessageList = ({ messages, currentUserId }) => {
                             >
                                 <div
                                     className={`max-w-md ${isOwnMessage
-                                            ? 'bg-brand-500 text-white'
-                                            : 'bg-white text-gray-900 border border-gray-200'
+                                        ? 'bg-green-600 text-white' // User's own messages: Green background
+                                        : 'bg-white text-gray-900 border border-gray-200' // Other party's messages: White background
                                         } rounded-2xl px-4 py-2.5 shadow-sm`}
                                 >
                                     <p className="text-sm">{message.message}</p>
@@ -64,6 +76,7 @@ const MessageList = ({ messages, currentUserId }) => {
                         );
                     })
                 )}
+                {/* Invisible element to act as the scroll anchor */}
                 <div ref={messagesEndRef} />
             </div>
         </div>

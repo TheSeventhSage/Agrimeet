@@ -1,51 +1,106 @@
-// components/PayoutHistory.jsx
-import { Download } from 'lucide-react';
-import Button from '../../../shared/components/Button';
+import { Hash, Calendar, Package, Percent } from 'lucide-react';
 
-const PayoutHistory = ({ history }) => {
+const PayoutHistory = ({ history = [] }) => {
     const statusConfig = {
-        completed: { color: 'text-green-800 bg-green-100', label: 'Completed' },
-        processing: { color: 'text-yellow-800 bg-yellow-100', label: 'Processing' },
-        failed: { color: 'text-red-800 bg-red-100', label: 'Failed' }
+        paid: { color: 'text-green-800 bg-green-100', label: 'Paid' },
+        pending: { color: 'text-yellow-800 bg-yellow-100', label: 'Pending' },
+        failed: { color: 'text-red-800 bg-red-100', label: 'Failed' },
+        cancelled: { color: 'text-gray-800 bg-gray-100', label: 'Cancelled' }
+    };
+
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Payout History</h3>
-                <Button variant="outline" size="sm">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export CSV
-                </Button>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col h-full">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Hash className="w-5 h-5 text-gray-500" />
+                    <h3 className="text-lg font-semibold text-gray-900">Earning History</h3>
+                </div>
             </div>
 
             <div className="overflow-x-auto">
                 <table className="w-full">
-                    <thead>
-                        <tr className="border-b border-gray-200">
-                            <th className="text-left py-3 text-sm font-medium text-gray-700">Date</th>
-                            <th className="text-left py-3 text-sm font-medium text-gray-700">Amount</th>
-                            <th className="text-left py-3 text-sm font-medium text-gray-700">Bank Account</th>
-                            <th className="text-left py-3 text-sm font-medium text-gray-700">Status</th>
-                            <th className="text-left py-3 text-sm font-medium text-gray-700">Reference</th>
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                            <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order Details</th>
+                            <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Product Value</th>
+                            <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
+                            <th className="text-right px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Your Earnings</th>
+                            <th className="text-center px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {history.map((item) => (
-                            <tr key={item.id} className="border-b border-gray-200">
-                                <td className="py-4 text-sm text-gray-900">{item.date}</td>
-                                <td className="py-4 text-sm font-medium text-gray-900">
-                                    ₦{item.amount.toLocaleString()}
+                    <tbody className="divide-y divide-gray-200">
+                        {history.length === 0 ? (
+                            <tr>
+                                <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                                    No transaction history found
                                 </td>
-                                <td className="py-4 text-sm text-gray-600">{item.bankAccount}</td>
-                                <td className="py-4">
-                                    <span className={`px-2 py-1 text-xs rounded-full ${statusConfig[item.status]?.color}`}>
-                                        {statusConfig[item.status]?.label || item.status}
-                                    </span>
-                                </td>
-                                <td className="py-4 text-sm text-gray-600">{item.reference}</td>
                             </tr>
-                        ))}
+                        ) : (
+                            history.map((item) => (
+                                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                                    {/* Date */}
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                            <Calendar className="w-4 h-4 text-gray-400" />
+                                            {formatDate(item.date)}
+                                        </div>
+                                    </td>
+
+                                    {/* Order Details */}
+                                    <td className="px-6 py-4">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium text-gray-900">{item.order_number}</span>
+                                            <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
+                                                <Package className="w-3 h-3" />
+                                                <span className="truncate max-w-[150px]">{item.product_name}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    {/* Product Total */}
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        ₦{parseInt(item.product_total).toLocaleString()}
+                                    </td>
+
+                                    {/* Commission */}
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm text-gray-600">₦{parseInt(item.commission_amount).toLocaleString()}</span>
+                                            <div className="flex items-center gap-1 text-xs text-gray-400">
+                                                <Percent className="w-3 h-3" />
+                                                {item.commission_rate}% rate
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    {/* Earnings */}
+                                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                                        <span className="text-sm font-bold text-green-600">
+                                            +₦{parseInt(item.your_earnings).toLocaleString()}
+                                        </span>
+                                    </td>
+
+                                    {/* Status */}
+                                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                                            ${statusConfig[item.payout_status]?.color || 'bg-gray-100 text-gray-800'}`}>
+                                            {statusConfig[item.payout_status]?.label || item.payout_status}
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>

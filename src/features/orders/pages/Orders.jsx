@@ -3,20 +3,16 @@ import { useState, useEffect } from 'react';
 import OrderTabs from '../components/OrderTabs';
 import OrdersList from '../components/OrdersList';
 import OrderDetails from '../components/OrderDetails';
-import OrderAnalytics from '../components/OrderAnalytics';
-import InvoiceModal from '../components/InvoiceModal';
 import { orderService } from '../api/orderService';
-import DashboardLayout from '../../../layouts/DashboardLayout'; // Import your dashboard layout
+import DashboardLayout from '../../../layouts/DashboardLayout';
 
 const OrdersPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [orderStats, setOrderStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [filters, setFilters] = useState({});
-  const [showInvoice, setShowInvoice] = useState(false);
-  const [invoiceOrder, setInvoiceOrder] = useState(null);
+
+  // Pagination State
   const [pagination, setPagination] = useState({
     current_page: 1,
     last_page: 1,
@@ -24,151 +20,95 @@ const OrdersPage = () => {
     total: 0
   });
 
-  // Fetch orders when tab, filters, or page changes
+  // Fetch orders when tab or page changes
   useEffect(() => {
-    fetchOrders();
-  }, [activeTab, filters, pagination.current_page]);
+    fetchOrders(pagination.current_page);
+  }, [activeTab, pagination.current_page]);
 
-  const fetchOrders = async () => {
+  // Reset page to 1 when tab changes
+  useEffect(() => {
+    setPagination(prev => ({ ...prev, current_page: 1 }));
+  }, [activeTab]);
+
+  const fetchOrders = async (page) => {
     try {
       setIsLoading(true);
-      const apiFilters = {
-        ...filters,
-        status: activeTab === 'all' ? '' : activeTab,
-        page: pagination.current_page
-      };
+      const response = await orderService.getOrders({
+        status: activeTab,
+        page: page
+      });
 
-      const response = await orderService.getOrders(apiFilters);
-      setOrders(response.orders);
-      setOrderStats(response.stats);
-      setPagination(response.pagination);
+      setOrders(response.data);
+
+      if (response.meta) {
+        setPagination({
+          current_page: response.meta.current_page,
+          last_page: response.meta.last_page,
+          per_page: response.meta.per_page,
+          total: response.meta.total
+        });
+      }
     } catch (error) {
-      console.error('Error fetching orders:', error);
-      // You might want to show an error message to the user
+      console.error('Failed to load orders', error);
+      setOrders([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.last_page) {
+      setPagination(prev => ({ ...prev, current_page: newPage }));
     }
   };
 
   const handleViewDetails = async (orderId) => {
     try {
       setIsLoading(true);
-      const order = await orderService.getOrder(orderId);
-      setSelectedOrder(order);
+      const details = await orderService.getOrderDetails(orderId);
+      setSelectedOrder(details);
     } catch (error) {
-      console.error('Error fetching order details:', error);
+      console.error('Error fetching details', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleUpdateStatus = async (orderId, status) => {
-    try {
-      await orderService.updateOrderStatus(orderId, status);
-
-      // Update local state
-      setOrders(prevOrders =>
-        prevOrders.map(order =>
-          order.id === orderId ? { ...order, status } : order
-        )
-      );
-
-      if (selectedOrder && selectedOrder.id === orderId) {
-        setSelectedOrder(prev => ({ ...prev, status }));
-      }
-
-      // Refetch orders to get updated counts
-      fetchOrders();
-    } catch (error) {
-      console.error('Error updating order status:', error);
-    }
-  };
-
-  const handlePrintInvoice = async (orderId) => {
-    try {
-      const order = await orderService.getOrder(orderId);
-      setInvoiceOrder(order);
-      setShowInvoice(true);
-    } catch (error) {
-      console.error('Error fetching order for invoice:', error);
-    }
-  };
-
-  const handleApplyFilters = (newFilters) => {
-    setFilters(newFilters);
-    // Reset to first page when filters change
-    setPagination(prev => ({ ...prev, current_page: 1 }));
-  };
-
-  const handlePageChange = (page) => {
-    setPagination(prev => ({ ...prev, current_page: page }));
-  };
-
-  const handleExportOrders = () => {
-    // Implement export functionality
-    console.log('Export orders');
-  };
-
-  const handleBackToList = () => {
-    setSelectedOrder(null);
-  };
-
-  if (selectedOrder) {
-    return (
-      <DashboardLayout> {/* Wrap in dashboard layout */}
-        <div className="p-6">
-          <OrderDetails
-            order={selectedOrder}
-            onBack={handleBackToList}
-            onUpdateStatus={handleUpdateStatus}
-            onPrintInvoice={handlePrintInvoice}
-            isLoading={isLoading}
-          />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
   return (
-    <DashboardLayout> {/* Wrap in dashboard layout */}
-      <div className="-p-4 md:p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Orders Management</h1>
-          <p className="text-gray-600">Manage and track your customer orders</p>
-        </div>
+    <DashboardLayout>
+      <div className="p-4 md:p-6 space-y-6">
 
-        <OrderTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          orderStats={orderStats || {}}
-        />
-
-        {activeTab === 'analytics' ? (
-          <OrderAnalytics
-            orderStats={orderStats}
-            isLoading={!orderStats}
-          />
-        ) : (
-          <OrdersList
-            orders={orders}
-            isLoading={isLoading}
-            onViewDetails={handleViewDetails}
-            onUpdateStatus={handleUpdateStatus}
-            onPrintInvoice={handlePrintInvoice}
-            onExportOrders={handleExportOrders}
-            onApplyFilters={handleApplyFilters}
-            onPageChange={handlePageChange}
-            pagination={pagination}
-            currentFilters={filters}
-          />
+        {!selectedOrder && (
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Orders Management</h1>
+              <p className="text-gray-500 mt-1">Manage and track your customer orders</p>
+            </div>
+          </div>
         )}
 
-        <InvoiceModal
-          isOpen={showInvoice}
-          onClose={() => setShowInvoice(false)}
-          order={invoiceOrder}
-          isLoading={!invoiceOrder}
-        />
+        {selectedOrder ? (
+          <OrderDetails
+            order={selectedOrder}
+            onBack={() => setSelectedOrder(null)}
+            onUpdateStatus={() => fetchOrders(pagination.current_page)}
+          />
+        ) : (
+          <>
+            <OrderTabs
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
+
+            <OrdersList
+              orders={orders}
+              isLoading={isLoading}
+              onViewDetails={handleViewDetails}
+              onPageChange={handlePageChange}
+              pagination={pagination}
+            />
+          </>
+        )}
       </div>
     </DashboardLayout>
   );

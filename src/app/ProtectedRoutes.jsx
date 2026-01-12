@@ -1,7 +1,7 @@
 // src/pages/ProtectedRoutes.jsx
 
 import { Navigate, useLocation } from 'react-router-dom'; // <-- 1. IMPORT useLocation
-import { storageManager } from '../pages/utils/storageManager';
+import { storageManager } from '../shared/utils/storageManager';
 import { showError, showWarning } from '../shared/utils/alert';
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {

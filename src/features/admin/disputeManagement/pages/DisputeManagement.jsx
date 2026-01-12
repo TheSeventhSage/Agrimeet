@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import DashboardLayout from '../../../layouts/DashboardLayout';
+import DashboardLayout from '../../../../layouts/DashboardLayout';
 import {
     AlertTriangle,
     Search,
@@ -17,11 +17,13 @@ import {
     X,
     Send
 } from 'lucide-react';
-import adminService from '../api/adminService';
-import { showSuccess, showError } from '../../../shared/utils/alert';
+// Changed import to the new service file
+import adminDisputeService from '../api/adminDisputeService';
+import { showSuccess, showError } from '../../../../shared/utils/alert';
 
 const DisputeManagement = () => {
     const [disputes, setDisputes] = useState([]);
+    // Stats will default to 0 as API endpoint was not provided for stats
     const [stats, setStats] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [selectedDispute, setSelectedDispute] = useState(null);
@@ -29,7 +31,7 @@ const DisputeManagement = () => {
     const [newNote, setNewNote] = useState('');
     const [resolution, setResolution] = useState('');
     const [refundAmount, setRefundAmount] = useState('');
-    
+
     const [filters, setFilters] = useState({
         search: '',
         status: 'open',
@@ -45,18 +47,24 @@ const DisputeManagement = () => {
 
     useEffect(() => {
         loadDisputes();
-        loadStats();
+        // loadStats(); // Commented out as no API endpoint was provided for stats
     }, [filters]);
 
     const loadDisputes = async () => {
         try {
             setIsLoading(true);
-            const response = await adminService.getDisputes(filters);
-            setDisputes(response.data.data || response.data);
+            const response = await adminDisputeService.getAllDisputes(filters);
+
+            // Handle response structure based on common patterns or simple array
+            const data = response.data.data || response.data || [];
+
+            setDisputes(data);
+
+            // Set pagination if available, otherwise default (API definition returned simple array)
             setPagination(response.data.meta || response.data.pagination || {
                 current_page: 1,
                 total_pages: 1,
-                total: response.data.length || 0
+                total: data.length || 0
             });
         } catch (error) {
             console.error('Failed to load disputes:', error);
@@ -66,6 +74,8 @@ const DisputeManagement = () => {
         }
     };
 
+    /* // Stats endpoint not provided in Swagger definition. 
+    // Commenting out to prevent 404s, but keeping structure if needed later.
     const loadStats = async () => {
         try {
             const response = await adminService.getDisputeStats();
@@ -74,10 +84,11 @@ const DisputeManagement = () => {
             console.error('Failed to load stats:', error);
         }
     };
+    */
 
     const handleViewDispute = async (dispute) => {
         try {
-            const response = await adminService.getDisputeById(dispute.id);
+            const response = await adminDisputeService.getDisputeById(dispute.id);
             setSelectedDispute(response.data);
             setShowDisputeModal(true);
         } catch (error) {
@@ -90,16 +101,20 @@ const DisputeManagement = () => {
             showError('Please enter a note');
             return;
         }
-        try {
+        // NOTE: The provided API definition does not have an endpoint for adding notes.
+        // This is a placeholder to preserve UI functionality without crashing.
+        showError('Add Note API endpoint not available');
+
+        /* try {
             await adminService.addDisputeNote(selectedDispute.id, newNote);
             showSuccess('Note added successfully');
             setNewNote('');
-            // Reload dispute details
-            const response = await adminService.getDisputeById(selectedDispute.id);
+            const response = await adminDisputeService.getDisputeById(selectedDispute.id);
             setSelectedDispute(response.data);
         } catch (error) {
             showError('Failed to add note');
         }
+        */
     };
 
     const handleResolveDispute = async () => {
@@ -108,26 +123,47 @@ const DisputeManagement = () => {
             return;
         }
         try {
-            await adminService.resolveDispute(selectedDispute.id, resolution, refundAmount);
-            showSuccess('Dispute resolved successfully');
+            // Using the 'settle' endpoint with status: 'settled'
+            await adminDisputeService.settleDispute(selectedDispute.id, {
+                resolution: resolution,
+                status: 'settled'
+            });
+
+            showSuccess('Dispute settled successfully');
             setShowDisputeModal(false);
             loadDisputes();
-            loadStats();
+            // loadStats(); 
         } catch (error) {
+            console.error(error);
             showError('Failed to resolve dispute');
         }
     };
 
+    // Updated to handle Reject logic using the same endpoint
     const handleUpdateStatus = async (status) => {
-        try {
-            await adminService.updateDisputeStatus(selectedDispute.id, status, resolution);
-            showSuccess('Status updated successfully');
-            const response = await adminService.getDisputeById(selectedDispute.id);
-            setSelectedDispute(response.data);
-            loadDisputes();
-            loadStats();
-        } catch (error) {
-            showError('Failed to update status');
+        // The API only supports "settled" or "rejected" via the settle endpoint
+        if (status === 'rejected') {
+            if (!resolution.trim()) {
+                showError('Please provide a reason for rejection');
+                return;
+            }
+            try {
+                await adminDisputeService.settleDispute(selectedDispute.id, {
+                    resolution: resolution,
+                    status: 'rejected'
+                });
+                showSuccess('Dispute rejected successfully');
+                const response = await adminDisputeService.getDisputeById(selectedDispute.id);
+                setSelectedDispute(response.data);
+                loadDisputes();
+            } catch (error) {
+                showError('Failed to update status');
+            }
+        } else {
+            // For visual UI updates like 'in_progress', if backend doesn't support it,
+            // we might just show a message or need a different endpoint.
+            // Assuming for now we just show a message as the API is strictly 'settle/reject'.
+            showError('API only supports Settling or Rejecting disputes currently.');
         }
     };
 
@@ -136,12 +172,14 @@ const DisputeManagement = () => {
             open: { color: 'bg-blue-100 text-blue-800', icon: AlertCircle, label: 'Open' },
             in_progress: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'In Progress' },
             resolved: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Resolved' },
+            settled: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Settled' }, // Added for new API enum
+            rejected: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Rejected' }, // Added for new API enum
             closed: { color: 'bg-gray-100 text-gray-800', icon: XCircle, label: 'Closed' }
         };
-        
+
         const config = statusConfig[status] || statusConfig.open;
         const Icon = config.icon;
-        
+
         return (
             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
                 <Icon className="w-3 h-3" />
@@ -156,7 +194,7 @@ const DisputeManagement = () => {
             medium: 'bg-yellow-100 text-yellow-800',
             low: 'bg-green-100 text-green-800'
         };
-        
+
         return (
             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${priorityColors[priority] || priorityColors.medium}`}>
                 {priority?.charAt(0).toUpperCase() + priority?.slice(1) || 'Medium'}
@@ -244,8 +282,8 @@ const DisputeManagement = () => {
                                 <option value="all">All Status</option>
                                 <option value="open">Open</option>
                                 <option value="in_progress">In Progress</option>
-                                <option value="resolved">Resolved</option>
-                                <option value="closed">Closed</option>
+                                <option value="settled">Settled</option>
+                                <option value="rejected">Rejected</option>
                             </select>
                         </div>
 
@@ -472,51 +510,56 @@ const DisputeManagement = () => {
                             </div>
 
                             {/* Resolution */}
-                            {selectedDispute.status !== 'resolved' && selectedDispute.status !== 'closed' && (
-                                <div>
-                                    <h4 className="text-lg font-semibold text-gray-900 mb-4">Resolve Dispute</h4>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Resolution Details
-                                            </label>
-                                            <textarea
-                                                value={resolution}
-                                                onChange={(e) => setResolution(e.target.value)}
-                                                rows={4}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
-                                                placeholder="Enter resolution details..."
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Refund Amount (Optional)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={refundAmount}
-                                                onChange={(e) => setRefundAmount(e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
-                                                placeholder="0.00"
-                                            />
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <button
-                                                onClick={() => handleUpdateStatus('in_progress')}
-                                                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                                            >
-                                                Mark In Progress
-                                            </button>
-                                            <button
-                                                onClick={handleResolveDispute}
-                                                className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                                            >
-                                                Resolve Dispute
-                                            </button>
+                            {/* Check against new 'settled' and 'rejected' statuses as well */}
+                            {selectedDispute.status !== 'resolved' &&
+                                selectedDispute.status !== 'closed' &&
+                                selectedDispute.status !== 'settled' &&
+                                selectedDispute.status !== 'rejected' && (
+                                    <div>
+                                        <h4 className="text-lg font-semibold text-gray-900 mb-4">Resolve Dispute</h4>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Resolution Details
+                                                </label>
+                                                <textarea
+                                                    value={resolution}
+                                                    onChange={(e) => setResolution(e.target.value)}
+                                                    rows={4}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
+                                                    placeholder="Enter resolution details..."
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Refund Amount (Optional)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={refundAmount}
+                                                    onChange={(e) => setRefundAmount(e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                {/* Changed 'Mark In Progress' to 'Reject' as API only supports settle/reject */}
+                                                <button
+                                                    onClick={() => handleUpdateStatus('rejected')}
+                                                    className="flex-1 px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
+                                                >
+                                                    Reject Dispute
+                                                </button>
+                                                <button
+                                                    onClick={handleResolveDispute}
+                                                    className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                                                >
+                                                    Settle Dispute
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
                         </div>
                     </div>
                 </div>

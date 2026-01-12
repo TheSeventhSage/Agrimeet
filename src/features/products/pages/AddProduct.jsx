@@ -10,7 +10,7 @@ import { ConfirmationModal } from '../../../shared/components';
 import { Loading } from '../../../shared/components/Loader';
 import { showSuccess, showError } from '../../../shared/utils/alert';
 import { createProduct, getCategories, getUnits } from '../api/productsApi';
-import { storageManager } from '../../../pages/utils/storageManager';
+import { storageManager } from '../../../shared/utils/storageManager';
 import { useNavigate } from 'react-router-dom';
 const AddProduct = () => {
     const [formData, setFormData] = useState({

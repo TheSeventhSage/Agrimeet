@@ -1,10 +1,10 @@
 // contexts/AuthContext.jsx - Simplified
 import { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authApi } from '../api/auth';
-import { getKYCStatus } from '../api/kyc.api';
+import { authApi } from '../../pages/api/auth';
+import { getKYCStatus } from '../../pages/api/kyc.api';
 import { storageManager } from '../utils/storageManager';
-import { showSuccess, showError } from '../../shared/utils/alert';
+import { showSuccess, showError } from '../utils/alert';
 
 const AuthContext = createContext();
 

@@ -1,39 +1,32 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, X, Check, AlertCircle, Info, ShoppingCart, Package } from 'lucide-react';
+import { getSellerNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '../../features/messages/api/notifications.api';
+import { Link } from 'react-router-dom';
 
 const NotificationDropdown = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const [notifications, setNotifications] = useState([
-        {
-            id: 1,
-            type: 'order',
-            title: 'New Order Received',
-            message: 'You have received a new order #12345 for $150.00',
-            time: '2 minutes ago',
-            read: false,
-            icon: ShoppingCart
-        },
-        {
-            id: 2,
-            type: 'stock',
-            title: 'Low Stock Alert',
-            message: 'Product "Men Black T-shirt" is running low (5 items left)',
-            time: '1 hour ago',
-            read: false,
-            icon: Package
-        },
-        {
-            id: 3,
-            type: 'info',
-            title: 'System Update',
-            message: 'Your dashboard has been updated with new features',
-            time: '3 hours ago',
-            read: true,
-            icon: Info
-        }
-    ]);
-
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
     const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    const fetchNotifications = async () => {
+        try {
+            const response = await getSellerNotifications(1, 5);
+
+            if (response?.data?.success && response?.data?.data) {
+                setNotifications(response.data.data.notifications);
+                setUnreadCount(response.data.data.unread_count);
+            }
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        }
+    };
+
+    const recentNotifications = notifications.slice(0,5)
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -46,25 +39,44 @@ const NotificationDropdown = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const markAsRead = (id) => {
-        setNotifications(prev =>
-            prev.map(notification =>
-                notification.id === id
-                    ? { ...notification, read: true }
-                    : notification
-            )
-        );
+    const markAsRead = async (id) => {
+        try {
+            await markNotificationAsRead(id);
+
+            setNotifications(prev =>
+                prev.map(notification =>
+                    notification.id === id
+                        ? { ...notification, read_at: new Date().toISOString() }
+                        : notification
+                )
+            );
+
+            setUnreadCount(prev => Math.max(0, prev - 1));
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+        }
     };
 
-    const markAllAsRead = () => {
-        setNotifications(prev =>
-            prev.map(notification => ({ ...notification, read: true }))
-        );
+    const markAllAsRead = async () => {
+        try {
+            await markAllNotificationsAsRead();
+
+            setNotifications(prev =>
+                prev.map(notification => ({ ...notification, read_at: new Date().toISOString() }))
+            );
+            setUnreadCount(0);
+        } catch (error) {
+            console.error('Error marking all as read:', error);
+        }
     };
 
     const getNotificationIcon = (type) => {
-        const notification = notifications.find(n => n.type === type);
-        return notification ? notification.icon : AlertCircle;
+        const icons = {
+            order: ShoppingCart,
+            stock: Package,
+            info: Info
+        };
+        return icons[type] || AlertCircle;
     };
 
     const getNotificationColor = (type) => {
@@ -85,11 +97,13 @@ const NotificationDropdown = () => {
             >
                 <Bell className="w-5 h-5" />
 
-                {/* The new element for the pulsing effect */}
-                <span className="absolute top-[5px] right-[7px] flex justify-center h-[10px] w-[10px] z-0">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                </span>
+                {/* The new element for the pulsing effect - only show if unreadCount > 0 */}
+                {unreadCount > 0 && (
+                    <span className="absolute top-[5px] right-[7px] flex justify-center h-[10px] w-[10px] z-0">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    </span>
+                )}
             </button>
 
             {/* Dropdown Menu */}
@@ -116,19 +130,21 @@ const NotificationDropdown = () => {
 
                     {/* Notifications List */}
                     <div className="max-h-96 overflow-y-auto">
-                        {notifications.length === 0 ? (
+                        {recentNotifications.length === 0 ? (
                             <div className="p-4 text-center text-gray-500">
                                 No notifications
                             </div>
                         ) : (
                             <div className="divide-y divide-gray-100">
-                                {notifications.map((notification) => {
-                                    const IconComponent = notification.icon;
+                                    {recentNotifications.map((notification) => {
+                                    const IconComponent = getNotificationIcon(notification.type);
+                                    const isUnread = !notification.read_at;
+
                                     return (
                                         <div
                                             key={notification.id}
-                                            className={`p-4 hover:bg-gray-50 transition-colors ${!notification.read ? 'bg-blue-50' : ''
-                                                }`}
+                                            onClick={() => isUnread && markAsRead(notification.id)}
+                                            className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${isUnread ? 'bg-blue-50' : ''}`}
                                         >
                                             <div className="flex items-start gap-3">
                                                 <div className={`p-2 rounded-full ${getNotificationColor(notification.type)}`}>
@@ -138,18 +154,21 @@ const NotificationDropdown = () => {
                                                     <div className="flex items-start justify-between">
                                                         <div className="flex-1">
                                                             <h4 className="text-sm font-medium text-gray-900">
-                                                                {notification.title}
+                                                                {notification.data?.message || notification.title}
                                                             </h4>
                                                             <p className="text-sm text-gray-600 mt-1">
-                                                                {notification.message}
+                                                                Order #{notification.data?.order_number}
                                                             </p>
                                                             <p className="text-xs text-gray-500 mt-1">
-                                                                {notification.time}
+                                                                {new Date(notification.created_at).toLocaleString()}
                                                             </p>
                                                         </div>
-                                                        {!notification.read && (
+                                                        {isUnread && (
                                                             <button
-                                                                onClick={() => markAsRead(notification.id)}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    markAsRead(notification.id);
+                                                                }}
                                                                 className="ml-2 p-1 hover:bg-gray-200 rounded-sm"
                                                             >
                                                                 <Check className="w-3 h-3 text-gray-400" />
@@ -166,10 +185,10 @@ const NotificationDropdown = () => {
                     </div>
 
                     {/* Footer */}
-                    <div className="p-3 border-t border-gray-200">
-                        <button className="w-full text-sm text-blue-600 hover:text-blue-700 font-medium">
+                    <div className="p-3 text-center border-t border-gray-200">
+                        <Link to="/notifications" className="w-full  text-sm text-blue-600 hover:text-blue-700 font-medium">
                             View all notifications
-                        </button>
+                        </Link>
                     </div>
                 </div>
             )}

@@ -1,4 +1,4 @@
-import { storageManager } from '../../../../pages/utils/storageManager'; // Adjust this path
+import { storageManager } from '../../../../shared/utils/storageManager'; // Adjust this path
 
 // Use the same BASE_URL as your existing admin.api.js
 const BASE_URL = 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
@@ -285,3 +285,45 @@ export const couponsApi = {
         return handleResponse(res);
     },
 };
+
+export const productAttributeApi = {
+
+    async list(params) {
+        const res = await fetch(`${BASE_URL}/seller/product-attributes`, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+        return handleResponse(res);
+    },
+    async get(id) {
+        const res = await fetch(`${BASE_URL}/admin/product-attributes/${id}`, {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+        return handleResponse(res);
+    },
+    async create(data) {
+        const res = await fetch(`${BASE_URL}/admin/product-attributes`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data),
+        });
+        return handleResponse(res);
+    },
+    async update(id, data) {
+        const res = await fetch(`${BASE_URL}/admin/product-attributes/${id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data),
+        });
+        return handleResponse(res);
+    },
+    async delete(id) {
+        const res = await fetch(`${BASE_URL}/admin/product-attributes/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+        });
+        if (res.status === 204) return true;
+        return handleResponse(res);
+    }
+}

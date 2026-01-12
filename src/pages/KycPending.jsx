@@ -1,7 +1,7 @@
 import { CheckCircle } from 'lucide-react';
 import Button from '../shared/components/Button';
 import BackgroundArt from '../shared/components/BackgroundArt';
-import { performRedirect, ROUTES } from './utils/routingManager';
+import { performRedirect, ROUTES } from '../shared/utils/routingManager';
 
 export const KycPending = () => {
     return (
@@ -36,6 +36,6 @@ export const KycPending = () => {
             </div>
         </div>
 
-        
+
     )
 }

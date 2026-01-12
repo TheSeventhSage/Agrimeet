@@ -1,109 +1,52 @@
 // components/OrdersList.jsx
-import { useState } from 'react';
-import { Search, Filter, Download, Calendar, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import Button from '../../../shared/components/Button';
 import { LoadingSpinner } from '../../../shared/components/Loader';
-import OrderCard from './OrderCard';
+import { STATUS_CONFIG } from '../api/orderService';
 
 const OrdersList = ({
     orders,
     isLoading,
     onViewDetails,
-    onUpdateStatus,
-    onPrintInvoice,
-    onExportOrders,
-    onApplyFilters,
     onPageChange,
-    pagination,
-    currentFilters = {}
+    pagination
 }) => {
-    const [searchTerm, setSearchTerm] = useState(currentFilters.search || '');
-    const [showFilters, setShowFilters] = useState(false);
-    const [filters, setFilters] = useState({
-        dateFrom: currentFilters.dateFrom || '',
-        dateTo: currentFilters.dateTo || '',
-        paymentMethod: currentFilters.paymentMethod || '',
-        minAmount: currentFilters.minAmount || '',
-        maxAmount: currentFilters.maxAmount || ''
-    });
 
-    const handleSearchSubmit = (e) => {
-        e.preventDefault();
-        onApplyFilters({ ...currentFilters, search: searchTerm });
+    // Helper to render a status badge
+    const StatusBadge = ({ type, status }) => {
+        const config = STATUS_CONFIG[status] || { label: status, color: 'bg-gray-100 text-gray-800' };
+        return (
+            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize border ${config.color} mb-1 mr-1`}>
+                <span className="text-[10px] uppercase text-gray-400 mr-1 font-bold">{type}:</span>
+                {config.label}
+            </span>
+        );
     };
 
-    const handleApplyFilters = () => {
-        onApplyFilters({
-            ...currentFilters,
-            ...filters,
-            search: searchTerm
-        });
-        setShowFilters(false);
-    };
-
-    const handleClearFilters = () => {
-        setFilters({
-            dateFrom: '',
-            dateTo: '',
-            paymentMethod: '',
-            minAmount: '',
-            maxAmount: ''
-        });
-        setSearchTerm('');
-        onApplyFilters({ status: currentFilters.status });
-    };
-
-    const hasActiveFilters = Object.values({ ...filters, search: searchTerm }).some(value => value !== '');
-
-    // Pagination functions
-    const handlePreviousPage = () => {
-        if (pagination.current_page > 1) {
-            onPageChange(pagination.current_page - 1);
-        }
-    };
-
-    const handleNextPage = () => {
-        if (pagination.current_page < pagination.last_page) {
-            onPageChange(pagination.current_page + 1);
-        }
-    };
-
-    const handlePageClick = (page) => {
-        onPageChange(page);
-    };
-
-    // Generate page numbers for pagination
+    // Pagination Logic for Page Numbers
     const getPageNumbers = () => {
         const pages = [];
-        const totalPages = pagination.last_page;
-        const currentPage = pagination.current_page;
+        const { current_page, last_page } = pagination;
 
-        if (totalPages <= 7) {
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-            }
-        } else {
-            if (currentPage <= 4) {
-                for (let i = 1; i <= 5; i++) {
-                    pages.push(i);
-                }
-                pages.push('...');
-                pages.push(totalPages);
-            } else if (currentPage >= totalPages - 3) {
-                pages.push(1);
-                pages.push('...');
-                for (let i = totalPages - 4; i <= totalPages; i++) {
-                    pages.push(i);
-                }
-            } else {
-                pages.push(1);
-                pages.push('...');
-                for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-                    pages.push(i);
-                }
-                pages.push('...');
-                pages.push(totalPages);
-            }
+        // Always show first page
+        pages.push(1);
+
+        if (current_page > 3) {
+            pages.push('...');
+        }
+
+        // Show pages around current
+        for (let i = Math.max(2, current_page - 1); i <= Math.min(last_page - 1, current_page + 1); i++) {
+            pages.push(i);
+        }
+
+        if (current_page < last_page - 2) {
+            pages.push('...');
+        }
+
+        // Always show last page if > 1
+        if (last_page > 1) {
+            pages.push(last_page);
         }
 
         return pages;
@@ -117,277 +60,117 @@ const OrdersList = ({
         );
     }
 
-    return (
-        <div className="space-y-6">
-            {/* Search and Filters Bar */}
-            <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-4">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-                    {/* Search */}
-                    <form onSubmit={handleSearchSubmit} className="flex-1 max-w-md">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                            <input
-                                type="text"
-                                placeholder="Search orders, customers..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                            />
-                        </div>
-                    </form>
+    if (orders.length === 0) {
+        return (
+            <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
+                <div className="mx-auto h-12 w-12 text-gray-400 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                    <Search className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900">No orders found</h3>
+                <p className="text-gray-500 mt-1">There are no orders in this category.</p>
+            </div>
+        );
+    }
 
-                    {/* Action Buttons */}
-                    <div className="flex items-center space-x-3">
-                        <div className="relative">
+    return (
+        <div className="space-y-4">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                        <thead className="bg-gray-50 text-gray-600 font-medium border-b border-gray-100">
+                            <tr>
+                                <th className="px-6 py-4">Order Ref</th>
+                                <th className="px-6 py-4">Date</th>
+                                <th className="px-6 py-4">Customer</th>
+                                <th className="px-6 py-4 w-1/3">Status Overview</th>
+                                <th className="px-6 py-4">Amount</th>
+                                <th className="px-6 py-4 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {orders.map((order) => (
+                                <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
+                                    <td className="px-6 py-4 font-medium text-gray-900">{order.orderNumber}</td>
+                                    <td className="px-6 py-4 text-gray-500">
+                                        {new Date(order.orderDate).toLocaleDateString()}
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-900">
+                                        <div className="font-medium">{order.customer?.name}</div>
+                                        <div className="text-xs text-gray-500">{order.customer?.phone}</div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex flex-wrap gap-1">
+                                            <StatusBadge type="Pay" status={order.paymentStatus} />
+                                            <StatusBadge type="Ord" status={order.orderStatus} />
+                                            <StatusBadge type="Ful" status={order.fulfillmentStatus} />
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 font-medium text-gray-900">
+                                        ₦{order.totalAmount?.toLocaleString()}
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => onViewDetails(order.id)}
+                                            className="text-brand-600 hover:text-brand-700"
+                                        >
+                                            <Eye className="w-4 h-4" />
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Numbered Pagination Footer */}
+                {pagination.last_page > 1 && (
+                    <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
+                        <div className="text-sm text-gray-500 hidden sm:block">
+                            Showing page <span className="font-medium">{pagination.current_page}</span> of <span className="font-medium">{pagination.last_page}</span>
+                        </div>
+                        <div className="flex items-center space-x-1 mx-auto sm:mx-0">
                             <Button
                                 variant="outline"
-                                onClick={() => setShowFilters(!showFilters)}
-                                className={`relative ${hasActiveFilters ? 'border-brand-500 text-brand-600' : ''}`}
+                                size="sm"
+                                onClick={() => onPageChange(pagination.current_page - 1)}
+                                disabled={pagination.current_page <= 1}
+                                className="px-2"
                             >
-                                <Filter className="w-4 h-4 mr-2" />
-                                Filters
-                                {hasActiveFilters && (
-                                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-brand-500 rounded-full"></span>
-                                )}
+                                <ChevronLeft className="w-4 h-4" />
                             </Button>
 
-                            {/* Filters Dropdown */}
-                            {showFilters && (
-                                <div className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-20 w-80">
-                                    <div className="p-4">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h3 className="font-semibold text-gray-900">Filter Orders</h3>
-                                            <button
-                                                onClick={() => setShowFilters(false)}
-                                                className="text-gray-400 hover:text-gray-600"
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </button>
-                                        </div>
+                            {getPageNumbers().map((page, index) => (
+                                page === '...' ? (
+                                    <span key={`dots-${index}`} className="px-2 text-gray-400">...</span>
+                                ) : (
+                                    <button
+                                        key={page}
+                                        onClick={() => onPageChange(page)}
+                                        className={`min-w-[32px] h-8 rounded-md text-sm font-medium transition-colors ${pagination.current_page === page
+                                            ? 'bg-brand-600 text-white'
+                                            : 'text-gray-600 hover:bg-gray-100'
+                                            }`}
+                                    >
+                                        {page}
+                                    </button>
+                                )
+                            ))}
 
-                                        <div className="space-y-4">
-                                            {/* Date Range */}
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        From Date
-                                                    </label>
-                                                    <input
-                                                        type="date"
-                                                        value={filters.dateFrom}
-                                                        onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value }))}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        To Date
-                                                    </label>
-                                                    <input
-                                                        type="date"
-                                                        value={filters.dateTo}
-                                                        onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value }))}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            {/* Payment Method */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Payment Method
-                                                </label>
-                                                <select
-                                                    value={filters.paymentMethod}
-                                                    onChange={(e) => setFilters(prev => ({ ...prev, paymentMethod: e.target.value }))}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
-                                                >
-                                                    <option value="">All Methods</option>
-                                                    <option value="Card">Card</option>
-                                                    <option value="Bank Transfer">Bank Transfer</option>
-                                                    <option value="Cash">Cash</option>
-                                                </select>
-                                            </div>
-
-                                            {/* Amount Range */}
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        Min Amount
-                                                    </label>
-                                                    <input
-                                                        type="number"
-                                                        placeholder="₦0"
-                                                        value={filters.minAmount}
-                                                        onChange={(e) => setFilters(prev => ({ ...prev, minAmount: e.target.value }))}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                        Max Amount
-                                                    </label>
-                                                    <input
-                                                        type="number"
-                                                        placeholder="₦999,999"
-                                                        value={filters.maxAmount}
-                                                        onChange={(e) => setFilters(prev => ({ ...prev, maxAmount: e.target.value }))}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Filter Actions */}
-                                        <div className="flex space-x-2 mt-6 pt-4 border-t border-gray-200">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={handleClearFilters}
-                                                className="flex-1"
-                                            >
-                                                Clear All
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                onClick={handleApplyFilters}
-                                                className="flex-1"
-                                            >
-                                                Apply Filters
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => onPageChange(pagination.current_page + 1)}
+                                disabled={pagination.current_page >= pagination.last_page}
+                                className="px-2"
+                            >
+                                <ChevronRight className="w-4 h-4" />
+                            </Button>
                         </div>
-
-                        <Button
-                            variant="outline"
-                            onClick={onExportOrders}
-                        >
-                            <Download className="w-4 h-4 mr-2" />
-                            Export
-                        </Button>
                     </div>
-                </div>
+                )}
             </div>
-
-            {/* Orders Table */}
-            {orders.length === 0 ? (
-                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-12 text-center">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Search className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No orders found</h3>
-                    <p className="text-gray-600">
-                        {hasActiveFilters
-                            ? "Try adjusting your search or filter criteria."
-                            : "Orders will appear here once customers start placing them."
-                        }
-                    </p>
-                    {hasActiveFilters && (
-                        <Button
-                            variant="outline"
-                            onClick={handleClearFilters}
-                            className="mt-4"
-                        >
-                            Clear Filters
-                        </Button>
-                    )}
-                </div>
-            ) : (
-                <>
-                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-200">
-                                        <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Order</th>
-                                        <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Customer</th>
-                                        <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Date</th>
-                                        <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Status</th>
-                                        <th className="text-right py-4 px-6 text-sm font-semibold text-gray-700">Amount</th>
-                                        <th className="text-center py-4 px-6 text-sm font-semibold text-gray-700">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {orders.map((order) => (
-                                        <OrderCard
-                                            key={order.id}
-                                            order={order}
-                                            onViewDetails={onViewDetails}
-                                            onUpdateStatus={onUpdateStatus}
-                                            onPrintInvoice={onPrintInvoice}
-                                        />
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    {/* Pagination */}
-                    {pagination.last_page > 1 && (
-                        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-4">
-                            <div className="flex items-center justify-between">
-                                <div className="text-sm text-gray-700">
-                                    Showing {pagination.from || 1} to {pagination.to || orders.length} of {pagination.total} results
-                                </div>
-
-                                <div className="flex items-center space-x-2">
-                                    {/* Previous Button */}
-                                    <button
-                                        onClick={handlePreviousPage}
-                                        disabled={pagination.current_page === 1}
-                                        className={`p-2 rounded-lg border ${pagination.current_page === 1
-                                                ? 'text-gray-400 border-gray-300 cursor-not-allowed'
-                                                : 'text-gray-600 border-gray-300 hover:bg-gray-50'
-                                            }`}
-                                    >
-                                        <ChevronLeft className="w-4 h-4" />
-                                    </button>
-
-                                    {/* Page Numbers */}
-                                    {getPageNumbers().map((page, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() => typeof page === 'number' && handlePageClick(page)}
-                                            className={`px-3 py-1 rounded-lg text-sm font-medium ${page === pagination.current_page
-                                                    ? 'bg-brand-500 text-white'
-                                                    : page === '...'
-                                                        ? 'text-gray-500 cursor-default'
-                                                        : 'text-gray-600 hover:bg-gray-50 border border-gray-300'
-                                                }`}
-                                            disabled={page === '...'}
-                                        >
-                                            {page}
-                                        </button>
-                                    ))}
-
-                                    {/* Next Button */}
-                                    <button
-                                        onClick={handleNextPage}
-                                        disabled={pagination.current_page === pagination.last_page}
-                                        className={`p-2 rounded-lg border ${pagination.current_page === pagination.last_page
-                                                ? 'text-gray-400 border-gray-300 cursor-not-allowed'
-                                                : 'text-gray-600 border-gray-300 hover:bg-gray-50'
-                                            }`}
-                                    >
-                                        <ChevronRight className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </>
-            )}
-
-            {/* Click outside handler for filters */}
-            {showFilters && (
-                <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setShowFilters(false)}
-                />
-            )}
         </div>
     );
 };

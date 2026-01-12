@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LogoMerge } from './Logo';
-import { storageManager } from '../../pages/utils/storageManager';
+import { storageManager } from '../utils/storageManager';
+import Button from './Button';
 
 import {
     Home,
@@ -16,7 +17,7 @@ import {
     Plus,
     Eye,
     Edit,
-    Menu,
+    HandCoins,
     X,
     MessageCircle,
     Star,
@@ -25,7 +26,10 @@ import {
     FileCheck,
     DollarSign,
     AlertTriangle,
-    TrendingUp
+    TrendingUp,
+    ScrollText,
+    ShieldCheck,
+    HelpCircle
 } from 'lucide-react';
 
 const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
@@ -39,7 +43,7 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             [itemKey]: !prev[itemKey]
         }));
     };
-    
+
     // Normalize roles to handle both 'role' (string) and 'roles' (array)
     const userRoles = (() => {
         if (!user) return [];
@@ -63,7 +67,7 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
     })();
 
     console.log(userRoles);
-    
+
     // Check if user is admin or seller
     const isAdmin = userRoles.includes('admin');
     const isSeller = userRoles.includes('seller');
@@ -101,6 +105,12 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             path: '/admin/transactions'
         },
         {
+            key: 'commissions',
+            label: 'Commissions',
+            icon: HandCoins,
+            path: '/admin/commissions'
+        },
+        {
             key: 'disputes',
             label: 'Dispute Management',
             icon: AlertTriangle,
@@ -117,6 +127,32 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             label: 'Product Settings',
             icon: Settings,
             path: '/admin/settings'
+        },
+        {
+            key: 'legal-contents',
+            label: 'Legal Contents',
+            icon: Package,
+            hasSubmenu: true,
+            submenu: [
+                {
+                    key: 'policies',
+                    label: 'Privacy policy',
+                    icon: ShieldCheck,
+                    path: '/admin/privacy-policy'
+                },
+                {
+                    key: 'terms-of-service',
+                    label: 'Terms Of Service',
+                    icon: ScrollText,
+                    path: '/admin/terms-of-service'
+                },
+                {
+                    name: 'FAQs',
+                    icon: HelpCircle,
+                    label: 'FAQs',
+                    path: '/admin/faqs',
+                }
+            ],
         },
     ];
 
@@ -148,12 +184,12 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                 },
             ],
         },
-        // {
-        //     key: 'orders',
-        //     label: 'Orders',
-        //     icon: ShoppingCart,
-        //     path: '/orders'
-        // },
+        {
+            key: 'orders',
+            label: 'Orders',
+            icon: ShoppingCart,
+            path: '/orders'
+        },
         {
             key: 'analytics',
             label: 'Analytics',
@@ -233,9 +269,9 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             )}
 
             {/* Sidebar */}
-            <div className={`
+            <div className={` flex flex-col
                 w-64 bg-sidebar-900 text-white h-screen fixed left-0 top-0 z-50
-                transform transition-transform duration-300 ease-in-out
+                transform transition-transform duration-300 ease-in-out overflow-auto
                 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
                 lg:translate-x-0
                 shadow-xl lg:shadow-none
@@ -247,10 +283,13 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                     </div>
                     <button
                         onClick={onMobileMenuToggle}
-                        className="p-2 hover:bg-sidebar-800 rounded-lg transition-colors"
+                        className="p-2 hover:bg-sidebar-800 rounded-lg transition-colors cursor-pointer"
                     >
                         <X className="w-5 h-5" />
                     </button>
+                    {/* <Button conbined=>
+                    <X className="w-5 h-5" />
+                </Button> */}
                 </div>
 
                 {/* Logo */}
@@ -259,13 +298,13 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                 </div>
 
                 {/* Menu Items */}
-                <nav className="mt-6">
+                <nav className="my-6 grow-1">
                     {(isAdmin ? adminMenuItems : menuItems).map((item) => (
                         <div key={item.key}>
                             {/* Main Menu Item */}
                             <button
                                 onClick={() => handleItemClick(item)}
-                                className="w-full flex items-center justify-between px-6 py-3 text-left hover:bg-sidebar-800 transition-colors"
+                                className="w-full flex items-center justify-between px-6 py-3 text-left hover:bg-sidebar-800 transition-colors cursor-pointer"
                             >
                                 <div className="flex items-center gap-3">
                                     <item.icon className="w-5 h-5" />
@@ -286,7 +325,7 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                                         <button
                                             key={subItem.key}
                                             onClick={() => handleSubmenuClick(subItem)}
-                                            className="w-full flex items-center gap-3 px-12 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+                                            className="w-full flex items-center gap-3 px-12 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors cursor-pointer"
                                         >
                                             <subItem.icon className="w-4 h-4" />
                                             <span>{subItem.label}</span>
@@ -299,10 +338,10 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                 </nav>
 
                 {/* User Info */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-50">
+                <div className=" p-6 border-t border-gray-50">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-brand-500 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-medium text-white">{user?.data?.first_name?.charAt(0) + user?.data?.first_name?.charAt(1).toUpperCase()   || 'SA' }</span>
+                            <span className="text-sm font-medium text-white">{user?.data?.first_name?.charAt(0) + user?.data?.first_name?.charAt(1).toUpperCase() || 'SA'}</span>
                         </div>
                         <div>
                             <p className="text-sm font-medium">{user?.data?.first_name || user.user || 'User'}</p>
@@ -312,7 +351,7 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
         </>
     );
 };

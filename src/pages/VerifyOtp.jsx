@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import AuthLayout from '../layouts/AuthLayout';
 import OtpInput from '../shared/components/OtpInput';
 import Button from '../shared/components/Button';
-import { useAuth } from './contexts/AuthContext';
+import { useAuth } from '../shared/contexts/AuthContext';
 import { authApi } from './api/auth';
-import { otpValidation } from './utils/validation';
-import { storageManager } from './utils/storageManager';
-import { handlePostOTPVerification } from './utils/routingManager';
+import { otpValidation } from '../shared/utils/validation';
+import { storageManager } from '../shared/utils/storageManager';
+import { handlePostOTPVerification } from '../shared/utils/routingManager';
 import { showError, showSuccess } from '../shared/utils/alert';
 
 export default function VerifyOtp() {

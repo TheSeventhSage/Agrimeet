@@ -46,9 +46,6 @@ const ChatList = ({ conversations, selectedChat, onSelectChat, searchQuery, onSe
                                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-semibold">
                                             {getInitials(conversation.other_user?.name || 'User')}
                                         </div>
-                                        {conversation.other_user?.online && (
-                                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-                                        )}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between mb-1">
@@ -59,9 +56,18 @@ const ChatList = ({ conversations, selectedChat, onSelectChat, searchQuery, onSe
                                                 {conversation.last_message?.created_at || ''}
                                             </span>
                                         </div>
-                                        <p className="text-sm text-gray-600 truncate mb-1">
-                                            {conversation.last_message?.message || 'No messages yet'}
-                                        </p>
+
+                                        {/* Typing indicator logic for List View */}
+                                        {conversation.is_typing ? (
+                                            <p className="text-sm text-green-600 animate-pulse font-medium mb-1">
+                                                Typing...
+                                            </p>
+                                        ) : (
+                                            <p className="text-sm text-gray-600 truncate mb-1">
+                                                {conversation.last_message?.message || 'No messages yet'}
+                                            </p>
+                                        )}
+
                                         <div className="flex items-center justify-between">
                                             <span className="text-xs text-gray-500 truncate flex items-center gap-1">
                                                 <Package className="w-3 h-3" />

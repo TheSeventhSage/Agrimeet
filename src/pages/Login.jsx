@@ -6,8 +6,8 @@ import TextField from '../shared/components/TextFields';
 import PasswordField from '../shared/components/PasswordField';
 import Button from '../shared/components/Button';
 import { showError } from '../shared/utils/alert';
-import { useAuth } from './contexts/AuthContext';
-import { loginValidation } from './utils/validation';
+import { useAuth } from '../shared/contexts/AuthContext';
+import { loginValidation } from '../shared/utils/validation';
 
 export default function Login() {
     const [form, setForm] = useState({ email: '', password: '' });

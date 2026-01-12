@@ -11,10 +11,10 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../../pages/contexts/AuthContext';
+import { useAuth } from '../../../shared/contexts/AuthContext';
 import { LoadingSpinner, PageLoader } from '../../../shared/components/Loader';
 import { showError } from '../../../shared/utils/alert';
-import { storageManager } from '../../../pages/utils/storageManager';
+import { storageManager } from '../../../shared/utils/storageManager';
 // Import the new API functions
 import {
     getVendorStats,

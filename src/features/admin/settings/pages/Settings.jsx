@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import DashboardLayout from '../../../../layouts/DashboardLayout';
-import { LayoutGrid, Briefcase, Scale, Ticket } from 'lucide-react';
+import { LayoutGrid, Briefcase, Scale, Ticket, Tags } from 'lucide-react';
 
 // Import the tab components
 import UnitsTab from '../components/UnitsTab';
 import BusinessTypesTab from '../components/BusinessTypesTab';
 import CategoriesTab from '../components/CategoriesTab';
+import ProductAttributes from '../components/ProductAttributes';
 // import CouponsTab from '../components/Coupons';
 
 const tabs = [
     { id: 'units', label: 'Measurement Units', icon: Scale },
     { id: 'businessTypes', label: 'Business Types', icon: Briefcase },
     { id: 'categories', label: 'Categories', icon: LayoutGrid },
+    { id: 'attributes', label: 'Product Attributes', icon: Tags },
     // { id: 'coupons', label: 'Coupons', icon: Ticket },
 ];
 
@@ -26,6 +28,8 @@ const AdminSettings = () => {
                 return <BusinessTypesTab />;
             case 'categories':
                 return <CategoriesTab />;
+            case 'attributes':
+                return <ProductAttributes />;
             // case 'coupons':
             //     return <CouponsTab />
             default:

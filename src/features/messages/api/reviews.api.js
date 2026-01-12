@@ -1,4 +1,4 @@
-import { storageManager } from "../../../pages/utils/storageManager";
+import { storageManager } from "../../../shared/utils/storageManager";
 
 const API_BASE_URL = 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
 

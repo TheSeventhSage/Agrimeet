@@ -49,9 +49,9 @@ export default function Product() {
                 if (!productsArray || !paginationInfo) {
                     throw new Error("Invalid API response structure");
                 }
-                
+
                 setProducts(productsArray.map(transformProductData));
-                
+
                 setPagination({
                     current_page: paginationInfo.current_page,
                     last_page: paginationInfo.last_page,
@@ -113,7 +113,7 @@ export default function Product() {
             if (data.length === 0 && currentPage > 1) {
                 setCurrentPage(currentPage - 1);
             }
-            
+
         } catch (err) {
             showError('Failed to delete product', err.message);
         } finally {
@@ -134,7 +134,7 @@ export default function Product() {
                 <ProductGridHeader
                     onAddProduct={handleAddProduct}
                     totalProducts={pagination.total} // Use total from pagination
-                    
+
                     // --- Pass filter state down ---
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
@@ -157,7 +157,7 @@ export default function Product() {
                                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Price
                                     </th>
-                                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Stock
                                     </th>
                                     <th className="px-5 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -177,6 +177,7 @@ export default function Product() {
                                             onEdit={handleEditProduct}
                                             onDelete={handleDelete}
                                             onView={handleViewProduct}
+                                            onVariant={''}
                                             isDeleting={deletingId === product.id}
                                         />
                                     ))

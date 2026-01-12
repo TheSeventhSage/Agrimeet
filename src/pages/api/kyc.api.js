@@ -1,7 +1,8 @@
-// COMPLETE REPLACEMENT of kyc.api.js
+// kyc.api.js
 const API_BASE_URL = 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
-import { storageManager } from '../utils/storageManager';
+import { storageManager } from '../../shared/utils/storageManager';
 
+// 1. MAIN SUBMISSION (Step 1)
 export const submitKYC = async (formData) => {
     const token = storageManager.getAccessToken();
     if (!token) {
@@ -14,6 +15,7 @@ export const submitKYC = async (formData) => {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Accept': 'application/json'
+                // Content-Type is set automatically for FormData
             },
             body: formData
         });
@@ -25,6 +27,15 @@ export const submitKYC = async (formData) => {
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
+            let errorMessage = errorData.message || `Submission failed with status: ${response.status}`;
+
+            if (errorData.errors) {
+                // Collect all error messages into a single string
+                const validationMessages = Object.values(errorData.errors).flat();
+                if (validationMessages.length > 0) {
+                    errorMessage += `\n- ${validationMessages.join('\n- ')}`;
+                }
+            }
             throw new Error(errorData.message || `Submission failed with status: ${response.status}`);
         }
 
@@ -34,8 +45,59 @@ export const submitKYC = async (formData) => {
         throw error;
     }
 };
-export const getKYCStatus = async () => {
 
+// 2. UPDATE COORDINATES (Step 2)
+export const updateSellerLocation = async (latitude, longitude) => {
+    const token = storageManager.getAccessToken();
+    if (!token) throw new Error('Authentication required.');
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/seller/update-location`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ latitude, longitude })
+        });
+
+        if (!response.ok) throw new Error('Failed to update location coordinates');
+        return await response.json();
+    } catch (error) {
+        console.error('Location update error:', error);
+        // We return null instead of throwing so the flow can continue if strictly necessary, 
+        // but ideally this should succeed.
+        return null;
+    }
+};
+
+// 3. VALIDATE ADDRESS / GENERATE TRACKING (Step 3)
+export const validateSellerAddress = async (sellerId) => {
+    const token = storageManager.getAccessToken();
+    if (!token) throw new Error('Authentication required.');
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/seller/kyc/validate-seller-address`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ seller_id: sellerId })
+        });
+
+        if (!response.ok) throw new Error('Address validation failed');
+        return await response.json();
+    } catch (error) {
+        console.error('Address validation error:', error);
+        throw error;
+    }
+};
+
+// EXISTING STATUS CHECK
+export const getKYCStatus = async () => {
     const token = storageManager.getAccessToken();
     if (!token) return null;
 
@@ -48,11 +110,32 @@ export const getKYCStatus = async () => {
         });
 
         if (response.ok) {
-            // storageManager.updateLastActivity();
             return await response.json();
         }
+        return null;
     } catch (error) {
-        console.error('Error fetching KYC status:', error);
+        console.error('Get KYC status error:', error);
+        return null;
     }
-    return null;
+};
+
+export const getBusinessTypes = async () => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/allbusinesstypes`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch business types');
+        }
+
+        // console.log(await response.json())
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching business types:', error);
+        return []; // Return empty array on failure so the app doesn't crash
+    }
 };

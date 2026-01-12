@@ -6,7 +6,7 @@ import MessageList from '../components/MessageList';
 import MessageInput from '../components/MessageInput';
 import EmptyChatState from '../components/EmptyChatState';
 import { messagesApi } from '../api/messages.api';
-import { storageManager } from '../../../pages/utils/storageManager';
+import { storageManager } from '../../../shared/utils/storageManager';
 
 const Messages = () => {
     const [conversations, setConversations] = useState([]);
@@ -19,7 +19,9 @@ const Messages = () => {
 
     // Get current user ID from storage
     const currentUser = storageManager.getUserData();
-    const currentUserId = currentUser?.id;
+    console.log(currentUser)
+    const currentUserId = currentUser?.data?.id;
+    console.log(currentUserId)
 
     // Fetch all conversations on mount
     useEffect(() => {
@@ -39,9 +41,25 @@ const Messages = () => {
             setError(null);
             const response = await messagesApi.getConversations();
 
-            // Based on API schema, response structure would be:
-            // { data: [...conversations], meta: {...} }
-            setConversations(response.data || []);
+            // Handle both array response and { data: [...] } structure
+            const rawData = Array.isArray(response) ? response : (response.data || []);
+
+            // Transform API data to match Component expectations
+            const formattedData = rawData.map(conv => ({
+                ...conv,
+                // Map 'other_party' to 'other_user' and create full name
+                other_user: {
+                    ...conv.other_party,
+                    name: conv.other_party
+                        ? `${conv.other_party.first_name || ''} ${conv.other_party.last_name || ''}`.trim()
+                        : 'Unknown User',
+                    online: false // Add default property to prevent undefined errors
+                },
+                // Map 'product' to 'context_details' if context is product
+                context_details: conv.context_type === 'product' ? conv.product : conv.order
+            }));
+
+            setConversations(formattedData);
         } catch (err) {
             setError(err.message);
             console.error('Error fetching conversations:', err);

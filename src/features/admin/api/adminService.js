@@ -1,6 +1,6 @@
 // Admin API Service - Integrated with AgriMeet API v1
 import axios from 'axios';
-import { storageManager } from '../../../pages/utils/storageManager';
+import { storageManager } from '../../../shared/utils/storageManager';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
 
@@ -29,7 +29,7 @@ const adminService = {
     // ============ USER MANAGEMENT ============
     // Note: These endpoints need to be implemented on the backend
     // The frontend is ready for when they're available
-    
+
     async getUsers(filters = {}) {
         const params = new URLSearchParams();
         if (filters.search) params.append('search', filters.search);
@@ -37,7 +37,7 @@ const adminService = {
         if (filters.role) params.append('role', filters.role);
         if (filters.page) params.append('page', filters.page);
         if (filters.per_page) params.append('per_page', filters.per_page);
-        
+
         // TODO: Implement on backend as /admin/users
         // For now, returning mock structure
         return {
@@ -89,13 +89,13 @@ const adminService = {
 
     // ============ SELLER APPROVAL (KYC) ============
     // Using existing KYC endpoints
-    
+
     async getPendingKyc(filters = {}) {
         const params = new URLSearchParams();
         if (filters.search) params.append('search', filters.search);
         if (filters.status) params.append('status', filters.status || 'pending');
         if (filters.page) params.append('page', filters.page);
-        
+
         // TODO: Implement on backend as /admin/kyc/pending
         // Return mock data for now
         return {
@@ -146,7 +146,7 @@ const adminService = {
     },
 
     // ============ PRODUCT MODERATION ============
-    
+
     async getPendingProducts(filters = {}) {
         const params = new URLSearchParams();
         if (filters.search) params.append('search_global', filters.search);
@@ -154,7 +154,7 @@ const adminService = {
         if (filters.status) params.append('status', filters.status || 'draft');
         if (filters.page) params.append('page', filters.page);
         params.append('per_page', 12);
-        
+
         // Using existing /allproducts endpoint with status filter
         return adminApi.get(`/allproducts?${params.toString()}`);
     },
@@ -196,7 +196,7 @@ const adminService = {
     },
 
     // ============ TRANSACTION OVERSIGHT ============
-    
+
     async getTransactions(filters = {}) {
         // TODO: Implement on backend as /admin/transactions
         const params = new URLSearchParams();
@@ -206,7 +206,7 @@ const adminService = {
         if (filters.date_from) params.append('date_from', filters.date_from);
         if (filters.date_to) params.append('date_to', filters.date_to);
         if (filters.page) params.append('page', filters.page);
-        
+
         return {
             data: {
                 data: [],
@@ -245,12 +245,12 @@ const adminService = {
         Object.keys(filters).forEach(key => {
             if (filters[key]) params.append(key, filters[key]);
         });
-        
+
         // TODO: Implement on backend as /admin/transactions/export
         const response = await adminApi.get(`/admin/transactions/export?${params.toString()}`, {
             responseType: 'blob'
         });
-        
+
         // Create download link
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
@@ -259,12 +259,12 @@ const adminService = {
         document.body.appendChild(link);
         link.click();
         link.remove();
-        
+
         return response;
     },
 
     // ============ DISPUTE MANAGEMENT ============
-    
+
     async getDisputes(filters = {}) {
         // TODO: Implement on backend as /admin/disputes
         const params = new URLSearchParams();
@@ -272,7 +272,7 @@ const adminService = {
         if (filters.status) params.append('status', filters.status);
         if (filters.priority) params.append('priority', filters.priority);
         if (filters.page) params.append('page', filters.page);
-        
+
         return {
             data: {
                 data: [],
@@ -320,7 +320,7 @@ const adminService = {
     },
 
     // ============ REPORTS & ANALYTICS ============
-    
+
     async getDashboardStats() {
         // TODO: Implement on backend as /admin/dashboard/stats
         // For now, aggregate data from existing endpoints
@@ -420,12 +420,12 @@ const adminService = {
         Object.keys(filters).forEach(key => {
             if (filters[key]) params.append(key, filters[key]);
         });
-        
+
         // TODO: Implement on backend as /admin/reports/{reportType}/export
         const response = await adminApi.get(`/admin/reports/${reportType}/export?${params.toString()}`, {
             responseType: 'blob'
         });
-        
+
         // Create download link
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
@@ -434,13 +434,13 @@ const adminService = {
         document.body.appendChild(link);
         link.click();
         link.remove();
-        
+
         return response;
     },
 
     // ============ EXISTING API INTEGRATIONS ============
     // Methods that use your actual API endpoints
-    
+
     // Business Types
     async getBusinessTypes() {
         return adminApi.get('/admin/business_types');
@@ -545,7 +545,7 @@ const adminService = {
         if (filters.status) params.append('status', filters.status);
         if (filters.page) params.append('page', filters.page);
         if (filters.per_page) params.append('per_page', filters.per_page);
-        
+
         return adminApi.get(`/allproducts?${params.toString()}`);
     },
 };

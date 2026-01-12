@@ -1,6 +1,6 @@
 // App.jsx - Simplified
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from '../pages/contexts/AuthContext';
+import { AuthProvider } from '../shared/contexts/AuthContext';
 import Router from './router';
 
 export default function App() {

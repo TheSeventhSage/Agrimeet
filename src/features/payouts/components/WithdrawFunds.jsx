@@ -10,6 +10,7 @@ const WithdrawFunds = ({ balance, bankAccounts, onWithdraw, isLoading }) => {
         bankAccountId: ''
     });
 
+    console.log(balance)
     const handleSubmit = (e) => {
         e.preventDefault();
         if (formData.amount && formData.bankAccountId) {
@@ -51,7 +52,7 @@ const WithdrawFunds = ({ balance, bankAccounts, onWithdraw, isLoading }) => {
                                 />
                             </div>
                             <p className="text-sm text-gray-500 mt-2">
-                                Available: ₦{balance.toLocaleString()}
+                                Available: ₦{balance}
                             </p>
                         </div>
 

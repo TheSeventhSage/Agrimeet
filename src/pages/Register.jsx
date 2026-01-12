@@ -5,10 +5,10 @@ import AuthLayout from '../layouts/AuthLayout';
 import TextField from '../shared/components/TextFields';
 import PasswordField from '../shared/components/PasswordField';
 import Button from '../shared/components/Button';
-import { useAuth } from './contexts/AuthContext';
-import { registerValidation } from './utils/validation';
-import { storageManager } from './utils/storageManager';
-import { handlePostRegistration } from './utils/routingManager';
+import { useAuth } from '../shared/contexts/AuthContext';
+import { registerValidation } from '../shared/utils/validation';
+import { storageManager } from '../shared/utils/storageManager';
+import { handlePostRegistration } from '../shared/utils/routingManager';
 import { showError } from '../shared/utils/alert';
 
 export default function Register() {

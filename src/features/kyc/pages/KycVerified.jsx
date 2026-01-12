@@ -21,7 +21,7 @@ import { LoadingSpinner } from '../../../shared/components/Loader';
 import ConfirmationModal from '../../../shared/components/ConfirmationModal';
 import { businessInfoConfig, ownerInfoConfig, bankInfoConfig } from '../components/kycDataConfig';
 import { showSuccess, showError } from '../../../shared/utils/alert';
-import { storageManager } from '../../../pages/utils/storageManager';
+import { storageManager } from '../../../shared/utils/storageManager';
 import DocumentViewerModal from '../components/DocumentViewerModal';
 
 // Helper function to format dates
@@ -327,10 +327,10 @@ const KYCStatusPage = () => {
             )}
 
             <DocumentViewerModal
-                isOpen = {showDocument} 
-                onClose={() => { closeDocumentViewer()}}
-                documentUrl = {documentURL}
-                title = {documentTitle}
+                isOpen={showDocument}
+                onClose={() => { closeDocumentViewer() }}
+                documentUrl={documentURL}
+                title={documentTitle}
             />
         </DashboardLayout>
     );

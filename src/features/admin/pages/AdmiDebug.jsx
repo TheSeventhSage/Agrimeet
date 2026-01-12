@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import { storageManager } from '../../../pages/utils/storageManager';
+import { storageManager } from '../../../shared/utils/storageManager';
 import { Shield, User, Key, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 const AdminDebug = () => {
@@ -15,12 +15,12 @@ const AdminDebug = () => {
     const loadDebugInfo = () => {
         const user = storageManager.getUserData();
         const tok = storageManager.getTokens();
-        
+
         // Normalize roles
-        const roles = user?.roles 
+        const roles = user?.roles
             ? (Array.isArray(user.roles) ? user.roles : [user.roles])
             : (user?.role ? [user.role] : []);
-        
+
         setUserData(user);
         setTokens(tok);
         setNormalizedRoles(roles);
@@ -177,8 +177,8 @@ const AdminDebug = () => {
                         <div>
                             <label className="text-sm font-medium text-gray-600">Access Token</label>
                             <p className="text-gray-900 font-mono bg-gray-50 p-2 rounded-sm mt-1 text-xs break-all">
-                                {tokens?.access_token ? 
-                                    `${tokens.access_token.substring(0, 50)}...` : 
+                                {tokens?.access_token ?
+                                    `${tokens.access_token.substring(0, 50)}...` :
                                     'No token found'}
                             </p>
                         </div>
@@ -202,7 +202,7 @@ const AdminDebug = () => {
                                     <p><strong>Option 1:</strong> Update your user account in the database to have 'admin' role</p>
                                     <p><strong>Option 2:</strong> The API login response should return:</p>
                                     <pre className="bg-white p-3 rounded-sm border border-yellow-200 mt-2 text-xs overflow-x-auto">
-{`{
+                                        {`{
   "access_token": "...",
   "role": "admin",        // Single role
   // OR

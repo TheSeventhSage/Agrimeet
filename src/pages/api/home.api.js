@@ -1,5 +1,5 @@
 // api/home.api.js
-import { storageManager } from '../utils/storageManager'; // Assuming path
+import { storageManager } from '../../shared/utils/storageManager'; // Assuming path
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
 

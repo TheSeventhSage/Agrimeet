@@ -18,22 +18,22 @@ const ChatHeader = ({ conversation }) => {
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-semibold">
                             {getInitials(otherUser.name || 'User')}
                         </div>
-                        {otherUser.online && (
-                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-                        )}
                     </div>
                     <div>
                         <h3 className="font-semibold text-gray-900">{otherUser.name || 'Unknown User'}</h3>
                         <div className="flex items-center gap-2 text-sm">
-                            <span className={`${otherUser.online ? 'text-green-600' : 'text-gray-500'}`}>
-                                {otherUser.online ? 'Online' : 'Offline'}
-                            </span>
-                            <span className="text-gray-400">•</span>
-                            <span className="text-gray-500">{contextName}</span>
+                            {/* Replaced Online/Offline with Typing Indicator */}
+                            {conversation.is_typing ? (
+                                <span className="text-green-600 font-medium animate-pulse">
+                                    Typing...
+                                </span>
+                            ) : (
+                                <span className="text-gray-500">{contextName}</span>
+                            )}
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                     <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                         <Phone className="w-5 h-5 text-gray-600" />
                     </button>
@@ -43,7 +43,7 @@ const ChatHeader = ({ conversation }) => {
                     <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                         <MoreVertical className="w-5 h-5 text-gray-600" />
                     </button>
-                </div>
+                </div> */}
             </div>
         </div>
     );

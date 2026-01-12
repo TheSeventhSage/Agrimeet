@@ -23,12 +23,12 @@ import {
 } from 'lucide-react';
 
 // API and Auth
-import { api } from './api/home.api.js'; 
-import { storageManager } from './utils/storageManager';
+import { api } from './api/home.api.js';
+import { storageManager } from '../shared/utils/storageManager.js';
 // Utils (assuming you have these from other files)
 import { LogoLightIcon } from "../shared/components/Logo";
-import { showSuccess, showError } from '../shared/utils/alert'; 
-import Button from '../shared/components/Button'; 
+import { showSuccess, showError } from '../shared/utils/alert';
+import Button from '../shared/components/Button';
 import Navbar from './components/Navbar';
 
 /**
@@ -636,8 +636,8 @@ export default function ProductDetailsPage() {
                                             <ReviewCard
                                                 key={review.id}
                                                 review={review}
-                                                // onLike={() => handleLike(review.id)}
-                                                // onUnlike={() => handleUnlike(review.id)}
+                                            // onLike={() => handleLike(review.id)}
+                                            // onUnlike={() => handleUnlike(review.id)}
                                             />
                                         ))}
                                     </div>

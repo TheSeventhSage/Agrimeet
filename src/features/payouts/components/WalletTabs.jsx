@@ -6,7 +6,7 @@ const WalletTabs = ({ activeTab, onTabChange }) => {
         { id: 'overview', label: 'Wallet Overview', icon: Wallet },
         { id: 'withdraw', label: 'Withdraw Funds', icon: ArrowUpRight },
         { id: 'banks', label: 'Bank Accounts', icon: Landmark },
-        { id: 'history', label: 'Payout History', icon: History }
+        { id: 'history', label: 'Earnings History', icon: History }
     ];
 
     return (
