@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import AuthLayout from '../layouts/AuthLayout';
 import TextField from '../shared/components/TextFields';
 import Button from '../shared/components/Button';
-import { useAuth } from './contexts/AuthContext';
+import { useAuth } from '../shared/contexts/AuthContext';
 import { forgotPasswordValidation } from '../shared/utils/validation';
 
 export default function ForgotPassword() {
