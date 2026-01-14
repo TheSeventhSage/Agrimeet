@@ -49,8 +49,8 @@ const SellerDetailsModal = ({ seller, onClose, onSuspendSeller, onUnsuspendSelle
                 <div className="p-6 space-y-6">
                     {/* User Status Banner */}
                     <div className={`p-4 rounded-lg ${isSuspended
-                            ? 'bg-red-50 border border-red-200'
-                            : 'bg-green-50 border border-green-200'
+                        ? 'bg-red-50 border border-red-200'
+                        : 'bg-green-50 border border-green-200'
                         }`}>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">

@@ -22,6 +22,7 @@ import {
     getRecentWeeklyOrders,
     getTopWeeklyTransactions,
     getUserProfile,
+    validateSellerAddress,
 } from '../api/dashboardApi'; // Adjust path if needed
 
 // --- Helper Functions ---
@@ -80,16 +81,18 @@ const Dashboard = () => {
 
     // --- Data Fetching ---
     useEffect(() => {
+        // 1. Existing Auth Check
         if (!authUser && !userProfile.user_id) {
             return;
         }
 
-        // Get user ID from authContext or from stored user data.
+        // 2. Existing ID extraction
         const userId = authUser.user_id || userProfile.user_id || userProfile.data.id;
 
         const fetchDashboardData = async () => {
             try {
-                const [statsData, productsData, ordersData, transactionsData, profileData,] = await Promise.all([
+                // 3. YOUR EXISTING DATA FETCHING (Unchanged)
+                const [statsData, productsData, ordersData, transactionsData, profileData] = await Promise.all([
                     getVendorStats().catch(err => {
                         console.error('Error fetching vendor stats:', err);
                         showError('Failed to load dashboard stats.');
@@ -116,12 +119,12 @@ const Dashboard = () => {
                     }),
                     getUserProfile(userId).catch(err => {
                         console.error('Error fetching user profile:', err);
-                        // Don't show a blocking error, as other data might load
                         showError('Could not refresh user profile.');
-                        return null; // Dont block dashboard
+                        return null;
                     }),
                 ]);
 
+                // 4. YOUR EXISTING STATE UPDATES (Unchanged)
                 if (statsData) setStats(statsData);
                 if (productsData) setTopProducts(productsData);
                 if (ordersData) setRecentOrders(ordersData);
@@ -129,14 +132,37 @@ const Dashboard = () => {
 
                 if (profileData) {
                     storageManager.setUserData(profileData);
-                    setUserProfile(profileData); // Update state to re-render with new data
+                    setUserProfile(profileData);
                 }
+
+                // 5. --- NEW: BACKGROUND ADDRESS VALIDATION ---
+                // This runs after the main data is fetched, but we don't 'await' it 
+                // so it doesn't block the UI if it's slow.
+                if (userId) {
+                    const sellerId = userProfile.data.seller.id;
+                    const validationKey = `addr_val_${sellerId}`;
+                    const hasValidated = localStorage.getItem(validationKey);
+
+                    if (!hasValidated) {
+                        validateSellerAddress(sellerId)
+                            .then(() => {
+                                // On success, mark as done in local storage
+                                localStorage.setItem(validationKey, 'true');
+                                console.log("Address validation synced successfully");
+                            })
+                            .catch(err => {
+                                // Silent fail - doesn't disturb the user
+                                console.error("Address validation deferred:", err);
+                            });
+                    }
+                }
+                // ---------------------------------------------
 
             } catch (error) {
                 console.error("An unexpected error occurred:", error);
                 showError("An unexpected error occurred while loading the dashboard.");
             } finally {
-                // Set all individual loaders to false once Promise.all settles
+                // 6. Existing Cleanup
                 setIsLoading({ stats: false, products: false, orders: false, transactions: false });
                 setIsInitialLoading(false);
             }

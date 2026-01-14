@@ -12,10 +12,11 @@ import {
     Building,
     AlertCircle,
     UserX,
-    UserCheck
+    UserCheck,
+    ShieldCheck
 } from 'lucide-react';
 
-const SellerCard = ({ seller, onViewDetails, onSuspendSeller, onUnsuspendSeller }) => {
+const SellerCard = ({ seller, onViewDetails, onSuspendSeller, onUnsuspendSeller, onReviewKYC }) => {
     const getKycStatusBadge = () => {
         // Check latest_kyc status
         if (seller.latest_kyc) {
@@ -75,6 +76,7 @@ const SellerCard = ({ seller, onViewDetails, onSuspendSeller, onUnsuspendSeller 
 
     const isSuspended = seller.user?.user_status === 'suspended' || seller.user?.user_status === 'banned';
     const suspensionCount = seller.user?.suspension_count || 0;
+    const isKycPending = seller.latest_kyc?.status === 'pending';
 
     return (
         <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
@@ -157,6 +159,18 @@ const SellerCard = ({ seller, onViewDetails, onSuspendSeller, onUnsuspendSeller 
                     <Eye className="w-4 h-4" />
                     View Details
                 </button>
+
+                {isKycPending && (
+                    <button
+                        onClick={() => { console.log('Seller being reviewed:', seller); onReviewKYC(seller) }}
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors text-sm font-medium"
+                        title="Review KYC Documents"
+                    >
+                        <ShieldCheck className="w-4 h-4" />
+                        Review
+                    </button>
+                )}
+
                 {isSuspended ? (
                     <button
                         onClick={() => onUnsuspendSeller(seller)}

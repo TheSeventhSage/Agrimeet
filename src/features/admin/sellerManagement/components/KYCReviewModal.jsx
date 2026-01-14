@@ -9,7 +9,17 @@ const KYCReviewModal = ({ isOpen, onClose, submission, onConfirm, isLoading }) =
     const [status, setStatus] = useState(null); // 'approved' or 'rejected'
     const [notes, setNotes] = useState('');
 
-    if (!submission) return null;
+    console.log(submission)
+
+    if (!submission) {
+        return (
+            <Modal isOpen={isOpen} onClose={onClose} title="Review KYC Submission" size="lg">
+                <div className="text-center py-8">
+                    <p className="text-gray-600">No KYC submission found for this seller.</p>
+                </div>
+            </Modal>
+        );
+    }
 
     const handleSubmit = () => {
         onConfirm(submission.id, {

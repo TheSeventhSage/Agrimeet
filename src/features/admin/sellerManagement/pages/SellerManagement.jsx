@@ -15,6 +15,7 @@ import SellerFilters from '../components/SellerFilters';
 import SellerCard from '../components/SellerCard';
 import SellerDetailsModal from '../components/SellerDetailsModal';
 import Pagination from '../../../../shared/components/Pagination';
+import KYCReviewModal from '../components/KYCReviewModal';
 
 const SellerManagement = () => {
     const [sellers, setSellers] = useState([]);
@@ -26,6 +27,16 @@ const SellerManagement = () => {
     const [showSuspendModal, setShowSuspendModal] = useState(false);
     const [showUnsuspendModal, setShowUnsuspendModal] = useState(false);
     const [isActionLoading, setIsActionLoading] = useState(false);
+    const [showKYCModal, setShowKYCModal] = useState(false);
+    const [isKYCLoading, setIsKYCLoading] = useState(false);
+
+    // Function to trigger the modal
+    const openKYCReview = (seller) => {
+        console.log('Seller data:', seller); // 🔍 Debug line
+        console.log('Latest KYC:', seller.latest_kyc); // 🔍 Debug line
+        setSelectedSeller(seller);
+        setShowKYCModal(true);
+    };
 
     const [filters, setFilters] = useState({
         search_global: '',
@@ -108,6 +119,22 @@ const SellerManagement = () => {
             setBusinessTypes(response.data?.data || []);
         } catch (error) {
             console.error('Failed to load business types:', error);
+        }
+    };
+
+    // 2. Add the handler function
+    const handleReviewKYC = async (submissionId, reviewData) => {
+        setIsKYCLoading(true);
+        try {
+            await adminSellerService.reviewKyc(submissionId, reviewData);
+            showSuccess(`KYC ${reviewData.status} successfully`);
+            setShowKYCModal(false);
+            // // Refresh the seller data
+            // loadSellers();
+        } catch (error) {
+            showError(error.message || 'Failed to process KYC review');
+        } finally {
+            setIsKYCLoading(false);
         }
     };
 
@@ -225,6 +252,7 @@ const SellerManagement = () => {
                                 onViewDetails={handleViewDetails}
                                 onSuspendSeller={handleSuspendSeller}
                                 onUnsuspendSeller={handleUnsuspendSeller}
+                                onReviewKYC={openKYCReview}
                             />
                         ))
                     )}
@@ -246,6 +274,7 @@ const SellerManagement = () => {
                     onClose={() => setShowDetailsModal(false)}
                     onSuspendSeller={handleSuspendSeller}
                     onUnsuspendSeller={handleUnsuspendSeller}
+                    onReviewKYC={openKYCReview}
                 />
             )}
 
@@ -265,12 +294,20 @@ const SellerManagement = () => {
                 onConfirm={confirmUnsuspendSeller}
                 title="Unsuspend Seller"
                 message={`Are you sure you want to unsuspend ${selectedSeller?.user
-                        ? `${selectedSeller.user.first_name} ${selectedSeller.user.last_name}`
-                        : selectedSeller?.store_name
+                    ? `${selectedSeller.user.first_name} ${selectedSeller.user.last_name}`
+                    : selectedSeller?.store_name
                     }? This will restore their access to the platform.`}
                 confirmText="Unsuspend"
                 confirmButtonClass="bg-green-600 hover:bg-green-700"
                 isLoading={isActionLoading}
+            />
+
+            <KYCReviewModal
+                isOpen={showKYCModal}
+                onClose={() => setShowKYCModal(false)}
+                submission={selectedSeller?.latest_kyc} // Path based on the profile JSON you shared earlier
+                onConfirm={handleReviewKYC}
+                isLoading={isKYCLoading}
             />
         </DashboardLayout>
     );

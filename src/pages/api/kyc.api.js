@@ -27,16 +27,7 @@ export const submitKYC = async (formData) => {
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            let errorMessage = errorData.message || `Submission failed with status: ${response.status}`;
-
-            if (errorData.errors) {
-                // Collect all error messages into a single string
-                const validationMessages = Object.values(errorData.errors).flat();
-                if (validationMessages.length > 0) {
-                    errorMessage += `\n- ${validationMessages.join('\n- ')}`;
-                }
-            }
-            throw new Error(errorData.message || `Submission failed with status: ${response.status}`);
+            throw new Error(errorData.message || `Submission failed: ${response.status}`);
         }
 
         return await response.json();
@@ -137,5 +128,23 @@ export const getBusinessTypes = async () => {
     } catch (error) {
         console.error('Error fetching business types:', error);
         return []; // Return empty array on failure so the app doesn't crash
+    }
+};
+
+export const getBanks = async () => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/banks`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch banks');
+
+        const result = await response.json();
+        // Return the data array directly
+        return result.status === 'success' ? result.data : [];
+    } catch (error) {
+        console.error('Error fetching banks:', error);
+        return [];
     }
 };

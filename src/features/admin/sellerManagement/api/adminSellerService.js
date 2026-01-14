@@ -113,6 +113,22 @@ export const getBusinessTypes = async () => {
     }
 };
 
+/**
+ * Review a seller's KYC submission
+ * @param {number} submissionId - The ID of the KYC submission
+ * @param {Object} data - { status: 'approved' | 'rejected', admin_notes: string }
+ * @returns {Promise}
+ */
+export const reviewKyc = async (submissionId, data) => {
+    try {
+        const response = await api.post(`/admin/kyc/${submissionId}/review`, data);
+        return response.data;
+    } catch (error) {
+        console.error(`Error reviewing KYC ${submissionId}:`, error);
+        throw error;
+    }
+};
+
 export default {
     getAllSellers,
     getSellerById,
@@ -120,4 +136,5 @@ export default {
     unsuspendSeller,
     getSellerStats,
     getBusinessTypes,
+    reviewKyc,
 };

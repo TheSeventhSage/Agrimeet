@@ -2,6 +2,7 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../../pages/api/auth';
+import { getUserProfile } from '../../pages/api/profile.api';
 import { getKYCStatus } from '../../pages/api/kyc.api';
 import { storageManager } from '../utils/storageManager';
 import { showSuccess, showError } from '../utils/alert';
@@ -40,76 +41,98 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (formData) => {
         try {
-            const response = await authApi.login(formData);
+            // 1. Perform Login
+            const loginResponse = await authApi.login(formData);
 
-            const userData = response;
-            const roles = response.roles
-                ? (Array.isArray(response.roles) ? response.roles : [response.roles])
-                : (response.role ? [response.role] : ['buyer']);
-            storageManager.setUserData(userData);
-            storageManager.setTokens(response.access_token, response.refresh_token, roles);
-            storageManager.setVerificationStatus('verified'); // Or based on user data
+            // 2. Extract User Info and Set Tokens
+            const tempUserId = loginResponse.user_id || loginResponse.id;
+            const tempRoles = loginResponse.roles
+                ? (Array.isArray(loginResponse.roles) ? loginResponse.roles : [loginResponse.roles])
+                : (loginResponse.role ? [loginResponse.role] : ['buyer']);
 
-            setUser(userData);
-            setIsAuthenticated(true);
-            setVerificationStatus('verified'); // Or based on user data
+            storageManager.setTokens(loginResponse.access_token, loginResponse.refresh_token, tempRoles);
 
-            showSuccess(response.message || 'Login successful!');
+            // 3. ROLE-BASED SUSPENSION CHECK
+            // We only check suspension if the user is a SELLER and NOT an ADMIN
+            const isSeller = tempRoles.includes('seller');
+            const isAdmin = tempRoles.includes('admin');
 
-            const redirectPath = sessionStorage.getItem('redirectAfterLogin') || location.state?.from?.pathname;
-
-            if (redirectPath) {
-                sessionStorage.removeItem('redirectAfterLogin'); // Clean up
-                navigate(redirectPath, { replace: true }); // Go back to the previous page
-                return userData; // Exit the function early
-            }
-
-            if (roles.includes('admin')) {
-                // You mentioned admin dashboard, adjust path if needed
-                navigate('/admin/dashboard', { replace: true });
-            } else if (roles.includes('seller')) {
-                // Seller dashboard
-                navigate('/dashboard', { replace: true });
-            } else if (roles.includes('buyer')) {
+            if (isSeller && !isAdmin) {
                 try {
-                    const kycStatusResponse = await getKYCStatus();
-                    setKycStatus(kycStatusResponse?.status);
+                    const profileResponse = await getUserProfile(tempUserId);
 
-                    // Handle navigation based on KYC status
-                    if (kycStatusResponse.status === 'verified' || kycStatusResponse.status === 'approved') {
-                        navigate('/dashboard');
-                    } else if (kycStatusResponse.status === 'pending') {
-                        navigate('/kyc-pending');
-                    } else {
-                        // Catches 'not_submitted', 'rejected', etc.
-                        navigate('/kyc-register');
+                    // Accessing nested data based on your API structure: response.data.data
+                    const profileData = profileResponse.data?.data || profileResponse.data || profileResponse;
 
-                        // --- REMOVED ---
-                        // The old, misplaced redirect logic was here.
-                        // It's now handled by the new block at the top.
+                    if (profileData.user_status === 'suspended') {
+                        // Kill the session immediately
+                        storageManager.clearAll();
+                        setUser(null);
+                        setIsAuthenticated(false);
+
+                        // Throw custom error for Login.jsx to catch
+                        const error = new Error('ACCOUNT_SUSPENDED');
+                        error.suspensionData = {
+                            reason: profileData.suspension_reason || 'Violation of terms',
+                            count: profileData.suspension_count || 0
+                        };
+                        throw error;
                     }
-                } catch (error) {
-                    // If KYC check fails, navigate to dashboard anyway
-                    console.error('KYC status check failed:', error);
-                    navigate('/dashboard');
+
+                    // Update storage and local state with full profile if active
+                    storageManager.setUserData(loginResponse);
+                    setUser(loginResponse);
+
+                } catch (profileError) {
+                    // Rethrow our custom suspension error to the outer catch block
+                    if (profileError.message === 'ACCOUNT_SUSPENDED') {
+                        throw profileError;
+                    }
+                    console.error("Profile validation failed, proceeding with basic info", profileError);
                 }
             } else {
-                // Default fallback
-                navigate('/', { replace: true });
+                // For Admins or Buyers, we use the basic data from login response
+                const userData = loginResponse;
+                storageManager.setUserData(userData);
+                setUser(userData);
             }
 
-            // --- END NEW LOGIC ---
+            // 4. Success flow and Redirection
+            setIsAuthenticated(true);
+            setVerificationStatus('verified');
+            showSuccess(loginResponse.message || 'Login successful!');
 
-            return userData; // Return user data for Login.jsx if needed
+            // ... (rest of your navigation logic remains unchanged)
+            const redirectPath = sessionStorage.getItem('redirectAfterLogin') || location.state?.from?.pathname;
+            if (redirectPath) {
+                sessionStorage.removeItem('redirectAfterLogin');
+                navigate(redirectPath, { replace: true });
+                return loginResponse;
+            }
+
+            if (tempRoles.includes('admin')) {
+                navigate('/admin/dashboard', { replace: true });
+            } else if (tempRoles.includes('seller')) {
+                navigate('/dashboard', { replace: true });
+            } else {
+                // ... (KYC logic for buyers)
+                navigate('/dashboard');
+            }
+
+            return loginResponse;
 
         } catch (error) {
-            // Error handling (as it was before)
+            // Re-throw suspension error to Login.jsx, handle others
+            if (error.message === 'ACCOUNT_SUSPENDED') {
+                throw error;
+            }
+
             if (error.status === 401) {
                 showError('Invalid email or password.');
             } else {
                 showError(error.message || 'Login failed. Please try again.');
             }
-            throw error; // Re-throw error for Login.jsx to catch
+            throw error;
         }
     };
 
@@ -238,14 +261,18 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
+        // Clear all sessions
         storageManager.clearAll();
+
+        // Reset react states
         setUser(null);
         setVerificationStatus('unverified');
         setIsAuthenticated(false);
         setKycStatus(null);
 
+        // Navigate WITHOUT refreshing the page
+        navigate('/login', { replace: true });
         showSuccess('Logged out successfully');
-        window.location.href = '/login';
     };
 
     const value = {

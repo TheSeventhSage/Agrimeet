@@ -5,10 +5,11 @@ const API_BASE_URL = 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
 /**
  * A centralized API client for making authenticated fetch requests.
  * @param {string} endpoint - The API endpoint to call (e.g., '/seller/vendor_stats').
+ * @param {Object} [options] - Optional configuration for the fetch request (method, body, headers).
  * @returns {Promise<any>} - A promise that resolves with the JSON response.
  * @throws {Error} - Throws an error if the auth token is missing or if the API response is not ok.
  */
-const apiClient = async (endpoint) => {
+const apiClient = async (endpoint, options = {}) => {
     const token = storageManager.getAccessToken();
 
     if (!token) {
@@ -16,11 +17,14 @@ const apiClient = async (endpoint) => {
     }
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: options.method || 'GET',
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
+            ...options.headers, // Allow overriding/adding headers
         },
+        body: options.body || null,
     });
 
     if (!response.ok) {
@@ -61,4 +65,16 @@ export const getUserProfile = (userId) => {
     }
     // Assumes the endpoint is /user/{id} based on your documentation
     return apiClient(`/buyer/users/${userId}`);
+};
+
+/**
+ * Validates the seller's address.
+ * @param {number|string} sellerId - The ID of the seller to validate.
+ * @returns {Promise<any>} - API response confirming validation.
+ */
+export const validateSellerAddress = (sellerId) => {
+    return apiClient('/seller/kyc/validate-seller-address', {
+        method: 'POST',
+        body: JSON.stringify({ seller_id: sellerId })
+    });
 };

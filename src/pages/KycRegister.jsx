@@ -10,7 +10,7 @@ import DocumentUpload from '../shared/components/DocumentUpload';
 import { showSuccess, showError } from '../shared/utils/alert';
 import BackgroundArt from '../shared/components/BackgroundArt';
 // Import the 3 API functions
-import { submitKYC, updateSellerLocation, validateSellerAddress, getBusinessTypes } from './api/kyc.api';
+import { submitKYC, getBanks, getBusinessTypes } from './api/kyc.api';
 
 // --- GEOAPIFY IMPORTS ---
 import { GeoapifyContext, GeoapifyGeocoderAutocomplete } from '@geoapify/react-geocoder-autocomplete';
@@ -21,28 +21,47 @@ const KYCRegistrationForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
     const [businessTypesList, setBusinessTypesList] = useState([]);
+    const [banksList, setBanksList] = useState([]);
 
     useEffect(() => {
-        const fetchTypes = async () => {
-            const data = await getBusinessTypes();
-            // We assume the API returns an array like [{id: 1, name: 'Retailer'}, ...]
-            // We map it to the format the Select component expects: { value, label }
-            const formattedOptions = Array.isArray(data.data)
-                ? data.data.map(item => ({
-                    value: item.id,
-                    label: item.name
-                }))
-                : [];
+        const fetchInitialData = async () => {
+            try {
+                // Run both API calls in parallel for better performance
+                const [typesData, banksData] = await Promise.all([
+                    getBusinessTypes(),
+                    getBanks()
+                ]);
 
-            console.log(formattedOptions)
+                // 1. Process Business Types
+                const formattedTypes = Array.isArray(typesData.data)
+                    ? typesData.data.map(item => ({
+                        value: item.id,
+                        label: item.name
+                    }))
+                    : [];
+                setBusinessTypesList(formattedTypes);
 
-            setBusinessTypesList(formattedOptions);
+                // 2. Process Banks List
+                // We store the 'code' in the object so handleBankChange can find it
+                const formattedBanks = Array.isArray(banksData)
+                    ? banksData.map(bank => ({
+                        value: bank.name,
+                        label: bank.name,
+                        code: bank.code
+                    }))
+                    : [];
+                setBanksList(formattedBanks);
+
+            } catch (error) {
+                console.error("Error loading registration data:", error);
+                showError("Could not load form data. Please refresh.");
+            }
         };
 
-        fetchTypes();
+        fetchInitialData();
     }, []);
 
-    console.log(businessTypesList);
+    console.log(businessTypesList, banksList);
 
     // Form data state - Includes latitude and longitude
     const [formData, setFormData] = useState({
@@ -55,6 +74,7 @@ const KYCRegistrationForm = () => {
         longitude: null, // Stored in state
         business_phone_number: '',
         bank_name: '',
+        bank_code: '',
         bank_account_number: '',
         name_on_account: '',
         business_bio: '',
@@ -138,6 +158,19 @@ const KYCRegistrationForm = () => {
         }
     };
 
+    const handleBankChange = (e) => {
+        const selectedBankName = e.target.value;
+        const bankData = banksList.find(b => b.value === selectedBankName);
+
+        setFormData(prev => ({
+            ...prev,
+            bank_name: selectedBankName,
+            bank_code: bankData ? bankData.code : '' // Set the code automatically
+        }));
+
+        if (errors.bank_name) setErrors(prev => ({ ...prev, bank_name: null }));
+    };
+
     const validateStep = (step) => {
         const newErrors = {};
 
@@ -190,47 +223,41 @@ const KYCRegistrationForm = () => {
 
     // --- SUBMISSION LOGIC ---
     const handleSubmit = async () => {
+        // 1. Validate the current (last) step before proceeding
         if (!validateStep(currentStep)) return;
 
+        // 2. Trigger loading state for the button
         setIsSubmitting(true);
+
         try {
-            // Prepare FormData (Exclude lat/long for the first call)
             const submissionData = new FormData();
+
+            // 3. Append all data including coordinates and bank details
             Object.keys(formData).forEach(key => {
-                if (key !== 'latitude' && key !== 'longitude') {
+                if (formData[key] !== null && formData[key] !== undefined) {
                     submissionData.append(key, formData[key]);
                 }
             });
 
-            // STEP 1: Submit Basic KYC
-            const kycResponse = await submitKYC(submissionData);
+            // 4. Single API Call: Submit all registration data at once
+            await submitKYC(submissionData);
 
-            // Extract Seller ID from response (adjust based on actual response structure)
-            // Assuming response looks like: { seller: { id: 123 }, ... }
-            const sellerId = kycResponse.seller?.id;
+            // 5. Show Success Alert
+            showSuccess('KYC submitted successfully! Your account is now pending approval.');
 
-            if (!sellerId) {
-                console.warn("Seller ID missing from response, skipping location updates.");
-            } else {
-                // STEP 2: Update Location (Silent background update)
-                await updateSellerLocation(formData.latitude, formData.longitude);
-
-                // STEP 3: Validate Address / Generate Address Code
-                await validateSellerAddress(sellerId);
-            }
-
-            // SUCCESS & REDIRECT
-            showSuccess('KYC submitted successfully! Pending Admin Approval.');
-
+            // 6. DELAY REDIRECT: Give the user 3 seconds to read the alert
             setTimeout(() => {
                 window.location.href = '/login';
-            }, 1000);
+            }, 3000);
 
         } catch (error) {
-            showError('Submission Failed', error.message);
-        } finally {
+            // Handle errors and stop loading so user can try again
+            console.error("Submission Error:", error);
+            showError('Submission Failed', error.message || 'An unexpected error occurred.');
             setIsSubmitting(false);
         }
+        // Note: We don't setIsSubmitting(false) on success to keep the button 
+        // in a loading state while the page is redirecting.
     };
 
     // Helper to render steps
@@ -376,14 +403,19 @@ const KYCRegistrationForm = () => {
                             {/* STEP 3 */}
                             {currentStep === 3 && (
                                 <div className="space-y-6 animate-fadeIn">
-                                    <Input
+                                    <Select
                                         label="Bank Name"
                                         name="bank_name"
                                         value={formData.bank_name}
-                                        onChange={handleInputChange}
+                                        onChange={handleBankChange} // Use our custom bank handler
                                         error={errors.bank_name}
+                                        options={banksList}
                                         required
                                     />
+
+                                    {/* Hidden or read-only bank code field (Optional, for debugging) */}
+                                    <input type="hidden" name="bank_code" value={formData.bank_code} />
+
                                     <Input
                                         label="Account Number"
                                         name="bank_account_number"
@@ -453,7 +485,7 @@ const KYCRegistrationForm = () => {
                                 <Button
                                     onClick={currentStep === totalSteps ? handleSubmit : handleNext}
                                     className="flex-1"
-                                    isLoading={isSubmitting}
+                                    loading={isSubmitting}
                                 >
                                     {currentStep === totalSteps ? (
                                         'Submit Verification'

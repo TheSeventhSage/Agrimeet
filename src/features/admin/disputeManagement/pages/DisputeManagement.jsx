@@ -15,15 +15,19 @@ import {
     ChevronLeft,
     ChevronRight,
     X,
-    Send
+    Send,
+    DollarSign,
+    FileText,
+    ShoppingCart,
+    Mail,
+    Phone,
+    MapPin
 } from 'lucide-react';
-// Changed import to the new service file
 import adminDisputeService from '../api/adminDisputeService';
 import { showSuccess, showError } from '../../../../shared/utils/alert';
 
 const DisputeManagement = () => {
     const [disputes, setDisputes] = useState([]);
-    // Stats will default to 0 as API endpoint was not provided for stats
     const [stats, setStats] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [selectedDispute, setSelectedDispute] = useState(null);
@@ -31,10 +35,11 @@ const DisputeManagement = () => {
     const [newNote, setNewNote] = useState('');
     const [resolution, setResolution] = useState('');
     const [refundAmount, setRefundAmount] = useState('');
+    const [actionLoading, setActionLoading] = useState(false);
 
     const [filters, setFilters] = useState({
         search: '',
-        status: 'open',
+        status: 'all',
         priority: 'all',
         page: 1
     });
@@ -47,20 +52,15 @@ const DisputeManagement = () => {
 
     useEffect(() => {
         loadDisputes();
-        // loadStats(); // Commented out as no API endpoint was provided for stats
     }, [filters]);
 
     const loadDisputes = async () => {
         try {
             setIsLoading(true);
             const response = await adminDisputeService.getAllDisputes(filters);
-
-            // Handle response structure based on common patterns or simple array
             const data = response.data.data || response.data || [];
-
             setDisputes(data);
 
-            // Set pagination if available, otherwise default (API definition returned simple array)
             setPagination(response.data.meta || response.data.pagination || {
                 current_page: 1,
                 total_pages: 1,
@@ -74,22 +74,11 @@ const DisputeManagement = () => {
         }
     };
 
-    /* // Stats endpoint not provided in Swagger definition. 
-    // Commenting out to prevent 404s, but keeping structure if needed later.
-    const loadStats = async () => {
-        try {
-            const response = await adminService.getDisputeStats();
-            setStats(response.data);
-        } catch (error) {
-            console.error('Failed to load stats:', error);
-        }
-    };
-    */
-
     const handleViewDispute = async (dispute) => {
         try {
             const response = await adminDisputeService.getDisputeById(dispute.id);
-            setSelectedDispute(response.data);
+            console.log(response);
+            setSelectedDispute(response.data.data);
             setShowDisputeModal(true);
         } catch (error) {
             showError('Failed to load dispute details');
@@ -101,20 +90,7 @@ const DisputeManagement = () => {
             showError('Please enter a note');
             return;
         }
-        // NOTE: The provided API definition does not have an endpoint for adding notes.
-        // This is a placeholder to preserve UI functionality without crashing.
         showError('Add Note API endpoint not available');
-
-        /* try {
-            await adminService.addDisputeNote(selectedDispute.id, newNote);
-            showSuccess('Note added successfully');
-            setNewNote('');
-            const response = await adminDisputeService.getDisputeById(selectedDispute.id);
-            setSelectedDispute(response.data);
-        } catch (error) {
-            showError('Failed to add note');
-        }
-        */
     };
 
     const handleResolveDispute = async () => {
@@ -123,7 +99,7 @@ const DisputeManagement = () => {
             return;
         }
         try {
-            // Using the 'settle' endpoint with status: 'settled'
+            setActionLoading(true);
             await adminDisputeService.settleDispute(selectedDispute.id, {
                 resolution: resolution,
                 status: 'settled'
@@ -131,39 +107,38 @@ const DisputeManagement = () => {
 
             showSuccess('Dispute settled successfully');
             setShowDisputeModal(false);
+            setResolution('');
+            setRefundAmount('');
             loadDisputes();
-            // loadStats(); 
         } catch (error) {
             console.error(error);
             showError('Failed to resolve dispute');
+        } finally {
+            setActionLoading(false);
         }
     };
 
-    // Updated to handle Reject logic using the same endpoint
     const handleUpdateStatus = async (status) => {
-        // The API only supports "settled" or "rejected" via the settle endpoint
         if (status === 'rejected') {
             if (!resolution.trim()) {
                 showError('Please provide a reason for rejection');
                 return;
             }
             try {
+                setActionLoading(true);
                 await adminDisputeService.settleDispute(selectedDispute.id, {
                     resolution: resolution,
                     status: 'rejected'
                 });
                 showSuccess('Dispute rejected successfully');
-                const response = await adminDisputeService.getDisputeById(selectedDispute.id);
-                setSelectedDispute(response.data);
+                setShowDisputeModal(false);
+                setResolution('');
                 loadDisputes();
             } catch (error) {
                 showError('Failed to update status');
+            } finally {
+                setActionLoading(false);
             }
-        } else {
-            // For visual UI updates like 'in_progress', if backend doesn't support it,
-            // we might just show a message or need a different endpoint.
-            // Assuming for now we just show a message as the API is strictly 'settle/reject'.
-            showError('API only supports Settling or Rejecting disputes currently.');
         }
     };
 
@@ -172,8 +147,8 @@ const DisputeManagement = () => {
             open: { color: 'bg-blue-100 text-blue-800', icon: AlertCircle, label: 'Open' },
             in_progress: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'In Progress' },
             resolved: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Resolved' },
-            settled: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Settled' }, // Added for new API enum
-            rejected: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Rejected' }, // Added for new API enum
+            settled: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Settled' },
+            rejected: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Rejected' },
             closed: { color: 'bg-gray-100 text-gray-800', icon: XCircle, label: 'Closed' }
         };
 
@@ -181,53 +156,38 @@ const DisputeManagement = () => {
         const Icon = config.icon;
 
         return (
-            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${config.color}`}>
                 <Icon className="w-3 h-3" />
                 {config.label}
             </span>
         );
     };
 
-    const getPriorityBadge = (priority) => {
-        const priorityColors = {
-            high: 'bg-red-100 text-red-800',
-            medium: 'bg-yellow-100 text-yellow-800',
-            low: 'bg-green-100 text-green-800'
+    const getPaymentStatusBadge = (status) => {
+        const statusColors = {
+            paid: 'bg-green-100 text-green-800',
+            pending: 'bg-yellow-100 text-yellow-800',
+            failed: 'bg-red-100 text-red-800'
         };
 
         return (
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${priorityColors[priority] || priorityColors.medium}`}>
-                {priority?.charAt(0).toUpperCase() + priority?.slice(1) || 'Medium'}
+            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[status] || statusColors.pending}`}>
+                {status?.charAt(0).toUpperCase() + status?.slice(1) || 'Pending'}
             </span>
         );
     };
 
-    const statCards = [
-        {
-            title: 'Open Disputes',
-            value: stats.open || 0,
-            icon: AlertCircle,
-            color: 'bg-blue-500'
-        },
-        {
-            title: 'In Progress',
-            value: stats.inProgress || 0,
-            icon: Clock,
-            color: 'bg-yellow-500'
-        },
-        {
-            title: 'Resolved Today',
-            value: stats.resolvedToday || 0,
-            icon: CheckCircle,
-            color: 'bg-green-500'
-        },
-        {
-            title: 'Total Resolved',
-            value: stats.totalResolved || 0,
-            icon: CheckCircle,
-            color: 'bg-purple-500'
-        }
-    ];
+    const filteredDisputes = disputes.filter(dispute => {
+        const matchesSearch = filters.search === '' ||
+            dispute.reason?.toLowerCase().includes(filters.search.toLowerCase()) ||
+            dispute.order?.order_number?.toLowerCase().includes(filters.search.toLowerCase()) ||
+            dispute.user?.first_name?.toLowerCase().includes(filters.search.toLowerCase()) ||
+            dispute.user?.last_name?.toLowerCase().includes(filters.search.toLowerCase());
+
+        const matchesStatus = filters.status === 'all' || dispute.status === filters.status;
+
+        return matchesSearch && matchesStatus;
+    });
 
     return (
         <DashboardLayout>
@@ -238,36 +198,19 @@ const DisputeManagement = () => {
                     <p className="text-gray-600 mt-2">Handle buyer-seller disputes and resolve issues</p>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {statCards.map((stat, index) => (
-                        <div key={index} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                                    <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value.toLocaleString()}</p>
-                                </div>
-                                <div className={`p-3 rounded-lg ${stat.color}`}>
-                                    <stat.icon className="w-6 h-6 text-white" />
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
                 {/* Filters and Search */}
-                <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Search */}
                         <div>
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                                 <input
                                     type="text"
-                                    placeholder="Search disputes..."
+                                    placeholder="Search by reason, order number, or user..."
                                     value={filters.search}
                                     onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
+                                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                                 />
                             </div>
                         </div>
@@ -277,7 +220,7 @@ const DisputeManagement = () => {
                             <select
                                 value={filters.status}
                                 onChange={(e) => setFilters({ ...filters, status: e.target.value, page: 1 })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             >
                                 <option value="all">All Status</option>
                                 <option value="open">Open</option>
@@ -286,80 +229,71 @@ const DisputeManagement = () => {
                                 <option value="rejected">Rejected</option>
                             </select>
                         </div>
-
-                        {/* Priority Filter */}
-                        <div>
-                            <select
-                                value={filters.priority}
-                                onChange={(e) => setFilters({ ...filters, priority: e.target.value, page: 1 })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
-                            >
-                                <option value="all">All Priority</option>
-                                <option value="high">High</option>
-                                <option value="medium">Medium</option>
-                                <option value="low">Low</option>
-                            </select>
-                        </div>
                     </div>
                 </div>
 
                 {/* Disputes List */}
                 <div className="space-y-4">
                     {isLoading ? (
-                        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-12 text-center">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
                             <div className="flex items-center justify-center">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500"></div>
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
                             </div>
                         </div>
-                    ) : disputes.length === 0 ? (
-                        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-12 text-center">
+                    ) : filteredDisputes.length === 0 ? (
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
                             <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-600">No disputes found</p>
                         </div>
                     ) : (
-                        disputes.map((dispute) => (
-                            <div key={dispute.id} className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
-                                <div className="flex items-start justify-between mb-4">
+                        filteredDisputes.map((dispute) => (
+                            <div key={dispute.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                                <div className="flex items-start justify-between">
                                     <div className="flex items-start gap-4 flex-1">
                                         <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center shrink-0">
                                             <AlertTriangle className="w-6 h-6 text-red-600" />
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-2">
-                                                <h3 className="text-lg font-semibold text-gray-900">{dispute.title || 'Dispute'}</h3>
-                                                {getStatusBadge(dispute.status || 'open')}
-                                                {getPriorityBadge(dispute.priority || 'medium')}
+                                                <h3 className="text-lg font-semibold text-gray-900">
+                                                    Dispute #{dispute.id}
+                                                </h3>
+                                                {getStatusBadge(dispute.status)}
                                             </div>
-                                            <p className="text-gray-600 mb-3">{dispute.description || 'No description'}</p>
+                                            <p className="text-gray-600 mb-4 line-clamp-2">{dispute.reason}</p>
                                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                                                 <div>
-                                                    <span className="text-gray-500 flex items-center gap-1">
+                                                    <span className="text-gray-500 flex items-center gap-1 mb-1">
                                                         <User className="w-4 h-4" />
-                                                        Buyer
+                                                        Customer
                                                     </span>
-                                                    <p className="font-medium text-gray-900">{dispute.buyer_name || 'N/A'}</p>
+                                                    <p className="font-medium text-gray-900">
+                                                        {dispute.user?.first_name} {dispute.user?.last_name}
+                                                    </p>
                                                 </div>
                                                 <div>
-                                                    <span className="text-gray-500 flex items-center gap-1">
-                                                        <User className="w-4 h-4" />
-                                                        Seller
-                                                    </span>
-                                                    <p className="font-medium text-gray-900">{dispute.seller_name || 'N/A'}</p>
-                                                </div>
-                                                <div>
-                                                    <span className="text-gray-500 flex items-center gap-1">
+                                                    <span className="text-gray-500 flex items-center gap-1 mb-1">
                                                         <Package className="w-4 h-4" />
-                                                        Order ID
+                                                        Order Number
                                                     </span>
-                                                    <p className="font-medium text-gray-900">{dispute.order_id || 'N/A'}</p>
+                                                    <p className="font-medium text-gray-900">{dispute.order?.order_number}</p>
                                                 </div>
                                                 <div>
-                                                    <span className="text-gray-500 flex items-center gap-1">
+                                                    <span className="text-gray-500 flex items-center gap-1 mb-1">
+                                                        <DollarSign className="w-4 h-4" />
+                                                        Order Amount
+                                                    </span>
+                                                    <p className="font-medium text-gray-900">
+                                                        {dispute.order?.currency} {parseFloat(dispute.order?.total_amount).toLocaleString()}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <span className="text-gray-500 flex items-center gap-1 mb-1">
                                                         <Calendar className="w-4 h-4" />
                                                         Created
                                                     </span>
                                                     <p className="font-medium text-gray-900">
-                                                        {new Date(dispute.created_at || Date.now()).toLocaleDateString()}
+                                                        {new Date(dispute.created_at).toLocaleDateString()}
                                                     </p>
                                                 </div>
                                             </div>
@@ -367,7 +301,7 @@ const DisputeManagement = () => {
                                     </div>
                                     <button
                                         onClick={() => handleViewDispute(dispute)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors ml-4"
+                                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors ml-4 shrink-0"
                                     >
                                         <Eye className="w-4 h-4" />
                                         View Details
@@ -379,12 +313,11 @@ const DisputeManagement = () => {
                 </div>
 
                 {/* Pagination */}
-                {!isLoading && disputes.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-xs border border-gray-100 px-6 py-4 flex items-center justify-between">
+                {!isLoading && filteredDisputes.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-4 flex items-center justify-between">
                         <div className="text-sm text-gray-700">
-                            Showing <span className="font-medium">{((pagination.current_page - 1) * 10) + 1}</span> to{' '}
-                            <span className="font-medium">{Math.min(pagination.current_page * 10, pagination.total)}</span> of{' '}
-                            <span className="font-medium">{pagination.total}</span> disputes
+                            Showing <span className="font-medium">{filteredDisputes.length}</span> of{' '}
+                            <span className="font-medium">{disputes.length}</span> disputes
                         </div>
                         <div className="flex items-center gap-2">
                             <button
@@ -412,154 +345,217 @@ const DisputeManagement = () => {
             {/* Dispute Details Modal */}
             {showDisputeModal && selectedDispute && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+                        {/* Modal Header */}
+                        <div className="p-6 border-b border-gray-200 sticky top-0 bg-white z-10 rounded-t-2xl">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-xl font-semibold text-gray-900">{selectedDispute.title || 'Dispute Details'}</h3>
-                                    <p className="text-sm text-gray-600 mt-1">ID: {selectedDispute.id}</p>
+                                    <h3 className="text-2xl font-bold text-gray-900">Dispute Details</h3>
+                                    <p className="text-sm text-gray-600 mt-1">Dispute ID: #{selectedDispute.id}</p>
                                 </div>
                                 <button
                                     onClick={() => setShowDisputeModal(false)}
                                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                                 >
-                                    <X className="w-5 h-5 text-gray-500" />
+                                    <X className="w-6 h-6 text-gray-500" />
                                 </button>
                             </div>
-                        </div>
-                        <div className="p-6 space-y-6">
-                            {/* Status and Priority */}
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 mt-4">
                                 {getStatusBadge(selectedDispute.status)}
-                                {getPriorityBadge(selectedDispute.priority)}
+                                {getPaymentStatusBadge(selectedDispute.order?.payment_status)}
+                            </div>
+                        </div>
+
+                        <div className="p-6 space-y-6">
+                            {/* Dispute Reason */}
+                            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                                <div className="flex items-start gap-3">
+                                    <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+                                    <div className="flex-1">
+                                        <h4 className="font-semibold text-red-900 mb-2">Dispute Reason</h4>
+                                        <p className="text-red-800 whitespace-pre-line">{selectedDispute.reason}</p>
+                                    </div>
+                                </div>
                             </div>
 
-                            {/* Dispute Information */}
+                            {/* Order Information */}
                             <div>
-                                <h4 className="text-lg font-semibold text-gray-900 mb-4">Dispute Information</h4>
-                                <div className="grid grid-cols-2 gap-4">
+                                <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                    <ShoppingCart className="w-5 h-5" />
+                                    Order Information
+                                </h4>
+                                <div className="bg-gray-50 rounded-xl p-4 grid grid-cols-2 md:grid-cols-3 gap-4">
                                     <div>
-                                        <label className="text-sm font-medium text-gray-600">Order ID</label>
-                                        <p className="text-gray-900">{selectedDispute.order_id || 'N/A'}</p>
+                                        <label className="text-sm font-medium text-gray-600">Order Number</label>
+                                        <p className="text-gray-900 font-semibold">{selectedDispute.order?.order_number}</p>
                                     </div>
                                     <div>
-                                        <label className="text-sm font-medium text-gray-600">Created Date</label>
-                                        <p className="text-gray-900">
-                                            {new Date(selectedDispute.created_at || Date.now()).toLocaleString()}
+                                        <label className="text-sm font-medium text-gray-600">Total Amount</label>
+                                        <p className="text-gray-900 font-semibold">
+                                            {selectedDispute.order?.currency} {parseFloat(selectedDispute.order?.total_amount).toLocaleString()}
                                         </p>
                                     </div>
-                                    <div className="col-span-2">
-                                        <label className="text-sm font-medium text-gray-600">Description</label>
-                                        <p className="text-gray-900">{selectedDispute.description || 'No description'}</p>
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-600">Payment Status</label>
+                                        <div className="mt-1">
+                                            {getPaymentStatusBadge(selectedDispute.order?.payment_status)}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-600">Order Status</label>
+                                        <p className="text-gray-900">{selectedDispute.order?.order_status}</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-600">Fulfillment</label>
+                                        <p className="text-gray-900">{selectedDispute.order?.fulfillment_status}</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium text-gray-600">Tracking Number</label>
+                                        <p className="text-gray-900">{selectedDispute.order?.tracking_number || 'N/A'}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Parties Involved */}
+                            {/* Customer Information */}
                             <div>
-                                <h4 className="text-lg font-semibold text-gray-900 mb-4">Parties Involved</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="border border-gray-200 rounded-lg p-4">
-                                        <h5 className="font-medium text-gray-900 mb-2">Buyer</h5>
-                                        <p className="text-gray-900">{selectedDispute.buyer_name || 'N/A'}</p>
-                                        <p className="text-sm text-gray-600">{selectedDispute.buyer_email || ''}</p>
-                                    </div>
-                                    <div className="border border-gray-200 rounded-lg p-4">
-                                        <h5 className="font-medium text-gray-900 mb-2">Seller</h5>
-                                        <p className="text-gray-900">{selectedDispute.seller_name || 'N/A'}</p>
-                                        <p className="text-sm text-gray-600">{selectedDispute.seller_email || ''}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Admin Notes */}
-                            <div>
-                                <h4 className="text-lg font-semibold text-gray-900 mb-4">Admin Notes</h4>
-                                <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
-                                    {selectedDispute.notes && selectedDispute.notes.length > 0 ? (
-                                        selectedDispute.notes.map((note, index) => (
-                                            <div key={index} className="bg-gray-50 rounded-lg p-3">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="text-sm font-medium text-gray-900">{note.admin_name || 'Admin'}</span>
-                                                    <span className="text-xs text-gray-500">
-                                                        {new Date(note.created_at || Date.now()).toLocaleString()}
+                                <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                    <User className="w-5 h-5" />
+                                    Customer Information
+                                </h4>
+                                <div className="border border-gray-200 rounded-xl p-6">
+                                    <div className="flex items-start gap-4">
+                                        {selectedDispute.user?.profile_photo ? (
+                                            <img
+                                                src={selectedDispute.user.profile_photo}
+                                                alt="User"
+                                                className="w-16 h-16 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                                                <User className="w-8 h-8 text-green-600" />
+                                            </div>
+                                        )}
+                                        <div className="flex-1">
+                                            <h5 className="font-semibold text-gray-900 text-lg mb-3">
+                                                {selectedDispute.user?.first_name} {selectedDispute.user?.last_name}
+                                            </h5>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                                <div className="flex items-center gap-2 text-gray-600">
+                                                    <Mail className="w-4 h-4" />
+                                                    <span>{selectedDispute.user?.email}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-gray-600">
+                                                    <Phone className="w-4 h-4" />
+                                                    <span>{selectedDispute.user?.phone_number}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${selectedDispute.user?.user_status === 'active'
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : 'bg-red-100 text-red-800'
+                                                        }`}>
+                                                        {selectedDispute.user?.user_status}
                                                     </span>
                                                 </div>
-                                                <p className="text-sm text-gray-700">{note.content || note.note}</p>
                                             </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-gray-600 text-sm">No notes yet</p>
-                                    )}
-                                </div>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={newNote}
-                                        onChange={(e) => setNewNote(e.target.value)}
-                                        placeholder="Add a note..."
-                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
-                                    />
-                                    <button
-                                        onClick={handleAddNote}
-                                        className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
-                                    >
-                                        <Send className="w-5 h-5" />
-                                    </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Resolution */}
-                            {/* Check against new 'settled' and 'rejected' statuses as well */}
-                            {selectedDispute.status !== 'resolved' &&
-                                selectedDispute.status !== 'closed' &&
-                                selectedDispute.status !== 'settled' &&
-                                selectedDispute.status !== 'rejected' && (
-                                    <div>
-                                        <h4 className="text-lg font-semibold text-gray-900 mb-4">Resolve Dispute</h4>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Resolution Details
-                                                </label>
-                                                <textarea
-                                                    value={resolution}
-                                                    onChange={(e) => setResolution(e.target.value)}
-                                                    rows={4}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
-                                                    placeholder="Enter resolution details..."
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Refund Amount (Optional)
-                                                </label>
+                            {/* Shipping Information */}
+                            {selectedDispute.order?.courier_name && (
+                                <div>
+                                    <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                        <Package className="w-5 h-5" />
+                                        Shipping Information
+                                    </h4>
+                                    <div className="bg-gray-50 rounded-xl p-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">Courier</label>
+                                            <p className="text-gray-900">{selectedDispute.order.courier_name}</p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">Shipping Amount</label>
+                                            <p className="text-gray-900">
+                                                {selectedDispute.order.currency} {parseFloat(selectedDispute.order.shipping_amount).toLocaleString()}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-600">Delivery Charge</label>
+                                            <p className="text-gray-900">
+                                                {selectedDispute.order.currency} {parseFloat(selectedDispute.order.delivery_charge).toLocaleString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Resolution Section */}
+                            {selectedDispute.status !== 'settled' && selectedDispute.status !== 'rejected' && (
+                                <div>
+                                    <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                        <FileText className="w-5 h-5" />
+                                        Resolve Dispute
+                                    </h4>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Resolution Details *
+                                            </label>
+                                            <textarea
+                                                value={resolution}
+                                                onChange={(e) => setResolution(e.target.value)}
+                                                rows={4}
+                                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                placeholder="Provide detailed resolution or reason for rejection..."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Refund Amount (Optional)
+                                            </label>
+                                            <div className="relative">
+                                                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                                                 <input
                                                     type="number"
                                                     value={refundAmount}
                                                     onChange={(e) => setRefundAmount(e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-brand-500"
+                                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
                                                     placeholder="0.00"
+                                                    step="0.01"
                                                 />
                                             </div>
-                                            <div className="flex items-center gap-3">
-                                                {/* Changed 'Mark In Progress' to 'Reject' as API only supports settle/reject */}
-                                                <button
-                                                    onClick={() => handleUpdateStatus('rejected')}
-                                                    className="flex-1 px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
-                                                >
-                                                    Reject Dispute
-                                                </button>
-                                                <button
-                                                    onClick={handleResolveDispute}
-                                                    className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                                                >
-                                                    Settle Dispute
-                                                </button>
-                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 pt-4">
+                                            <button
+                                                onClick={() => handleUpdateStatus('rejected')}
+                                                disabled={actionLoading}
+                                                className="flex-1 px-6 py-3 border-2 border-red-500 text-red-600 rounded-xl hover:bg-red-50 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {actionLoading ? 'Processing...' : 'Reject Dispute'}
+                                            </button>
+                                            <button
+                                                onClick={handleResolveDispute}
+                                                disabled={actionLoading}
+                                                className="flex-1 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {actionLoading ? 'Processing...' : 'Settle Dispute'}
+                                            </button>
                                         </div>
                                     </div>
-                                )}
+                                </div>
+                            )}
+
+                            {/* Resolution Display (if already resolved) */}
+                            {selectedDispute.resolution && (
+                                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                                    <h4 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
+                                        <CheckCircle className="w-5 h-5" />
+                                        Resolution
+                                    </h4>
+                                    <p className="text-green-800 whitespace-pre-line">{selectedDispute.resolution}</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

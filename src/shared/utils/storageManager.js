@@ -50,12 +50,9 @@ export const storageManager = {
 
     // Clear all
     clearAll: () => {
-            // Clear all storage types
-            localStorage.clear();
-            sessionStorage.clear();
-
-            // Redirect to login page
-            window.location.href = '/login';
+        // Clear all storage types
+        localStorage.clear();
+        sessionStorage.clear();
     },
 
     hasActiveSession: () => {

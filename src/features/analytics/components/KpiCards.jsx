@@ -10,8 +10,15 @@ const formatCurrency = (amount) =>
     new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
-        minimumFractionDigits: 0,
+        minimumFractionDigits: 1,
     }).format(amount);
+
+const formatCompact = (num) => {
+    return Intl.NumberFormat('en-US', {
+        notation: "compact",
+        maximumFractionDigits: 1
+    }).format(num);
+};
 
 const KpiCards = ({ filters }) => {
     const {
@@ -29,31 +36,31 @@ const KpiCards = ({ filters }) => {
     const kpiData = [
         {
             title: 'Total Revenue',
-            // ✅ FIX: Coerce total_revenue to a number before formatting
-            value: formatCurrency(+stats?.total_revenue || 0),
+            value: +stats?.total_revenue || 0, // Keep as Number
             icon: DollarSign,
             color: 'text-green-600',
+            isCurrency: true, // Add this flag
         },
         {
-            title: 'Total Customers',
-            // ✅ FIX: Coerce total_customers to a number
-            value: +stats?.total_customers || 0,
+            title: 'Total Reviews',
+            value: +stats?.total_reviews || 0,
             icon: Users,
             color: 'text-blue-600',
+            isCurrency: false,
         },
         {
-            title: 'Products Sold',
-            // ✅ FIX: Coerce total_products_sold to a number
-            value: +stats?.total_products_sold || 0,
+            title: 'Total Products',
+            value: +stats?.total_products || 0,
             icon: Package,
             color: 'text-brand-600',
+            isCurrency: false,
         },
         {
-            title: 'Avg. Order Value',
-            // ✅ FIX: Coerce average_order_value to a number
-            value: formatCurrency(+stats?.average_order_value || 0),
+            title: 'Total Orders',
+            value: +stats?.total_orders || 0, // Keep as Number
             icon: Star,
             color: 'text-yellow-500',
+            isCurrency: false,
         },
     ];
 
@@ -89,10 +96,13 @@ const KpiCards = ({ filters }) => {
                                 {card.title}
                             </p>
                             <p
-                                className={`mt-2 font-bold ${card.isText ? 'text-xl truncate' : 'text-3xl'
+                                className={`mt-2 font-bold ${card.isText ? 'text-sm truncate' : 'text-xl'
                                     }`}
                             >
-                                {card.value}
+                                {card.value >= 1000000
+                                    ? (card.isCurrency ? '$' : '') + formatCompact(card.value)
+                                    : (card.isCurrency ? formatCurrency(card.value) : card.value)
+                                }
                             </p>
                         </div>
                         <div className="p-2 bg-gray-100 rounded-lg">

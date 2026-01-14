@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
     Search,
     MessageCircle,
@@ -94,12 +95,11 @@ const HelpSupport = () => {
                             </button>
                             <h1 className="text-2xl font-bold text-gray-900">Help & Support</h1>
                         </div>
-                        <button
-                            onClick={() => window.location.hash = '/login'}
+                        <Link to="/contact"
                             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                         >
-                            Sign In
-                        </button>
+                            Contact Support
+                        </Link>
                     </div>
                 </div>
             </div>
