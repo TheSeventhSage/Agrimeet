@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
@@ -8,7 +8,7 @@ import Button from '../../../shared/components/Button';
 import { ConfirmationModal } from '../../../shared/components';
 import { Loading } from '../../../shared/components/Loader';
 import { showSuccess, showError } from '../../../shared/utils/alert';
-import { createVariant, getUnits } from '../api/productsApi';
+import { createVariant, getUnits, getProductAttributes } from '../api/productsApi';
 
 const AddVariant = () => {
     const { productId } = useParams();
@@ -21,11 +21,13 @@ const AddVariant = () => {
         stock_quantity: '',
         unit_id: ''
     });
+
     const [attributes, setAttributes] = useState([{ attribute_id: '', value: '' }]);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [units, setUnits] = useState([]);
+    const [availableAttributes, setAvailableAttributes] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -36,21 +38,41 @@ const AddVariant = () => {
             return;
         }
 
-        loadUnits();
+        loadFormData();
     }, [productId, navigate]);
 
-    const loadUnits = async () => {
+    const loadFormData = async () => {
         try {
             setIsLoading(true);
-            const unitsResponse = await getUnits();
+            const [unitsResponse, attributesResponse] = await Promise.all([
+                getUnits(),
+                getProductAttributes()
+            ]);
+
             setUnits(unitsResponse.data || []);
+            // Handle both single object or array responses based on your API snippet
+            const attrData = attributesResponse.data || attributesResponse;
+            setAvailableAttributes(Array.isArray(attrData) ? attrData : [attrData]);
         } catch (error) {
-            console.error('Error loading units:', error);
-            showError('Failed to load units. Please refresh the page.');
+            console.error('Error loading form data:', error);
+            showError('Failed to load form data. Please refresh.');
         } finally {
             setIsLoading(false);
         }
     };
+
+    // const loadUnits = async () => {
+    //     try {
+    //         setIsLoading(true);
+    //         const unitsResponse = await getUnits();
+    //         setUnits(unitsResponse.data || []);
+    //     } catch (error) {
+    //         console.error('Error loading units:', error);
+    //         showError('Failed to load units. Please refresh the page.');
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -71,16 +93,6 @@ const AddVariant = () => {
         const newAttributes = [...attributes];
         newAttributes[index][field] = value;
         setAttributes(newAttributes);
-    };
-
-    const addAttribute = () => {
-        setAttributes([...attributes, { attribute_id: '', value: '' }]);
-    };
-
-    const removeAttribute = (index) => {
-        if (attributes.length > 1) {
-            setAttributes(attributes.filter((_, i) => i !== index));
-        }
     };
 
     const validateForm = () => {
@@ -118,7 +130,7 @@ const AddVariant = () => {
         try {
             const variantData = {
                 ...formData,
-                attributes: attributes.map(attr => ({
+                attributeValues: attributes.map(attr => ({
                     attribute_id: parseInt(attr.attribute_id),
                     value: attr.value
                 }))
@@ -263,25 +275,21 @@ const AddVariant = () => {
                     <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-semibold text-gray-900">Attributes</h2>
-                            <Button
-                                type="button"
-                                onClick={addAttribute}
-                                className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-2"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Add Attribute
-                            </Button>
                         </div>
 
                         <div className="space-y-4">
                             {attributes.map((attribute, index) => (
                                 <div key={index} className="flex gap-4 items-start">
                                     <div className="flex-1">
-                                        <Input
-                                            label="Attribute ID"
+                                        <Select
+                                            label="Attribute Type"
                                             value={attribute.attribute_id}
                                             onChange={(e) => handleAttributeChange(index, 'attribute_id', e.target.value)}
-                                            placeholder="e.g., 1 (Size)"
+                                            options={availableAttributes.map(attr => ({
+                                                value: String(attr.id),
+                                                label: attr.name
+                                            }))}
+                                            placeholder="Select Attribute (e.g. Size)"
                                             error={errors[`attribute_${index}_id`]}
                                             required
                                         />
@@ -296,14 +304,6 @@ const AddVariant = () => {
                                             required
                                         />
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeAttribute(index)}
-                                        disabled={attributes.length === 1}
-                                        className="mt-8 p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
                                 </div>
                             ))}
                         </div>

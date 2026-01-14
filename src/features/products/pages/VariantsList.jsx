@@ -176,13 +176,13 @@ const VariantsList = () => {
                                             {/* Attributes */}
                                             <div className="col-span-2">
                                                 <div className="flex flex-wrap gap-1">
-                                                    {variant.attributes && variant.attributes.length > 0 ? (
-                                                        variant.attributes.map((attr, idx) => (
+                                                    {variant.attribute_values && variant.attribute_values.length > 0 ? (
+                                                        variant.attribute_values.map((attr, idx) => (
                                                             <span
                                                                 key={idx}
                                                                 className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full"
                                                             >
-                                                                {attr.value}
+                                                                {attr.attribute.name}
                                                             </span>
                                                         ))
                                                     ) : (

@@ -4,6 +4,7 @@ import DashboardLayout from '../../../layouts/DashboardLayout';
 import ProductGridHeader from '../components/ProductGridHeader';
 import ProductTable from '../components/ProductTable';
 import { LoadingSpinner } from '../../../shared/components/Loader';
+import ConfirmationModal from '../../../shared/components/ConfirmationModal'; // Added Import
 import Pagination from '../components/Pagination';
 import {
     getProducts,
@@ -17,9 +18,13 @@ export default function Product() {
     const navigate = useNavigate();
 
     // --- State Management ---
-    const [products, setProducts] = useState([]); // Products from API
+    const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [deletingId, setDeletingId] = useState(null);
+
+    // Modal State (Moved from ProductTable)
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [productToDelete, setProductToDelete] = useState(null);
 
     // --- Pagination State ---
     const [currentPage, setCurrentPage] = useState(1);
@@ -31,7 +36,7 @@ export default function Product() {
 
     // --- Client-side Filter State ---
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'active', 'inactive'
+    const [statusFilter, setStatusFilter] = useState('all');
 
     // --- Data Fetching ---
     useEffect(() => {
@@ -39,10 +44,6 @@ export default function Product() {
             setLoading(true);
             try {
                 const response = await getProducts(currentPage);
-
-                // --- FIX: Correctly parse the response ---
-                // The product list is in response.data
-                // The pagination info is in response.meta
                 const productsArray = response.data;
                 const paginationInfo = response.meta;
 
@@ -51,13 +52,11 @@ export default function Product() {
                 }
 
                 setProducts(productsArray.map(transformProductData));
-
                 setPagination({
                     current_page: paginationInfo.current_page,
                     last_page: paginationInfo.last_page,
                     total: paginationInfo.total
                 });
-                // --- END FIX ---
 
             } catch (err) {
                 showError('Failed to fetch products', err.message);
@@ -67,23 +66,16 @@ export default function Product() {
         };
 
         fetchProducts();
-    }, [currentPage]); // Re-fetches *only* when the page changes
+    }, [currentPage]);
 
     // --- Client-side Filtering ---
-    // This hook filters the `products` list.
-    // It relies on `transformProductData` correctly setting `is_published`
     const filteredProducts = useMemo(() => {
         return products.filter(product => {
-            // Search filter (product name)
             const matchesSearch = product.name
                 .toLowerCase()
                 .includes(searchTerm.toLowerCase());
-
-            // Status filter
-            // product.is_published is now a boolean (true/false) from our transformer
             const productStatus = product.is_published ? 'active' : 'inactive';
             const matchesStatus = statusFilter === 'all' || productStatus === statusFilter;
-
             return matchesSearch && matchesStatus;
         });
     }, [products, searchTerm, statusFilter]);
@@ -93,13 +85,27 @@ export default function Product() {
     const handleEditProduct = (product) => navigate(`/products/edit/${product.id}`);
     const handleViewProduct = (product) => navigate(`/products/${product.id}`);
 
-    const handleDelete = async (product) => {
-        setDeletingId(product.id);
+    // ADDED: Fix for "Manage Variants" button not working
+    const handleManageVariants = (product) => navigate(`/products/${product.id}/variants`);
+
+    // ADDED: Handler to open the delete modal (Lifted from ProductTable)
+    const handleOpenDeleteModal = (product) => {
+        setProductToDelete(product);
+        setShowDeleteModal(true);
+    };
+
+    // ADDED: Handler to confirm deletion
+    const handleConfirmDelete = async () => {
+        if (!productToDelete) return;
+
+        setShowDeleteModal(false);
+        setDeletingId(productToDelete.id);
+
         try {
-            await deleteProduct(product.id);
+            await deleteProduct(productToDelete.id);
             showSuccess('Product deleted successfully');
 
-            // Refetch data for the current page
+            // Refetch to update list
             const response = await getProducts(currentPage);
             const { data, meta } = response;
             setProducts(data.map(transformProductData));
@@ -109,7 +115,6 @@ export default function Product() {
                 total: meta.total
             });
 
-            // If the current page is now empty, go to the previous page
             if (data.length === 0 && currentPage > 1) {
                 setCurrentPage(currentPage - 1);
             }
@@ -118,10 +123,10 @@ export default function Product() {
             showError('Failed to delete product', err.message);
         } finally {
             setDeletingId(null);
+            setProductToDelete(null);
         }
     };
 
-    // Pagination handler
     const handlePageChange = (page) => {
         if (page > 0 && page <= pagination.last_page) {
             setCurrentPage(page);
@@ -133,39 +138,24 @@ export default function Product() {
             <div className="space-y-6">
                 <ProductGridHeader
                     onAddProduct={handleAddProduct}
-                    totalProducts={pagination.total} // Use total from pagination
-
-                    // --- Pass filter state down ---
+                    totalProducts={pagination.total}
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
                     statusFilter={statusFilter}
                     onStatusChange={setStatusFilter}
                 />
 
-                {/* Product Table */}
                 <div className="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full min-w-[800px]">
                             <thead>
                                 <tr className="border-b border-gray-200 bg-gray-50">
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Product
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Category
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Price
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Stock
-                                    </th>
-                                    <th className="px-5 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Actions
-                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                                    <th className="px-5 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
@@ -175,9 +165,9 @@ export default function Product() {
                                             key={product.id}
                                             product={product}
                                             onEdit={handleEditProduct}
-                                            onDelete={handleDelete}
+                                            onDelete={handleOpenDeleteModal} // Pass the modal opener here
                                             onView={handleViewProduct}
-                                            onVariant={''}
+                                            onManageVariants={handleManageVariants} // Pass the variant handler here
                                             isDeleting={deletingId === product.id}
                                         />
                                     ))
@@ -186,28 +176,20 @@ export default function Product() {
                         </table>
                     </div>
 
-                    {/* Loading Spinner */}
                     {loading && (
                         <div className="flex items-center justify-center p-12">
                             <LoadingSpinner size="lg" message="Loading products..." />
                         </div>
                     )}
 
-                    {/* No Products Found */}
                     {!loading && filteredProducts.length === 0 && (
                         <div className="text-center p-12">
                             <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                {searchTerm || statusFilter !== 'all'
-                                    ? 'No Products Match Filters'
-                                    : 'No Products Found'
-                                }
+                                {searchTerm || statusFilter !== 'all' ? 'No Products Match Filters' : 'No Products Found'}
                             </h3>
                             <p className="text-gray-500 mb-6">
-                                {searchTerm || statusFilter !== 'all'
-                                    ? 'Try adjusting your search or filters.'
-                                    : "You haven't added any products yet."
-                                }
+                                {searchTerm || statusFilter !== 'all' ? 'Try adjusting your search or filters.' : "You haven't added any products yet."}
                             </p>
                             {!(searchTerm || statusFilter !== 'all') && (
                                 <button
@@ -221,7 +203,6 @@ export default function Product() {
                     )}
                 </div>
 
-                {/* Pagination */}
                 {!loading && pagination.last_page > 1 && (
                     <Pagination
                         currentPage={pagination.current_page}
@@ -230,6 +211,18 @@ export default function Product() {
                     />
                 )}
             </div>
+
+            {/* MOVED: Modal is now here, outside the table structure */}
+            <ConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleConfirmDelete}
+                title="Delete Product"
+                message={`Are you sure you want to delete "${productToDelete?.name}"? This action cannot be undone.`}
+                confirmText="Delete"
+                cancelText="Cancel"
+                type="danger"
+            />
         </DashboardLayout>
     );
 }

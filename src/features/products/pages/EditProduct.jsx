@@ -19,6 +19,8 @@ const EditProduct = () => {
 
     const [formData, setFormData] = useState({
         name: '',
+        sku: '', // Added back
+        tags: '', // Added back
         slug: '',
         description: '',
         base_price: '',
@@ -73,21 +75,23 @@ const EditProduct = () => {
 
                 const mapped = {
                     name: product?.name || '',
+                    sku: product?.sku || '', // Map SKU
+                    tags: product?.tags ? (Array.isArray(product.tags) ? product.tags.join(', ') : product.tags) : '', // Map Tags
                     slug: product?.slug || '',
                     description: product?.description || '',
                     base_price: product?.base_price ? String(product.base_price) : '',
                     discount_price: product?.discount_price ? String(product.discount_price) : '',
                     stock_quantity: product?.stock_quantity ? String(product.stock_quantity) : '',
                     status: product?.status || 'active',
-                    category_id: product?.category_id ? String(product.category_id) : '',
-                    unit_id: product?.unit_id ? String(product.unit_id) : ''
+                    category_id: product?.category_id ? String(product.category_id) : (product?.category?.id ? String(product.category.id) : ''),
+                    unit_id: product?.unit_id ? String(product.unit_id) : (product?.unit?.id ? String(product.unit.id) : '')
                 };
                 setFormData(mapped);
                 setOriginalData(mapped);
 
                 const existing = (product?.images || []).map(img => ({
                     id: img.id,
-                    url: img.url?.startsWith('http') ? img.url : `https://agrimeet.udehcoglobalfoodsltd.com/storage/${img.url}`
+                    url: typeof img === 'string' ? img : (img.url?.startsWith('http') ? img.url : `https://agrimeet.udehcoglobalfoodsltd.com/storage/${img.url}`)
                 }));
                 setExistingImages(existing);
             } catch (error) {
@@ -137,6 +141,7 @@ const EditProduct = () => {
         const newErrors = {};
 
         if (!formData.name.trim()) newErrors.name = 'Product name is required';
+        if (!formData.sku?.trim()) newErrors.sku = 'SKU is required'; // Validate SKU
         if (!formData.description.trim()) newErrors.description = 'Description is required';
         if (!formData.base_price || Number(formData.base_price) <= 0) newErrors.base_price = 'Valid base price is required';
         if (!formData.category_id) newErrors.category_id = 'Category is required';
@@ -151,6 +156,18 @@ const EditProduct = () => {
         return Object.keys(newErrors).length === 0;
     };
 
+    // Helper to convert URL to File
+    const urlToFile = async (url, filename, mimeType) => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            return new File([blob], filename, { type: mimeType || blob.type });
+        } catch (error) {
+            console.error("Error converting image to file:", error);
+            return null;
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -163,6 +180,8 @@ const EditProduct = () => {
         try {
             const fd = new FormData();
             fd.append('name', formData.name);
+            fd.append('sku', formData.sku); // Append SKU
+            if (formData.tags) fd.append('tags', formData.tags); // Append Tags
             if (formData.slug) fd.append('slug', formData.slug);
             fd.append('description', formData.description);
             fd.append('base_price', formData.base_price);
@@ -172,11 +191,38 @@ const EditProduct = () => {
             fd.append('category_id', formData.category_id);
             fd.append('unit_id', formData.unit_id);
 
+            // Method override for PUT
+            fd.append('_method', 'PUT');
+
             if (thumbnailImages.length > 0) {
-                fd.append('thumbnail', thumbnailImages[0].file);
+                // Check if .file exists (if wrapper object) or use directly if File
+                const thumbFile = thumbnailImages[0].file || thumbnailImages[0];
+                fd.append('thumbnail', thumbFile);
             }
-            uploadedImages.forEach((img, i) => {
-                fd.append(`images[${i}]`, img.file);
+
+            // 1. Convert Existing Images to Files and Append
+            // This ensures "kept" images are sent back to backend
+            let imageIndex = 0;
+
+            const existingFiles = await Promise.all(
+                existingImages.map(async (img, i) => {
+                    return await urlToFile(img.url, `existing-${i}.jpg`, 'image/jpeg');
+                })
+            );
+
+            existingFiles.forEach(file => {
+                if (file) {
+                    fd.append(`images[${imageIndex}]`, file);
+                    imageIndex++;
+                }
+            });
+
+            // 2. Append New Uploaded Images
+            uploadedImages.forEach((img) => {
+                // Handle wrapper object { file: File, ... } from DocumentUpload
+                const file = img.file || img;
+                fd.append(`images[${imageIndex}]`, file);
+                imageIndex++;
             });
 
             const response = await updateProduct(productId, fd);
@@ -198,12 +244,13 @@ const EditProduct = () => {
         // Check if form has been modified
         const hasChanges = originalData && (
             formData.name !== originalData.name ||
+            formData.sku !== originalData.sku || // Check SKU
+            formData.tags !== originalData.tags || // Check Tags
             formData.description !== originalData.description ||
-            formData.price !== originalData.price ||
-            formData.originalPrice !== originalData.originalPrice ||
-            formData.category !== originalData.category ||
-            formData.sku !== originalData.sku ||
-            formData.stock !== originalData.stock ||
+            formData.base_price !== originalData.base_price ||
+            formData.discount_price !== originalData.discount_price ||
+            formData.category_id !== originalData.category_id ||
+            formData.stock_quantity !== originalData.stock_quantity ||
             uploadedImages.length > 0 ||
             existingImages.length !== (originalData.images?.length || 0)
         );
@@ -272,6 +319,16 @@ const EditProduct = () => {
                             />
 
                             <Input
+                                label="SKU"
+                                name="sku"
+                                value={formData.sku}
+                                onChange={handleInputChange}
+                                placeholder="e.g. PROD-001"
+                                error={errors.sku}
+                                required
+                            />
+
+                            <Input
                                 label="Slug (Optional)"
                                 name="slug"
                                 value={formData.slug}
@@ -285,7 +342,7 @@ const EditProduct = () => {
                                 name="category_id"
                                 value={formData.category_id}
                                 onChange={handleInputChange}
-                                options={categories.map(cat => ({ value: cat.id, label: cat.name }))}
+                                options={categories.map(cat => ({ value: String(cat.id), label: cat.name }))}
                                 placeholder="Select category"
                                 error={errors.category_id}
                                 required
@@ -308,7 +365,7 @@ const EditProduct = () => {
                                 name="unit_id"
                                 value={formData.unit_id}
                                 onChange={handleInputChange}
-                                options={units.map(unit => ({ value: unit.id, label: unit.name }))}
+                                options={units.map(unit => ({ value: String(unit.id), label: unit.name }))}
                                 placeholder="Select unit"
                                 error={errors.unit_id}
                                 required
@@ -323,6 +380,15 @@ const EditProduct = () => {
                                 placeholder="Select status"
                                 error={errors.status}
                                 required
+                            />
+
+                            <Input
+                                label="Tags"
+                                name="tags"
+                                value={formData.tags}
+                                onChange={handleInputChange}
+                                placeholder="comma, separated, tags"
+                                error={errors.tags}
                             />
                         </div>
 

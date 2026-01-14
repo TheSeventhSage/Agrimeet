@@ -8,7 +8,7 @@ import Button from '../../../shared/components/Button';
 import { ConfirmationModal } from '../../../shared/components';
 import { Loading } from '../../../shared/components/Loader';
 import { showSuccess, showError } from '../../../shared/utils/alert';
-import { getVariant, updateVariant, getUnits } from '../api/productsApi';
+import { getVariant, updateVariant, getUnits, getProductAttributes } from '../api/productsApi';
 
 const EditVariant = () => {
     const { productId, variantId } = useParams();
@@ -26,6 +26,7 @@ const EditVariant = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [units, setUnits] = useState([]);
+    const [availableAttributes, setAvailableAttributes] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [originalData, setOriginalData] = useState(null);
 
@@ -43,9 +44,10 @@ const EditVariant = () => {
     const loadData = async () => {
         try {
             setIsLoading(true);
-            const [variantResponse, unitsResponse] = await Promise.all([
+            const [variantResponse, unitsResponse, attributesResponse] = await Promise.all([
                 getVariant(productId, variantId),
-                getUnits()
+                getUnits(),
+                getProductAttributes()
             ]);
 
             const variant = variantResponse.data || variantResponse;
@@ -61,6 +63,11 @@ const EditVariant = () => {
             setFormData(mappedData);
             setOriginalData(mappedData);
 
+            setUnits(unitsResponse.data || []);
+
+            const attrData = attributesResponse.data || attributesResponse;
+            setAvailableAttributes(Array.isArray(attrData) ? attrData : [attrData]);
+
             // Map attributes
             if (variant.attributes && variant.attributes.length > 0) {
                 setAttributes(variant.attributes.map(attr => ({
@@ -69,7 +76,6 @@ const EditVariant = () => {
                 })));
             }
 
-            setUnits(unitsResponse.data || []);
         } catch (error) {
             console.error('Error loading variant:', error);
             showError('Failed to load variant data. Please try again.');
@@ -97,16 +103,6 @@ const EditVariant = () => {
         const newAttributes = [...attributes];
         newAttributes[index][field] = value;
         setAttributes(newAttributes);
-    };
-
-    const addAttribute = () => {
-        setAttributes([...attributes, { attribute_id: '', value: '' }]);
-    };
-
-    const removeAttribute = (index) => {
-        if (attributes.length > 1) {
-            setAttributes(attributes.filter((_, i) => i !== index));
-        }
     };
 
     const validateForm = () => {
@@ -294,26 +290,22 @@ const EditVariant = () => {
                     {/* Attributes */}
                     <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-semibold text-gray-900">Attributes</h2>
-                            <Button
-                                type="button"
-                                onClick={addAttribute}
-                                className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-2"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Add Attribute
-                            </Button>
+                            <h2 className="text-xl font-semibold text-gray-900">Attribute</h2>
                         </div>
 
                         <div className="space-y-4">
                             {attributes.map((attribute, index) => (
                                 <div key={index} className="flex gap-4 items-start">
                                     <div className="flex-1">
-                                        <Input
-                                            label="Attribute ID"
+                                        <Select
+                                            label="Attribute Type"
                                             value={attribute.attribute_id}
                                             onChange={(e) => handleAttributeChange(index, 'attribute_id', e.target.value)}
-                                            placeholder="e.g., 1 (Size)"
+                                            options={availableAttributes.map(attr => ({
+                                                value: String(attr.id),
+                                                label: attr.name
+                                            }))}
+                                            placeholder="Select Attribute"
                                             error={errors[`attribute_${index}_id`]}
                                             required
                                         />
@@ -328,14 +320,6 @@ const EditVariant = () => {
                                             required
                                         />
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeAttribute(index)}
-                                        disabled={attributes.length === 1}
-                                        className="mt-8 p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
                                 </div>
                             ))}
                         </div>

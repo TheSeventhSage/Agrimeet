@@ -258,6 +258,21 @@ export const deleteVariant = async (productId, variantId) => {
     }
 };
 
+// Get attributes
+export const getProductAttributes = async () => {
+    try {
+        const response = await fetch(`${BASE_URL}/seller/product-attributes`, {
+            method: 'GET',
+            headers: getAuthHeaders()
+        });
+
+        return await handleResponse(response);
+    } catch (error) {
+        console.error('Error fetching product attributes:', error);
+        throw error;
+    }
+};
+
 // Helper function to transform API product data to match component expectations
 export const transformProductData = (apiProduct) => {
     return {

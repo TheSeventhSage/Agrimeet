@@ -1,9 +1,7 @@
-import { useState } from 'react';
 import { Edit, Trash2, Eye, Star, Package } from 'lucide-react';
-import ConfirmationModal from '../../../shared/components/ConfirmationModal';
 
 const ProductTable = ({ product, onEdit, onDelete, onView, onManageVariants, isDeleting = false }) => {
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    // NOTE: Modal state removed from here to fix nesting error
 
     // Defensive: try multiple places for images
     const imageSrc = product?.image
@@ -21,17 +19,6 @@ const ProductTable = ({ product, onEdit, onDelete, onView, onManageVariants, isD
 
     const totalStock = topLevelStock + variantStock;
     const isAvailable = totalStock > 0;
-
-    const handleDeleteClick = () => {
-        setShowDeleteModal(true);
-    };
-
-    const handleDeleteConfirm = () => {
-        if (onDelete) {
-            onDelete(product);
-        }
-        setShowDeleteModal(false);
-    };
 
     const renderStars = (rating) => {
         return Array.from({ length: 5 }, (_, i) => (
@@ -92,140 +79,126 @@ const ProductTable = ({ product, onEdit, onDelete, onView, onManageVariants, isD
     };
 
     return (
-        <>
-            <tr className="hover:bg-gray-50 transition-colors border-b border-gray-100">
-                {/* Product Image and Name */}
-                <td className="px-2 py-3">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                            <img
-                                src={imageSrc}
-                                alt={product?.name}
-                                className="w-full h-full object-cover"
-                                onError={handleImageError}
-                            />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                            <div className="font-medium text-gray-900 text-sm truncate" title={product?.name}>
-                                {product?.name}
-                            </div>
-                            <div className="text-xs text-gray-500 truncate" title={product?.description}>
-                                {product?.description || 'No description'}
-                            </div>
-                            {product?.slug && (
-                                <div className="text-xs text-gray-400">
-                                    Slug: {product.slug}
-                                </div>
-                            )}
-                            {/* Variant count if present */}
-                            {Array.isArray(product?.variants) && product.variants.length > 0 && (
-                                <div className="text-xs text-gray-400 mt-1">
-                                    {product.variants.length} variant{product.variants.length > 1 ? 's' : ''}
-                                </div>
-                            )}
-                        </div>
+        <tr className="hover:bg-gray-50 transition-colors border-b border-gray-100">
+            {/* Product Image and Name */}
+            <td className="px-2 py-3">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                        <img
+                            src={imageSrc}
+                            alt={product?.name}
+                            className="w-full h-full object-cover"
+                            onError={handleImageError}
+                        />
                     </div>
-                </td>
-
-                {/* Category */}
-                <td className="px-3 py-3">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {product?.category ?? '—'}
-                    </span>
-                </td>
-
-                {/* Price */}
-                <td className="px-3 py-3">
-                    <div className="flex flex-col">
-                        <div className="flex items-center gap-1">
-                            <span className="font-semibold text-gray-900 text-sm">
-                                ${product?.discountedPrice ?? product?.price ?? product?.discount_price ?? product?.base_price}
-                            </span>
-                            {product?.unit && (
-                                <span className="text-xs text-gray-500">
-                                    /{product?.unitSymbol ?? product?.unit?.symbol ?? product?.unit}
-                                </span>
-                            )}
+                    <div className="min-w-0 flex-1">
+                        <div className="font-medium text-gray-900 text-sm truncate" title={product?.name}>
+                            {product?.name}
                         </div>
-
-                        {product?.originalPrice && product?.originalPrice > (product?.discountedPrice ?? product?.price) && (
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs text-gray-500 line-through">
-                                    ${product.originalPrice}
-                                </span>
-                                <span className="text-xs font-medium text-green-600">
-                                    ({product.discount}% off)
-                                </span>
+                        <div className="text-xs text-gray-500 truncate" title={product?.description}>
+                            {product?.description || 'No description'}
+                        </div>
+                        {product?.slug && (
+                            <div className="text-xs text-gray-400">
+                                Slug: {product.slug}
+                            </div>
+                        )}
+                        {/* Variant count if present */}
+                        {Array.isArray(product?.variants) && product.variants.length > 0 && (
+                            <div className="text-xs text-gray-400 mt-1">
+                                {product.variants.length} variant{product.variants.length > 1 ? 's' : ''}
                             </div>
                         )}
                     </div>
-                </td>
+                </div>
+            </td>
 
-                {/* Stock */}
-                <td className="px-2 py-3 w-fit">
-                    <StockBadge stock={totalStock} />
-                </td>
+            {/* Category */}
+            <td className="px-3 py-3">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {product?.category ?? '—'}
+                </span>
+            </td>
 
-                {/* Status */}
-                <td className="px-3 py-3">
-                    <StatusBadge status={product?.status} />
-                </td>
-
-                {/* Actions */}
-                <td className="px-3 py-3">
+            {/* Price */}
+            <td className="px-3 py-3">
+                <div className="flex flex-col">
                     <div className="flex items-center gap-1">
-                        <button
-                            onClick={() => onView && onView(product)}
-                            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                            title="View Product"
-                        >
-                            <Eye className="w-4 h-4" />
-                        </button>
-
-                        <button
-                            onClick={() => onEdit && onEdit(product)}
-                            className="p-1.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Edit Product"
-                        >
-                            <Edit className="w-4 h-4" />
-                        </button>
-
-                        <button
-                            onClick={() => onManageVariants && onManageVariants(product)}
-                            className="p-1.5 text-purple-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                            title="Manage Variants"
-                        >
-                            <Package className="w-4 h-4" />
-                        </button>
-
-                        <button
-                            onClick={handleDeleteClick}
-                            disabled={isDeleting}
-                            className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Delete Product"
-                        >
-                            {isDeleting ? (
-                                <div className="w-4 h-4 animate-spin rounded-full border-2 border-red-300 border-t-red-600"></div>
-                            ) : (
-                                <Trash2 className="w-4 h-4" />
-                            )}
-                        </button>
+                        <span className="font-semibold text-gray-900 text-sm">
+                            ${product?.discountedPrice ?? product?.price ?? product?.discount_price ?? product?.base_price}
+                        </span>
+                        {product?.unit && (
+                            <span className="text-xs text-gray-500">
+                                /{product?.unitSymbol ?? product?.unit?.symbol ?? product?.unit}
+                            </span>
+                        )}
                     </div>
-                </td>
-            </tr>
 
-            {/* Delete Confirmation Modal */}
-            <ConfirmationModal
-                isOpen={showDeleteModal}
-                onClose={() => setShowDeleteModal(false)}
-                onConfirm={handleDeleteConfirm}
-                title="Delete Product"
-                message={`Are you sure you want to delete "${product?.name}"? This action cannot be undone.`}
-                confirmText="Delete"
-                cancelText="Cancel"
-                type="danger"
-            />
-        </>
+                    {product?.originalPrice && product?.originalPrice > (product?.discountedPrice ?? product?.price) && (
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-500 line-through">
+                                ${product.originalPrice}
+                            </span>
+                            <span className="text-xs font-medium text-green-600">
+                                ({product.discount}% off)
+                            </span>
+                        </div>
+                    )}
+                </div>
+            </td>
+
+            {/* Stock */}
+            <td className="px-2 py-3 w-fit">
+                <StockBadge stock={totalStock} />
+            </td>
+
+            {/* Status */}
+            <td className="px-3 py-3">
+                <StatusBadge status={product?.status} />
+            </td>
+
+            {/* Actions */}
+            <td className="px-3 py-3">
+                <div className="flex items-center gap-1">
+                    <button
+                        onClick={() => onView && onView(product)}
+                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="View Product"
+                    >
+                        <Eye className="w-4 h-4" />
+                    </button>
+
+                    <button
+                        onClick={() => onEdit && onEdit(product)}
+                        className="p-1.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Edit Product"
+                    >
+                        <Edit className="w-4 h-4" />
+                    </button>
+
+                    <button
+                        onClick={() => onManageVariants && onManageVariants(product)}
+                        className="p-1.5 text-purple-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                        title="Manage Variants"
+                    >
+                        <Package className="w-4 h-4" />
+                    </button>
+
+                    <button
+                        onClick={() => onDelete && onDelete(product)}
+                        disabled={isDeleting}
+                        className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Delete Product"
+                    >
+                        {isDeleting ? (
+                            <div className="w-4 h-4 animate-spin rounded-full border-2 border-red-300 border-t-red-600"></div>
+                        ) : (
+                            <Trash2 className="w-4 h-4" />
+                        )}
+                    </button>
+                </div>
+            </td>
+        </tr>
     );
 };
 
