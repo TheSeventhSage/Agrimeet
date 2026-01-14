@@ -319,16 +319,6 @@ const EditProduct = () => {
                             />
 
                             <Input
-                                label="SKU"
-                                name="sku"
-                                value={formData.sku}
-                                onChange={handleInputChange}
-                                placeholder="e.g. PROD-001"
-                                error={errors.sku}
-                                required
-                            />
-
-                            <Input
                                 label="Slug (Optional)"
                                 name="slug"
                                 value={formData.slug}
@@ -380,15 +370,6 @@ const EditProduct = () => {
                                 placeholder="Select status"
                                 error={errors.status}
                                 required
-                            />
-
-                            <Input
-                                label="Tags"
-                                name="tags"
-                                value={formData.tags}
-                                onChange={handleInputChange}
-                                placeholder="comma, separated, tags"
-                                error={errors.tags}
                             />
                         </div>
 
