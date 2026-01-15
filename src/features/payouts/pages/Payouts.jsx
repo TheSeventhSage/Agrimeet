@@ -5,22 +5,20 @@ import WalletOverview from '../components/WalletOverview';
 import WithdrawFunds from '../components/WithdrawFunds';
 import BankAccounts from '../components/BankAccounts';
 import PayoutHistory from '../components/PayoutHistory';
-import { earningsApi } from '../api/payouts.api'; // Assumed filename based on previous context
+import { earningsApi } from '../api/payouts.api';
+import { storageManager } from '../../../shared/utils/storageManager';
 
 const Payouts = () => {
     // Component states
     const [activeTab, setActiveTab] = useState('overview');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-
     // Data states
     const [overviewData, setOverviewData] = useState();
     const [history, setHistory] = useState([]);
     const [trend, setTrend] = useState([]);
-
     // Filter states
     const [timeFilter, setTimeFilter] = useState('all');
-
     // Mock bank accounts (keeping existing logic)
     const [bankAccounts, setBankAccounts] = useState([
         {
@@ -32,6 +30,14 @@ const Payouts = () => {
         }
     ]);
 
+    const userDetails = storageManager.getUserData();
+    const userBankAccount = {
+        id: 1 || userDetails.data.seller.bank_id,
+        accountNumber: userDetails.data.seller.bank_account_number || 1234567890,
+        accountName: userDetails.data.seller.name_on_account || 'Agrimeet Seller',
+        bankName: userDetails.data.seller.bank_name || 'AGM Bank',
+    }
+
     // Fetch data when component mounts or filter changes
     useEffect(() => {
         fetchDashboardData();
@@ -42,18 +48,25 @@ const Payouts = () => {
             setIsLoading(true);
             setError(null);
 
-            // Fetch all required data in parallel
-            // Note: History is fetched with a limit of 15 for the history tab, 
-            // WalletOverview will slice what it needs.
-            const [overviewRes, historyRes, trendRes] = await Promise.all([
+            // Fetch all required data in parallel including the new wallet balance
+            const [overviewRes, historyRes, trendRes, walletRes] = await Promise.all([
                 earningsApi.getEarningsOverview({ period: timeFilter }),
                 earningsApi.getEarningsHistory({ page: 1, per_page: 15 }),
-                earningsApi.getMonthlyEarningsTrend({ months: 6 })
+                earningsApi.getMonthlyEarningsTrend({ months: 12 }),
+                earningsApi.getWalletBalance()
             ]);
 
-            setOverviewData(overviewRes.data || overviewRes);
+            // Merge wallet balance into overview data so WalletOverview can access it
+            const combinedOverview = {
+                ...(overviewRes.data || overviewRes),
+                wallet_balance: walletRes.data?.wallet_balance || 0,
+                currency: walletRes.data?.currency || 'NGN'
+            };
+
+            setBankAccounts(userBankAccount)
+            setOverviewData(combinedOverview);
             setHistory(historyRes.data || []);
-            setTrend(trendRes.data || []);
+            setTrend(trendRes || []);
 
         } catch (err) {
             console.error('Error fetching payouts data:', err);
@@ -63,9 +76,25 @@ const Payouts = () => {
         }
     };
 
-    const handleWithdraw = (amount) => {
-        console.log('Withdrawing:', amount);
-        // Implement withdrawal logic here
+    console.log(bankAccounts)
+
+    const handleWithdraw = async (amount) => {
+        try {
+            setIsLoading(true);
+            // Consume the withdrawal endpoint
+            await earningsApi.requestWithdrawal({ amount });
+
+            // Refresh data to show updated balance
+            await fetchDashboardData();
+
+            // Reset tab to overview or show success message if needed
+            // setActiveTab('overview'); 
+        } catch (err) {
+            console.error('Withdrawal failed:', err);
+            alert(err.message || 'Failed to process withdrawal');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleAddBankAccount = (account) => {
@@ -85,8 +114,9 @@ const Payouts = () => {
             case 'withdraw':
                 return (
                     <WithdrawFunds
-                        balance={overviewData.paid_payouts}
-                        bankAccounts={bankAccounts}
+                        // Pass the actual wallet balance instead of paid_payouts
+                        balance={overviewData?.wallet_balance || 0}
+                        bankAccounts={[bankAccounts]}
                         onWithdraw={handleWithdraw}
                         isLoading={isLoading}
                     />

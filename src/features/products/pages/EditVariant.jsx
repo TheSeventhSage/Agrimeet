@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import Input from '../../../shared/components/Input';
 import Select from '../../../shared/components/Select';
@@ -8,7 +8,7 @@ import Button from '../../../shared/components/Button';
 import { ConfirmationModal } from '../../../shared/components';
 import { Loading } from '../../../shared/components/Loader';
 import { showSuccess, showError } from '../../../shared/utils/alert';
-import { getVariant, updateVariant, getUnits, getProductAttributes } from '../api/productsApi';
+import { getVariant, updateVariant, getUnits } from '../api/productsApi';
 
 const EditVariant = () => {
     const { productId, variantId } = useParams();
@@ -21,17 +21,22 @@ const EditVariant = () => {
         stock_quantity: '',
         unit_id: ''
     });
-    const [attributes, setAttributes] = useState([{ attribute_id: '', value: '' }]);
+
+    // We now manage a single attribute derived from the response
+    const [attributeData, setAttributeData] = useState({
+        id: '',        // The attribute ID (e.g., 1 for "Weight")
+        name: '',      // The attribute Name (e.g., "Weight")
+        value: ''      // The value (e.g., "89")
+    });
+
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [units, setUnits] = useState([]);
-    const [availableAttributes, setAvailableAttributes] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [originalData, setOriginalData] = useState(null);
 
     useEffect(() => {
-        // Validate IDs
         if (!productId || !variantId) {
             showError('Invalid product or variant ID');
             navigate('/products');
@@ -44,13 +49,14 @@ const EditVariant = () => {
     const loadData = async () => {
         try {
             setIsLoading(true);
-            const [variantResponse, unitsResponse, attributesResponse] = await Promise.all([
+            // Removed getProductAttributes call as requested
+            const [variantResponse, unitsResponse] = await Promise.all([
                 getVariant(productId, variantId),
-                getUnits(),
-                getProductAttributes()
+                getUnits()
             ]);
 
             const variant = variantResponse.data || variantResponse;
+            setUnits(unitsResponse.data || []);
 
             const mappedData = {
                 name: variant.name || '',
@@ -61,20 +67,28 @@ const EditVariant = () => {
             };
 
             setFormData(mappedData);
-            setOriginalData(mappedData);
 
-            setUnits(unitsResponse.data || []);
+            // Extract the single attribute from the response
+            let attrInfo = { id: '', name: '', value: '' };
 
-            const attrData = attributesResponse.data || attributesResponse;
-            setAvailableAttributes(Array.isArray(attrData) ? attrData : [attrData]);
-
-            // Map attributes
-            if (variant.attributes && variant.attributes.length > 0) {
-                setAttributes(variant.attributes.map(attr => ({
-                    attribute_id: String(attr.attribute_id || ''),
-                    value: attr.value || ''
-                })));
+            if (variant.attribute_values && variant.attribute_values.length > 0) {
+                // Assuming we take the first one since logic implies single attribute edit
+                const attrVal = variant.attribute_values[0];
+                if (attrVal) {
+                    attrInfo = {
+                        id: attrVal.attribute_id,
+                        name: attrVal.attribute?.name || 'Attribute', // From nested object
+                        value: attrVal.value
+                    };
+                }
             }
+
+            setAttributeData(attrInfo);
+
+            setOriginalData({
+                ...mappedData,
+                attributeValue: attrInfo.value
+            });
 
         } catch (error) {
             console.error('Error loading variant:', error);
@@ -86,23 +100,14 @@ const EditVariant = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-
-        if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
+        setFormData(prev => ({ ...prev, [name]: value }));
+        if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
     };
 
-    const handleAttributeChange = (index, field, value) => {
-        const newAttributes = [...attributes];
-        newAttributes[index][field] = value;
-        setAttributes(newAttributes);
+    // Only handle value change for the single attribute
+    const handleAttributeValueChange = (e) => {
+        setAttributeData(prev => ({ ...prev, value: e.target.value }));
+        if (errors.attribute_value) setErrors(prev => ({ ...prev, attribute_value: '' }));
     };
 
     const validateForm = () => {
@@ -114,15 +119,9 @@ const EditVariant = () => {
         if (!formData.stock_quantity || formData.stock_quantity < 0) newErrors.stock_quantity = 'Valid stock quantity is required';
         if (!formData.unit_id) newErrors.unit_id = 'Unit is required';
 
-        // Validate attributes
-        attributes.forEach((attr, index) => {
-            if (!attr.attribute_id.trim()) {
-                newErrors[`attribute_${index}_id`] = 'Attribute ID is required';
-            }
-            if (!attr.value.trim()) {
-                newErrors[`attribute_${index}_value`] = 'Attribute value is required';
-            }
-        });
+        if (!attributeData.value.toString().trim()) {
+            newErrors.attribute_value = 'Attribute value is required';
+        }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -130,31 +129,23 @@ const EditVariant = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!validateForm()) {
-            return;
-        }
-
+        if (!validateForm()) return;
         setIsSubmitting(true);
 
         try {
             const variantData = {
                 ...formData,
-                attributes: attributes.map(attr => ({
-                    attribute_id: parseInt(attr.attribute_id),
-                    value: attr.value
-                }))
+                attributes: [{
+                    attribute_id: attributeData.id,
+                    value: attributeData.value
+                }]
             };
 
             const response = await updateVariant(productId, variantId, variantData);
-
             showSuccess(response.message || 'Variant updated successfully!');
-
-            // Redirect back to products page
             navigate('/products');
         } catch (error) {
             console.error('Error updating variant:', error);
-
             if (error.message.includes('Session expired')) {
                 showError('Session expired. Please login again.');
                 navigate('/login');
@@ -167,13 +158,13 @@ const EditVariant = () => {
     };
 
     const goBack = () => {
-        // Check if form has been modified
         const hasChanges = originalData && (
             formData.name !== originalData.name ||
             formData.sku !== originalData.sku ||
             formData.price !== originalData.price ||
             formData.stock_quantity !== originalData.stock_quantity ||
-            formData.unit_id !== originalData.unit_id
+            formData.unit_id !== originalData.unit_id ||
+            attributeData.value !== originalData.attributeValue
         );
 
         if (hasChanges) {
@@ -206,13 +197,9 @@ const EditVariant = () => {
     return (
         <DashboardLayout>
             <div className="max-w-4xl mx-auto">
-                {/* Header */}
                 <div className="mb-6">
                     <div className="flex items-center gap-4 mb-4">
-                        <button
-                            onClick={goBack}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
+                        <button onClick={goBack} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                             <ArrowLeft className="w-5 h-5 text-gray-600" />
                         </button>
                         <div>
@@ -222,12 +209,9 @@ const EditVariant = () => {
                     </div>
                 </div>
 
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-8">
-                    {/* Basic Information */}
                     <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-6">Variant Information</h2>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <Input
                                 label="Variant Name"
@@ -238,7 +222,6 @@ const EditVariant = () => {
                                 error={errors.name}
                                 required
                             />
-
                             <Input
                                 label="SKU"
                                 name="sku"
@@ -248,7 +231,6 @@ const EditVariant = () => {
                                 error={errors.sku}
                                 required
                             />
-
                             <Input
                                 label="Price"
                                 name="price"
@@ -261,7 +243,6 @@ const EditVariant = () => {
                                 min="0"
                                 step="0.01"
                             />
-
                             <Input
                                 label="Stock Quantity"
                                 name="stock_quantity"
@@ -273,13 +254,12 @@ const EditVariant = () => {
                                 required
                                 min="0"
                             />
-
                             <Select
                                 label="Unit"
                                 name="unit_id"
                                 value={formData.unit_id}
                                 onChange={handleInputChange}
-                                options={units.map(unit => ({ value: unit.id, label: unit.name }))}
+                                options={units.map(unit => ({ value: String(unit.id), label: unit.name }))}
                                 placeholder="Select unit"
                                 error={errors.unit_id}
                                 required
@@ -287,65 +267,43 @@ const EditVariant = () => {
                         </div>
                     </div>
 
-                    {/* Attributes */}
+                    {/* Attributes Section */}
                     <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-semibold text-gray-900">Attribute</h2>
-                        </div>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-6">Attribute</h2>
 
-                        <div className="space-y-4">
-                            {attributes.map((attribute, index) => (
-                                <div key={index} className="flex gap-4 items-start">
-                                    <div className="flex-1">
-                                        <Select
-                                            label="Attribute Type"
-                                            value={attribute.attribute_id}
-                                            onChange={(e) => handleAttributeChange(index, 'attribute_id', e.target.value)}
-                                            options={availableAttributes.map(attr => ({
-                                                value: String(attr.id),
-                                                label: attr.name
-                                            }))}
-                                            placeholder="Select Attribute"
-                                            error={errors[`attribute_${index}_id`]}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <Input
-                                            label="Value"
-                                            value={attribute.value}
-                                            onChange={(e) => handleAttributeChange(index, 'value', e.target.value)}
-                                            placeholder="e.g., Large"
-                                            error={errors[`attribute_${index}_value`]}
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                            ))}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Attribute Name Display (Read Only) */}
+                            {/* We use an Input here but disabled to show it's fixed from the response */}
+                            <Input
+                                label="Attribute Type"
+                                value={attributeData.name || 'Loading...'}
+                                disabled={true}
+                                className="bg-gray-100 text-gray-700 cursor-not-allowed"
+                            />
+
+                            {/* Value Input (Editable) */}
+                            <Input
+                                label="Value"
+                                value={attributeData.value}
+                                onChange={handleAttributeValueChange}
+                                placeholder="Enter value"
+                                error={errors.attribute_value}
+                                required
+                            />
                         </div>
                     </div>
 
-                    {/* Actions */}
                     <div className="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
-                        <Button
-                            type="button"
-                            onClick={goBack}
-                            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
+                        <Button type="button" onClick={goBack} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
                             Cancel
                         </Button>
-                        <Button
-                            type="submit"
-                            loading={isSubmitting}
-                            className="px-6 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-2"
-                        >
+                        <Button type="submit" loading={isSubmitting} className="px-6 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-2">
                             <Save className="w-4 h-4" />
                             {isSubmitting ? 'Updating...' : 'Update Variant'}
                         </Button>
                     </div>
                 </form>
 
-                {/* Cancel Confirmation Modal */}
                 <ConfirmationModal
                     isOpen={showCancelModal}
                     onClose={() => setShowCancelModal(false)}

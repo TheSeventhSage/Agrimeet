@@ -1,29 +1,22 @@
-// components/WithdrawFunds.jsx
-import { useState } from 'react';
-import { ArrowUpRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowUpRight, AlertCircle } from 'lucide-react';
 import Button from '../../../shared/components/Button';
-import { LoadingSpinner } from '../../../shared/components/Loader';
+import { useNavigate } from 'react-router-dom';
 
 const WithdrawFunds = ({ balance, bankAccounts, onWithdraw, isLoading }) => {
-    const [formData, setFormData] = useState({
-        amount: '',
-        bankAccountId: ''
-    });
+    const navigate = useNavigate();
+    const [amount, setAmount] = useState('');
 
-    console.log(balance)
+    // Get the profile bank account
+    const accounts = bankAccounts;
+    const profileBankAccount = accounts && accounts.length > 0 ? accounts[0] : null;
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (formData.amount && formData.bankAccountId) {
-            onWithdraw(parseFloat(formData.amount), parseInt(formData.bankAccountId));
-            setFormData({ amount: '', bankAccountId: '' });
+        if (amount && profileBankAccount) {
+            onWithdraw(parseFloat(amount));
+            setAmount('');
         }
-    };
-
-    const handleInputChange = (field, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
     };
 
     return (
@@ -39,64 +32,74 @@ const WithdrawFunds = ({ balance, bankAccounts, onWithdraw, isLoading }) => {
                                 Amount to Withdraw
                             </label>
                             <div className="relative">
-                                <span className="absolute left-3 top-3 text-gray-500">₦</span>
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₦</span>
                                 <input
                                     type="number"
-                                    value={formData.amount}
-                                    onChange={(e) => handleInputChange('amount', e.target.value)}
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                                     placeholder="0.00"
                                     min="100"
                                     max={balance}
-                                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                                     required
+                                    disabled={!profileBankAccount}
                                 />
                             </div>
-                            <p className="text-sm text-gray-500 mt-2">
-                                Available: ₦{balance}
-                            </p>
+                            <div className="flex justify-between mt-1 text-xs">
+                                <span className="text-gray-500">Min: ₦100</span>
+                                <span className={balance < parseFloat(amount || 0) ? "text-red-500 font-medium" : "text-gray-500"}>
+                                    Available: ₦{parseFloat(balance).toLocaleString()}
+                                </span>
+                            </div>
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Select Bank Account
+                                Destination Bank
                             </label>
-                            <select
-                                value={formData.bankAccountId}
-                                onChange={(e) => handleInputChange('bankAccountId', e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                                required
-                            >
-                                <option value="">Choose bank account</option>
-                                {bankAccounts.map((account) => (
-                                    <option key={account.id} value={account.id}>
-                                        {account.bankName} - {account.accountNumber} {account.isDefault && '(Default)'}
-                                    </option>
-                                ))}
-                            </select>
+                            {profileBankAccount ? (
+                                <div className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 cursor-not-allowed">
+                                    <div className="font-medium">{profileBankAccount.bankName}</div>
+                                    <div className="text-sm text-gray-500">
+                                        {profileBankAccount.accountNumber} • {profileBankAccount.accountName}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                    <div className="flex gap-3">
+                                        <AlertCircle className="w-5 h-5 text-yellow-600 shrink-0" />
+                                        <div>
+                                            <h4 className="text-sm font-medium text-yellow-800">No Bank Account Linked</h4>
+                                            <p className="text-xs text-yellow-700 mt-1">
+                                                You need to update your profile with bank details before you can withdraw.
+                                            </p>
+                                            <button
+                                                type="button"
+                                                onClick={() => navigate('/settings/profile')}
+                                                className="text-xs font-semibold text-yellow-800 underline mt-2 hover:text-yellow-900"
+                                            >
+                                                Go to Profile Settings
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <Button
                             type="submit"
-                            disabled={isLoading || !formData.amount || !formData.bankAccountId}
-                            className="w-full"
+                            loading={isLoading}
+                            disabled={!amount || !profileBankAccount || parseFloat(amount) > balance}
+                            className="w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 text-white py-2.5 rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                         >
-                            {isLoading ? (
-                                <>
-                                    <LoadingSpinner size="sm" className="mr-2" />
-                                    Processing...
-                                </>
-                            ) : (
-                                <>
-                                    <ArrowUpRight className="w-4 h-4 mr-2" />
-                                    Withdraw Funds
-                                </>
-                            )}
+                            <ArrowUpRight className="w-4 h-4" />
+                            {isLoading ? 'Processing...' : 'Withdraw Funds'}
                         </Button>
                     </form>
                 </div>
 
-                {/* Withdrawal Info */}
-                <div className="bg-gray-50 rounded-lg p-6">
+                {/* Withdrawal Information */}
+                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                     <h4 className="font-medium text-gray-900 mb-4">Withdrawal Information</h4>
                     <div className="space-y-3 text-sm">
                         <div className="flex justify-between">
@@ -105,21 +108,17 @@ const WithdrawFunds = ({ balance, bankAccounts, onWithdraw, isLoading }) => {
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-600">Minimum Withdrawal:</span>
-                            <span className="font-medium">₦1,000</span>
+                            <span className="font-medium">₦100</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-600">Transaction Fee:</span>
-                            <span className="font-medium">₦25</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-gray-600">Daily Limit:</span>
-                            <span className="font-medium">₦500,000</span>
+                            <span className="font-medium">₦0</span>
                         </div>
                     </div>
 
                     <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                         <p className="text-sm text-yellow-800">
-                            💡 Withdrawals are processed on business days. Weekend requests will be processed on the next business day.
+                            💡 Withdrawals are processed on business days using the bank details in your profile.
                         </p>
                     </div>
                 </div>

@@ -32,8 +32,8 @@ const ProductDetails = () => {
                 setError(null);
 
                 const response = await getProduct(id);
-                const raw = response?.data ?? response;
-                const transformedProduct = transformProductData(raw);
+                console.log(response)
+                const transformedProduct = transformProductData(response.data);
                 setProduct(transformedProduct);
 
                 // set default selected variant: prefer first variant, else null
@@ -67,18 +67,6 @@ const ProductDetails = () => {
         navigate('/products');
     };
 
-    // Helper: compute variant stock sum and total stock (safe)
-    const computeVariantStockSum = (p) => {
-        if (!p) return 0;
-        if (!Array.isArray(p.variants)) return 0;
-        return p.variants.reduce((s, v) => s + (Number(v?.stock_quantity ?? v?.stock ?? 0) || 0), 0);
-    };
-
-    const variantStockSum = computeVariantStockSum(product);
-    const topLevelStock = Number(product?.stock ?? product?.stock_quantity ?? 0) || 0;
-    const totalStock = topLevelStock + variantStockSum;
-    const isAvailable = totalStock > 0;
-
     // Selected variant object
     const selectedVariant =
         Array.isArray(product?.variants) && selectedVariantId
@@ -87,8 +75,12 @@ const ProductDetails = () => {
 
     const selectedVariantStock = Number(selectedVariant?.stock_quantity ?? selectedVariant?.stock ?? 0) || 0;
 
+    // Use stock_quantity directly from response for total stock
+    const totalStock = Number(product?.stock ?? 0);
+
     // Price display: prefer variant price if selected, else product discounted/base price
-    const displayPrice = selectedVariant?.price ?? product?.discountedPrice ?? product?.discount_price ?? product?.price ?? product?.base_price;
+    const displayPrice = product?.price;
+    console.log(product?.price)
 
     // Quantity controls - respect selected variant stock or total stock
     const increaseQty = () => {
@@ -113,7 +105,7 @@ const ProductDetails = () => {
     };
 
     const StockIndicator = ({ stock, selectedStock = null }) => {
-        // stock = totalStock, selectedStock = selectedVariantStock (optional)
+        // stock = totalStock from response
         let config;
         if (stock > 50) {
             config = { dot: 'bg-green-500', text: 'In Stock', color: 'text-green-600' };
@@ -131,7 +123,7 @@ const ProductDetails = () => {
                 <div>
                     <div className={`text-sm font-medium ${config.color}`}>{config.text}</div>
                     <div className="text-xs text-gray-500">
-                        {stock} units total{selectedStock != null ? ` • selected: ${selectedStock} units` : ''}
+                        {stock} {product.unit}s {selectedStock != null ? ` • selected: ${selectedStock} units` : ''}
                     </div>
                 </div>
             </div>
@@ -266,21 +258,22 @@ const ProductDetails = () => {
                                     <StatusBadge status={product.status} />
                                 </div>
                                 <div className="flex items-center gap-4 text-sm text-gray-500">
-                                    <span>SKU: {product.slug || 'N/A'}</span>
+                                    <span>Slug: {product.slug || 'N/A'}</span>
+                                    <span>SKU: {product.sku || 'N/A'}</span>
                                     <span>•</span>
                                     <span>Category: {product.category ?? '—'}</span>
                                 </div>
                             </div>
 
                             {/* Rating */}
-                            <div className="flex items-center gap-2">
+                            {/* <div className="flex items-center gap-2">
                                 <div className="flex items-center gap-1">
                                     {renderStars(product.rating)}
                                 </div>
                                 <span className="text-sm text-gray-600">
                                     {product.rating ?? 0} • {product.reviews ?? 0} reviews
                                 </span>
-                            </div>
+                            </div> */}
 
                             {/* Price */}
                             <div className="flex items-center gap-4">
@@ -302,7 +295,7 @@ const ProductDetails = () => {
                                 </span>
                             </div>
 
-                            {/* Stock */}
+                            {/* Stock - Using top level stock quantity */}
                             <StockIndicator stock={totalStock} selectedStock={selectedVariant ? selectedVariantStock : null} />
 
                             {/* Variant selector (if variants exist) */}
@@ -354,34 +347,27 @@ const ProductDetails = () => {
                                 </p>
                             </div>
 
-                            {/* Key Features */}
+                            {/* Key Features - Added Weight */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                                     <Package className="w-5 h-5 text-brand-500" />
                                     <div>
                                         <div className="text-sm font-medium text-gray-900">Total Stock</div>
-                                        <div className="text-xs text-gray-500">{totalStock} units</div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                    <Truck className="w-5 h-5 text-brand-500" />
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-900">Free Shipping</div>
-                                        <div className="text-xs text-gray-500">Available</div>
+                                        <div className="text-xs text-gray-500">{product.stock}</div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                                     <Shield className="w-5 h-5 text-brand-500" />
                                     <div>
-                                        <div className="text-sm font-medium text-gray-900">Warranty</div>
-                                        <div className="text-xs text-gray-500">1 Year</div>
+                                        <div className="text-sm font-medium text-gray-900">Weight</div>
+                                        <div className="text-xs text-gray-500">{product.weight}</div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                                     <RotateCcw className="w-5 h-5 text-brand-500" />
                                     <div>
                                         <div className="text-sm font-medium text-gray-900">Returns</div>
-                                        <div className="text-xs text-gray-500">30 Days</div>
+                                        <div className="text-xs text-gray-500">No Returns</div>
                                     </div>
                                 </div>
                             </div>
@@ -394,7 +380,7 @@ const ProductDetails = () => {
                     {/* Tab Headers */}
                     <div className="border-b border-gray-200">
                         <nav className="flex gap-8 px-6">
-                            {['description', 'specifications', 'reviews'].map((tab) => (
+                            {['description', 'specifications'].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
@@ -434,7 +420,7 @@ const ProductDetails = () => {
                                             <span className="font-medium text-gray-900">{product.unit ?? product.unitSymbol}</span>
                                         </div>
                                         <div className="flex justify-between py-2 border-b border-gray-100">
-                                            <span className="text-gray-500">SKU</span>
+                                            <span className="text-gray-500">Slug</span>
                                             <span className="font-medium text-gray-900">{product.slug || 'N/A'}</span>
                                         </div>
                                         <div className="flex justify-between py-2 border-b border-gray-100">
@@ -448,12 +434,12 @@ const ProductDetails = () => {
                                     <div className="space-y-3">
                                         <div className="flex justify-between py-2 border-b border-gray-100">
                                             <span className="text-gray-500">Base Price</span>
-                                            <span className="font-medium text-gray-900">${product.originalPrice ?? product.base_price ?? product.price}</span>
+                                            <span className="font-medium text-gray-900">${product.originalPrice ?? product.price}</span>
                                         </div>
-                                        {product.discountedPrice && (
+                                        {product.discount > 0 && (
                                             <div className="flex justify-between py-2 border-b border-gray-100">
                                                 <span className="text-gray-500">Discount Price</span>
-                                                <span className="font-medium text-green-600">${product.discountedPrice}</span>
+                                                <span className="font-medium text-green-600">${product.discount}</span>
                                             </div>
                                         )}
                                         <div className="flex justify-between py-2 border-b border-gray-100">
@@ -468,18 +454,6 @@ const ProductDetails = () => {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
-
-                        {activeTab === 'reviews' && (
-                            <div className="text-center py-8">
-                                <div className="text-gray-400 mb-4">
-                                    <Star className="w-12 h-12 mx-auto" />
-                                </div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Reviews Yet</h3>
-                                <p className="text-gray-500">
-                                    This product doesn't have any reviews yet. Be the first to share your experience!
-                                </p>
                             </div>
                         )}
                     </div>

@@ -14,7 +14,7 @@ const WalletOverview = ({
     const balanceCards = [
         {
             title: 'Available Balance',
-            value: overviewData.paid_payouts || 0,
+            value: overviewData.wallet_balance, // Updated to consume wallet_balance
             color: 'green',
             icon: Wallet,
             description: 'Ready for withdrawal'
@@ -45,7 +45,8 @@ const WalletOverview = ({
     }
 
     // Calculate max value for chart scaling
-    const maxTrendValue = trend.length > 0 ? Math.max(...trend.map(t => t.amount), 1) : 1000;
+    // Updated to use 'total_earnings' from your API response and parse it as float
+    const maxTrendValue = trend.length > 0 ? Math.max(...trend.map(t => parseFloat(t.total_earnings || 0)), 1) : 1000;
 
     // Take only the first 5 items for the "Recent History" view
     const recentHistory = history.slice(0, 5);
@@ -107,7 +108,7 @@ const WalletOverview = ({
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Monthly Earnings Chart */}
-                <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                {/* <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-2">
                             <TrendingUp className="w-5 h-5 text-brand-600" />
@@ -122,7 +123,9 @@ const WalletOverview = ({
                             </div>
                         ) : (
                             trend.map((item, index) => {
-                                const heightPercentage = (item.amount / maxTrendValue) * 100;
+                                // Updated to consume item.total_earnings
+                                const earnings = parseFloat(item.total_earnings || 0);
+                                const heightPercentage = (earnings / maxTrendValue) * 100;
                                 return (
                                     <div key={index} className="flex flex-col items-center flex-1 group">
                                         <div className="relative w-full flex items-end justify-center h-full">
@@ -130,9 +133,9 @@ const WalletOverview = ({
                                                 className="w-full max-w-[40px] bg-brand-200 rounded-t-sm group-hover:bg-brand-500 transition-all duration-300 relative"
                                                 style={{ height: `${heightPercentage}%` }}
                                             >
-                                                {/* Tooltip */}
+                                                <-- tooltip -->
                                                 <div className="opacity-0 group-hover:opacity-100 absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs py-1 px-2 rounded whitespace-nowrap transition-opacity z-10">
-                                                    ₦{item.amount.toLocaleString()}
+                                                    ₦{earnings.toLocaleString()}
                                                 </div>
                                             </div>
                                         </div>
@@ -144,7 +147,7 @@ const WalletOverview = ({
                             })
                         )}
                     </div>
-                </div>
+                </div> */}
 
                 {/* Recent Transactions List */}
                 <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col">

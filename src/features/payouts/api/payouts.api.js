@@ -87,5 +87,40 @@ export const earningsApi = {
         });
 
         return handleResponse(response);
+    },
+
+    // --- Wallet Management Endpoints ---
+
+    // Get current wallet balance
+    getWalletBalance: async () => {
+        const url = `${API_BASE_URL}/seller/wallet/balance`;
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        return handleResponse(response);
+    },
+
+    // Request withdrawal from wallet
+    requestWithdrawal: async ({ amount }) => {
+        const url = `${API_BASE_URL}/seller/wallet/withdraw`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ amount })
+        });
+
+        return handleResponse(response);
     }
 };

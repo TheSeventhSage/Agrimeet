@@ -280,11 +280,9 @@ export const transformProductData = (apiProduct) => {
         name: apiProduct.name,
         description: apiProduct.description,
         originalPrice: parseFloat(apiProduct.base_price),
-        discountedPrice: parseFloat(apiProduct.discount_price || apiProduct.base_price),
         price: parseFloat(apiProduct.discount_price || apiProduct.base_price),
-        discount: apiProduct.discount_price ?
-            Math.round(((apiProduct.base_price - apiProduct.discount_price) / apiProduct.base_price) * 100) : 0,
-        stock: apiProduct.sku,
+        discount: apiProduct.discount_price > 0 ? apiProduct.discount_price : '',
+        stock: apiProduct.stock_quantity,
         category: apiProduct.category || 'Unknown',
         categoryId: apiProduct.category_id,
         status: apiProduct.status,
@@ -294,11 +292,12 @@ export const transformProductData = (apiProduct) => {
         images: Array.isArray(apiProduct.images)
             ? apiProduct.images.filter(img => img && img.includes('http'))
             : [],
-        rating: 4.5, // Default rating since not in API
-        reviews: 0, // Default reviews since not in API
+        // rating: 4.5, // Default rating since not in API
+        // reviews: 0, // Default reviews since not in API
+        weight: apiProduct.weight,
         unit: apiProduct.unit?.name || 'Unit',
         unitSymbol: apiProduct.unit?.symbol || '',
-        sellerId: apiProduct.seller.seller_id,
+        // sellerId: apiProduct.seller.id,
         seller: apiProduct.seller.name,
         variants: apiProduct.variants || [],
         createdAt: apiProduct.created_at,

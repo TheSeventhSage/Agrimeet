@@ -54,7 +54,7 @@ const AdminDashboard = lazy(() => import('../features/admin/pages/AdminDashboard
 const UserManagement = lazy(() => import('../features/admin/userManagement/pages/UserManagement'));
 const SellerManagement = lazy(() => import('../features/admin/sellerManagement/pages/SellerManagement'));
 const ProductModeration = lazy(() => import('../features/admin/pages/ProductModeration'));
-const TransactionOversight = lazy(() => import('../features/admin/pages/TransactionOversight'));
+const TransactionOversight = lazy(() => import('../features/admin/commissionsManagement/pages/TransactionOversight'));
 const CommissionManagement = lazy(() => import('../features/admin/commissionsManagement/pages/CommissionManagement'));
 const DisputeManagement = lazy(() => import('../features/admin/disputeManagement/pages/DisputeManagement'));
 const ReportsAnalytics = lazy(() => import('../features/admin/pages/ReportsAnalytics'));

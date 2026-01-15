@@ -13,14 +13,13 @@ import { showSuccess, showError } from '../../../shared/utils/alert';
 import { getProduct, updateProduct, getCategories, getUnits } from '../api/productsApi';
 
 const EditProduct = () => {
-    // Get product ID from URL hash (e.g., #/products/edit/123)
     const { id: productId } = useParams();
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
         name: '',
-        sku: '', // Added back
-        tags: '', // Added back
+        sku: '',
+        weight: '',
         slug: '',
         description: '',
         base_price: '',
@@ -60,40 +59,60 @@ const EditProduct = () => {
                 ]);
 
                 const product = productRes?.data || productRes?.product || productRes;
+                const fetchedCategories = categoriesRes?.data || [];
+                const fetchedUnits = unitsRes.data || [];
 
-                // Flatten nested categories
-                const flatten = (arr) => {
-                    let flat = [];
-                    (arr || []).forEach(c => {
-                        flat.push(c);
-                        if (c.children?.length) flat = flat.concat(flatten(c.children));
-                    });
-                    return flat;
+                setCategories(fetchedCategories);
+                setUnits(fetchedUnits);
+
+                const findCategoryIdByName = (cats, nameToFind) => {
+                    if (!nameToFind) return '';
+                    for (const cat of cats) {
+                        if (cat.name === nameToFind) return String(cat.id);
+                        if (cat.children && cat.children.length > 0) {
+                            const foundId = findCategoryIdByName(cat.children, nameToFind);
+                            if (foundId) return foundId;
+                        }
+                    }
+                    return '';
                 };
-                setCategories(flatten(categoriesRes?.data || []));
-                setUnits(unitsRes.data || []);
+
+                let resolvedCategoryId = '';
+                if (typeof product.category === 'string') {
+                    resolvedCategoryId = findCategoryIdByName(fetchedCategories, product.category);
+                } else if (product.category?.id) {
+                    resolvedCategoryId = String(product.category.id);
+                } else if (product.category_id) {
+                    resolvedCategoryId = String(product.category_id);
+                }
 
                 const mapped = {
                     name: product?.name || '',
-                    sku: product?.sku || '', // Map SKU
-                    tags: product?.tags ? (Array.isArray(product.tags) ? product.tags.join(', ') : product.tags) : '', // Map Tags
+                    sku: product?.sku || '',
+                    weight: product?.weight ? String(product.weight) : '',
                     slug: product?.slug || '',
                     description: product?.description || '',
                     base_price: product?.base_price ? String(product.base_price) : '',
                     discount_price: product?.discount_price ? String(product.discount_price) : '',
                     stock_quantity: product?.stock_quantity ? String(product.stock_quantity) : '',
                     status: product?.status || 'active',
-                    category_id: product?.category_id ? String(product.category_id) : (product?.category?.id ? String(product.category.id) : ''),
-                    unit_id: product?.unit_id ? String(product.unit_id) : (product?.unit?.id ? String(product.unit.id) : '')
+                    category_id: resolvedCategoryId,
+                    unit_id: product?.unit?.id
+                        ? String(product.unit.id)
+                        : (product?.unit_id ? String(product.unit_id) : '')
                 };
                 setFormData(mapped);
                 setOriginalData(mapped);
 
-                const existing = (product?.images || []).map(img => ({
-                    id: img.id,
-                    url: typeof img === 'string' ? img : (img.url?.startsWith('http') ? img.url : `https://agrimeet.udehcoglobalfoodsltd.com/storage/${img.url}`)
-                }));
+                const existing = (product?.images || []).map((img, index) => {
+                    const url = typeof img === 'string' ? img : (img.url?.startsWith('http') ? img.url : `https://agrimeet.udehcoglobalfoodsltd.com/storage/${img.url}`);
+                    return {
+                        id: `existing-${index}-${Date.now()}`,
+                        url: url
+                    };
+                });
                 setExistingImages(existing);
+
             } catch (error) {
                 console.error('Error loading product:', error);
                 showError(error.message || 'Failed to load product data');
@@ -112,12 +131,8 @@ const EditProduct = () => {
             [name]: value
         }));
 
-        // Clear error when user starts typing
         if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
+            setErrors(prev => ({ ...prev, [name]: '' }));
         }
     };
 
@@ -129,10 +144,6 @@ const EditProduct = () => {
         setThumbnailImages(files);
     };
 
-    const removeUploadedImage = (imageId) => {
-        setUploadedImages(prev => prev.filter(img => img.id !== imageId));
-    };
-
     const removeExistingImage = (imageId) => {
         setExistingImages(prev => prev.filter(img => img.id !== imageId));
     };
@@ -141,13 +152,12 @@ const EditProduct = () => {
         const newErrors = {};
 
         if (!formData.name.trim()) newErrors.name = 'Product name is required';
-        if (!formData.sku?.trim()) newErrors.sku = 'SKU is required'; // Validate SKU
         if (!formData.description.trim()) newErrors.description = 'Description is required';
         if (!formData.base_price || Number(formData.base_price) <= 0) newErrors.base_price = 'Valid base price is required';
         if (!formData.category_id) newErrors.category_id = 'Category is required';
         if (!formData.unit_id) newErrors.unit_id = 'Unit is required';
         if (!formData.stock_quantity || Number(formData.stock_quantity) < 0) newErrors.stock_quantity = 'Valid stock quantity is required';
-        // Allow existing images; new images optional
+
         if (existingImages.length === 0 && uploadedImages.length === 0 && thumbnailImages.length === 0) {
             newErrors.images = 'Provide at least one image (thumbnail or additional)';
         }
@@ -156,17 +166,45 @@ const EditProduct = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    // Helper to convert URL to File
     const urlToFile = async (url, filename, mimeType) => {
         try {
-            const response = await fetch(url);
+            // Attempt to fetch with CORS mode enabled. 
+            // NOTE: If this fails, you MUST enable CORS on your backend server or use a Chrome Extension.
+            const response = await fetch(url, {
+                mode: 'cors',
+                credentials: 'omit' // Sometimes helps with public buckets
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+
             const blob = await response.blob();
             return new File([blob], filename, { type: mimeType || blob.type });
         } catch (error) {
-            console.error("Error converting image to file:", error);
+            console.error(`Error converting ${url} to file. This is likely a CORS issue.`, error);
             return null;
         }
     };
+
+    const renderCategoryOptions = (cats, depth = 0) => {
+        let options = [];
+        if (!cats) return options;
+
+        cats.forEach(cat => {
+            const prefix = depth > 0 ? '\u00A0\u00A0'.repeat(depth) + '- ' : '';
+
+            options.push({
+                value: String(cat.id),
+                label: `${prefix}${cat.name}`
+            });
+
+            if (cat.children && cat.children.length > 0) {
+                options = [...options, ...renderCategoryOptions(cat.children, depth + 1)];
+            }
+        });
+        return options;
+    };
+
+    const categoryOptions = renderCategoryOptions(categories);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -180,8 +218,8 @@ const EditProduct = () => {
         try {
             const fd = new FormData();
             fd.append('name', formData.name);
-            fd.append('sku', formData.sku); // Append SKU
-            if (formData.tags) fd.append('tags', formData.tags); // Append Tags
+            if (formData.sku) fd.append('sku', formData.sku);
+            if (formData.weight) fd.append('weight', formData.weight);
             if (formData.slug) fd.append('slug', formData.slug);
             fd.append('description', formData.description);
             fd.append('base_price', formData.base_price);
@@ -191,38 +229,31 @@ const EditProduct = () => {
             fd.append('category_id', formData.category_id);
             fd.append('unit_id', formData.unit_id);
 
-            // Method override for PUT
             fd.append('_method', 'PUT');
 
             if (thumbnailImages.length > 0) {
-                // Check if .file exists (if wrapper object) or use directly if File
                 const thumbFile = thumbnailImages[0].file || thumbnailImages[0];
                 fd.append('thumbnail', thumbFile);
             }
 
-            // 1. Convert Existing Images to Files and Append
-            // This ensures "kept" images are sent back to backend
-            let imageIndex = 0;
-
-            const existingFiles = await Promise.all(
+            // 1. Convert Existing Images
+            const convertedExistingFiles = await Promise.all(
                 existingImages.map(async (img, i) => {
                     return await urlToFile(img.url, `existing-${i}.jpg`, 'image/jpeg');
                 })
             );
 
-            existingFiles.forEach(file => {
+            // 2. Append Existing Images
+            convertedExistingFiles.forEach(file => {
                 if (file) {
-                    fd.append(`images[${imageIndex}]`, file);
-                    imageIndex++;
+                    fd.append('images[]', file);
                 }
             });
 
-            // 2. Append New Uploaded Images
+            // 3. Append New Uploaded Images
             uploadedImages.forEach((img) => {
-                // Handle wrapper object { file: File, ... } from DocumentUpload
                 const file = img.file || img;
-                fd.append(`images[${imageIndex}]`, file);
-                imageIndex++;
+                fd.append('images[]', file);
             });
 
             const response = await updateProduct(productId, fd);
@@ -241,11 +272,10 @@ const EditProduct = () => {
     };
 
     const goBack = () => {
-        // Check if form has been modified
         const hasChanges = originalData && (
             formData.name !== originalData.name ||
-            formData.sku !== originalData.sku || // Check SKU
-            formData.tags !== originalData.tags || // Check Tags
+            formData.sku !== originalData.sku ||
+            formData.weight !== originalData.weight ||
             formData.description !== originalData.description ||
             formData.base_price !== originalData.base_price ||
             formData.discount_price !== originalData.discount_price ||
@@ -285,7 +315,6 @@ const EditProduct = () => {
     return (
         <DashboardLayout>
             <div className="max-w-4xl mx-auto">
-                {/* Header */}
                 <div className="mb-6">
                     <div className="flex items-center gap-4 mb-4">
                         <button
@@ -301,7 +330,6 @@ const EditProduct = () => {
                     </div>
                 </div>
 
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Basic Information */}
                     <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
@@ -319,6 +347,15 @@ const EditProduct = () => {
                             />
 
                             <Input
+                                label="SKU"
+                                name="sku"
+                                value={formData.sku}
+                                onChange={handleInputChange}
+                                placeholder="e.g. PROD-001"
+                                error={errors.sku}
+                            />
+
+                            <Input
                                 label="Slug (Optional)"
                                 name="slug"
                                 value={formData.slug}
@@ -332,7 +369,7 @@ const EditProduct = () => {
                                 name="category_id"
                                 value={formData.category_id}
                                 onChange={handleInputChange}
-                                options={categories.map(cat => ({ value: String(cat.id), label: cat.name }))}
+                                options={categoryOptions}
                                 placeholder="Select category"
                                 error={errors.category_id}
                                 required
@@ -370,6 +407,18 @@ const EditProduct = () => {
                                 placeholder="Select status"
                                 error={errors.status}
                                 required
+                            />
+
+                            <Input
+                                label="Weight"
+                                name="weight"
+                                type="number"
+                                value={formData.weight}
+                                onChange={handleInputChange}
+                                placeholder="Enter weight (e.g. 0.5)"
+                                error={errors.weight}
+                                min="0"
+                                step="0.01"
                             />
                         </div>
 
@@ -452,7 +501,7 @@ const EditProduct = () => {
                         {/* Upload Thumbnail */}
                         <DocumentUpload
                             label="Product Thumbnail (optional)"
-                            onChange={handleThumbnailUpload}
+                            onChange={handleThumbnailUpload} // FIXED: Changed onUpload to onChange
                             error={errors.thumbnail}
                             multiple={false}
                             maxFiles={1}
@@ -462,7 +511,7 @@ const EditProduct = () => {
                         {/* Upload New Additional Images */}
                         <DocumentUpload
                             label="Add New Images (optional)"
-                            onChange={handleImageUpload}
+                            onChange={handleImageUpload} // FIXED: Changed onUpload to onChange
                             error={errors.images}
                             multiple={true}
                             maxFiles={10}
@@ -471,33 +520,6 @@ const EditProduct = () => {
 
                         {errors.images && (
                             <p className="text-sm text-red-600 mt-2">{errors.images}</p>
-                        )}
-
-                        {/* New Uploaded Images Preview */}
-                        {uploadedImages.length > 0 && (
-                            <div className="mt-6">
-                                <h4 className="text-sm font-medium text-gray-700 mb-4">
-                                    New Images ({uploadedImages.length})
-                                </h4>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    {uploadedImages.map((image) => (
-                                        <div key={image.id} className="relative group">
-                                            <img
-                                                src={image.preview}
-                                                alt="Preview"
-                                                className="w-full h-24 object-cover rounded-lg"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => removeUploadedImage(image.id)}
-                                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                <Trash2 className="w-3 h-3" />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
                         )}
                     </div>
 
