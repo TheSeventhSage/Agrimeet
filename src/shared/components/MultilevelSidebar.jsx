@@ -29,7 +29,11 @@ import {
     TrendingUp,
     ScrollText,
     ShieldCheck,
-    HelpCircle
+    HelpCircle,
+    ArrowLeftRight,
+    Scale,
+    ShoppingBag,
+
 } from 'lucide-react';
 
 const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
@@ -93,28 +97,58 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             path: '/admin/seller'
         },
         {
-            key: 'product-moderation',
-            label: 'Product Moderation',
-            icon: Package,
-            path: '/admin/products'
+            key: 'marketplace',
+            label: 'Marketplace',
+            icon: ShoppingBag,
+            hasSubmenu: true,
+            submenu: [
+                {
+                    key: 'product-overview',
+                    label: 'Product Overview',
+                    icon: Package,
+                    path: '/admin/products'
+                },
+                {
+                    key: 'orders',
+                    label: 'Order Overview',
+                    icon: ShoppingCart,
+                    path: '/admin/orders'
+                },
+            ],
         },
         {
-            key: 'transactions',
-            label: 'Transactions',
+            key: 'finance',
+            label: 'Finance',
             icon: DollarSign,
-            path: '/admin/transactions'
+            hasSubmenu: true,
+            submenu: [
+                {
+                    key: 'transactions',
+                    label: 'Transactions',
+                    icon: ArrowLeftRight,
+                    path: '/admin/transactions'
+                },
+                {
+                    key: 'commissions',
+                    label: 'Commissions',
+                    icon: HandCoins,
+                    path: '/admin/commissions'
+                }
+            ]
         },
         {
-            key: 'commissions',
-            label: 'Commissions',
-            icon: HandCoins,
-            path: '/admin/commissions'
-        },
-        {
-            key: 'disputes',
-            label: 'Dispute Management',
+            key: 'support',
+            label: 'Support & Disputes',
             icon: AlertTriangle,
-            path: '/admin/disputes'
+            hasSubmenu: true,
+            submenu: [
+                {
+                    key: 'disputes',
+                    label: 'Dispute Management',
+                    icon: AlertTriangle,
+                    path: '/admin/disputes'
+                },
+            ]
         },
         {
             key: 'reports',
@@ -123,20 +157,14 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             path: '/admin/reports'
         },
         {
-            key: 'settings',
-            label: 'Product Settings',
-            icon: Settings,
-            path: '/admin/settings'
-        },
-        {
-            key: 'legal-contents',
-            label: 'Legal Contents',
-            icon: Package,
+            key: 'content-legal',
+            label: 'Content & Legal',
+            icon: Scale,
             hasSubmenu: true,
             submenu: [
                 {
                     key: 'policies',
-                    label: 'Privacy policy',
+                    label: 'Privacy Policy',
                     icon: ShieldCheck,
                     path: '/admin/privacy-policy'
                 },
@@ -147,13 +175,19 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                     path: '/admin/terms-of-service'
                 },
                 {
-                    name: 'FAQs',
-                    icon: HelpCircle,
+                    key: 'faqs',
                     label: 'FAQs',
+                    icon: HelpCircle,
                     path: '/admin/faqs',
                 }
             ],
         },
+        {
+            key: 'settings',
+            label: 'Product Settings',
+            icon: Settings,
+            path: '/admin/settings'
+        }
     ];
 
     // Seller menu items

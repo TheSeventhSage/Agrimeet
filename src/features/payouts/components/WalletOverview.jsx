@@ -14,7 +14,7 @@ const WalletOverview = ({
     const balanceCards = [
         {
             title: 'Available Balance',
-            value: overviewData.wallet_balance, // Updated to consume wallet_balance
+            value: overviewData.wallet_balance || 0, // Updated to consume wallet_balance
             color: 'green',
             icon: Wallet,
             description: 'Ready for withdrawal'

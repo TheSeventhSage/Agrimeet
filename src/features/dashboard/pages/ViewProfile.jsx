@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Mail,
     Phone,
@@ -61,6 +62,7 @@ const ViewProfile = () => {
         businessDescription: '',
         gender: ''
     });
+    const navigate = useNavigate();
 
     useEffect(() => {
         const responseData = storageManager.getUserData();
@@ -125,7 +127,7 @@ const ViewProfile = () => {
                                         <span className="text-sm text-gray-500 capitalize">• {userData.gender}</span>
                                     </div>
                                 </div>
-                                <Button variant="outline" className="mt-4 md:mt-0">
+                                <Button variant="outline" className="mt-4 md:mt-0" onClick={() => navigate('/settings')}>
                                     <Edit className="w-4 h-4 mr-2" />
                                     Edit Profile
                                 </Button>

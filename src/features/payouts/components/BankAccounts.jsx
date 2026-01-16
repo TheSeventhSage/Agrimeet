@@ -1,6 +1,7 @@
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
 import BankAccountCard from './BankAccountCard';
+import Button from '../../../shared/components/Button'
 import { useNavigate } from 'react-router-dom';
 
 const BankAccounts = ({ accounts }) => {
@@ -10,14 +11,14 @@ const BankAccounts = ({ accounts }) => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-1">
                 <h3 className="text-lg font-semibold text-gray-900">Linked Bank Account</h3>
-                <button
-                    onClick={() => navigate('/settings/profile')}
-                    className="text-sm text-brand-600 hover:text-brand-700 font-medium"
+                <Button
+                    onClick={() => navigate('/profile')}
+                    className="text-sm text-brand-600 border border-brand-500 hover:bg-gray-100 hover:text-brand-600 hover:border hover:border-brand-500 font-medium cursor-pointer"
                 >
                     Update in Profile
-                </button>
+                </Button>
             </div>
 
             {bankAccounts && bankAccounts.length > 0 ? (
@@ -31,12 +32,12 @@ const BankAccounts = ({ accounts }) => {
                     <AlertCircle className="w-10 h-10 text-gray-400 mx-auto mb-3" />
                     <h4 className="text-gray-900 font-medium mb-1">No Bank Account Linked</h4>
                     <p className="text-gray-500 text-sm mb-4">Please update your seller profile with your bank details.</p>
-                    <button
+                    <Button
                         onClick={() => navigate('/settings/profile')}
-                        className="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm hover:bg-brand-600"
+                        className="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm hover:bg-brand-100 hover:text-brand-600 hover:border hover:border-brand-500 cursor-pointer"
                     >
                         Go to Profile
-                    </button>
+                    </Button>
                 </div>
             )}
         </div>

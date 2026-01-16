@@ -53,7 +53,8 @@ const Orders = lazy(() => import('../features/orders/pages/Orders'));
 const AdminDashboard = lazy(() => import('../features/admin/pages/AdminDashboard'));
 const UserManagement = lazy(() => import('../features/admin/userManagement/pages/UserManagement'));
 const SellerManagement = lazy(() => import('../features/admin/sellerManagement/pages/SellerManagement'));
-const ProductModeration = lazy(() => import('../features/admin/pages/ProductModeration'));
+const ProductModeration = lazy(() => import('../features/admin/productOrderManagement/pages/ProductModeration'));
+const OrderModeration = lazy(() => import('../features/admin/productOrderManagement/pages/OrderManagement'));
 const TransactionOversight = lazy(() => import('../features/admin/commissionsManagement/pages/TransactionOversight'));
 const CommissionManagement = lazy(() => import('../features/admin/commissionsManagement/pages/CommissionManagement'));
 const DisputeManagement = lazy(() => import('../features/admin/disputeManagement/pages/DisputeManagement'));
@@ -127,6 +128,7 @@ export default function Router() {
                 <Route path="/admin/users" element={<ProtectedRoutes allowedRoles={['admin']}><UserManagement /></ProtectedRoutes>} />
                 <Route path="/admin/seller" element={<ProtectedRoutes allowedRoles={['admin']}><SellerManagement /></ProtectedRoutes>} />
                 <Route path="/admin/products" element={<ProtectedRoutes allowedRoles={['admin']}><ProductModeration /></ProtectedRoutes>} />
+                <Route path="/admin/orders" element={<ProtectedRoutes allowedRoles={['admin']}><OrderModeration /></ProtectedRoutes>} />
                 <Route path="/admin/transactions" element={<ProtectedRoutes allowedRoles={['admin']}><TransactionOversight /></ProtectedRoutes>} />
                 <Route path="/admin/disputes" element={<ProtectedRoutes allowedRoles={['admin']}><DisputeManagement /></ProtectedRoutes>} />
                 <Route path="/admin/commissions" element={<ProtectedRoutes allowedRoles={['admin']}><CommissionManagement /></ProtectedRoutes>} />

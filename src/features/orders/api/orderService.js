@@ -158,7 +158,7 @@ export const orderService = {
       if (!response.ok) throw new Error('Failed to fetch order details');
 
       const jsonResponse = await response.json();
-      return transformOrderData(jsonResponse.data);
+      return jsonResponse.data;
 
     } catch (error) {
       console.error('Error fetching order details:', error);

@@ -38,7 +38,7 @@ export const getAllSellers = async (page = 1, perPage = 20, filters = {}) => {
         }
 
         const response = await api.get(`/admin/allsellers`, {
-            params: {
+            query: {
                 type: filters.business_type,
                 status: filters.status,
                 search: filters.search_global,
@@ -90,7 +90,7 @@ export const unsuspendSeller = unsuspendUser;
 export const getSellerStats = async () => {
     try {
         const response = await api.get('/admin/allsellers', {
-            searchParams: { per_page: 1 },
+            query: { per_page: 1 },
         });
         return response;
     } catch (error) {

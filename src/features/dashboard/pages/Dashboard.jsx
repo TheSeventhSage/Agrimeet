@@ -25,6 +25,8 @@ import {
     validateSellerAddress,
 } from '../api/dashboardApi'; // Adjust path if needed
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 // --- Helper Functions ---
 
 const formatCurrency = (amount) => {
@@ -275,7 +277,7 @@ const Dashboard = () => {
                                     {topProducts.map((item) => (
                                         <div key={item.product_id} className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <img src={item.product.thumbnail || 'https://via.placeholder.com/40'} alt={item.product.name} className="w-10 h-10 object-cover rounded-lg bg-gray-100" />
+                                                <img src={API_BASE_URL + item.product.thumbnail || 'https://via.placeholder.com/40'} alt={item.product.name} className="w-10 h-10 object-cover rounded-lg bg-gray-100" />
                                                 <div>
                                                     <p className="font-medium text-gray-900 truncate max-w-[150px]">{item.product.name}</p>
                                                     <div className="flex items-center gap-1">

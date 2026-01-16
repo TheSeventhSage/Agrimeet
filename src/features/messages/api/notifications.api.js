@@ -9,7 +9,7 @@ import { api } from '../../../shared/utils/apiClient';
 export const getSellerNotifications = async (page = 1, perPage = 15) => {
     try {
         const response = await api.get('/seller/notifications', {
-            searchParams: {
+            query: {
                 page,
                 per_page: perPage,
             },
@@ -75,7 +75,7 @@ export const deleteNotification = async (id) => {
 export const getNotificationsByType = async (type, page = 1, perPage = 15) => {
     try {
         const response = await api.get(`/notifications/type/${type}`, {
-            searchParams: {
+            query: {
                 page,
                 per_page: perPage,
             },

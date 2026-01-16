@@ -26,7 +26,7 @@ export const getCommissionOverview = async (period = 'month') => {
 export const getDailyBreakdown = async (days = 30) => {
     try {
         const response = await api.get('/admin/commissions/daily-breakdown', {
-            params: { days }
+            query: { days }
         });
         return response;
     } catch (error) {
@@ -43,7 +43,7 @@ export const getDailyBreakdown = async (days = 30) => {
 export const getCommissionBySeller = async (params = {}) => {
     try {
         const response = await api.get('/admin/commissions/by-seller', {
-            params: {
+            query: {
                 period: params.period || 'month',
                 payout_status: params.payout_status
             }
