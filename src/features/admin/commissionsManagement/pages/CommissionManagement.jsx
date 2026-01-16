@@ -1,17 +1,16 @@
 // admin/commission/CommissionManagement.jsx
 import { useState } from 'react';
-import DashboardLayout from '../../../../layouts/DashboardLayout';
 import { BarChart3, CreditCard, Users, Settings } from 'lucide-react';
-
+import DashboardLayout from '../../../../layouts/DashboardLayout';
 // Sub-components
-import CommissionOverview from '../components/CommissionOverview';
-import PayoutsList from '../components/PayoutsList';
+// import PayoutsList from '../components/PayoutsList';
 import SellerReports from '../components/SellerReports';
+import CommissionOverview from '../components/CommissionOverview';
 import CommissionSettings from '../components/CommissionSettings';
 
 const tabs = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
-    { id: 'payouts', label: 'Payouts', icon: CreditCard },
+    // { id: 'payouts', label: 'Payouts', icon: CreditCard },
     { id: 'sellers', label: 'Seller Reports', icon: Users },
     { id: 'settings', label: 'Settings', icon: Settings },
 ];
@@ -23,8 +22,8 @@ const CommissionManagement = () => {
         switch (activeTab) {
             case 'overview':
                 return <CommissionOverview />;
-            case 'payouts':
-                return <PayoutsList />;
+            // case 'payouts':
+            //     return <PayoutsList />;
             case 'sellers':
                 return <SellerReports />;
             case 'settings':

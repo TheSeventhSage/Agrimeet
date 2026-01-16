@@ -9,12 +9,6 @@ import {
     Eye,
     CreditCard
 } from 'lucide-react';
-import DashboardLayout from '../../../layouts/DashboardLayout';
-import { useState, useEffect } from 'react';
-import { useAuth } from '../../../shared/contexts/AuthContext';
-import { LoadingSpinner, PageLoader } from '../../../shared/components/Loader';
-import { showError } from '../../../shared/utils/alert';
-import { storageManager } from '../../../shared/utils/storageManager';
 // Import the new API functions
 import {
     getVendorStats,
@@ -23,9 +17,16 @@ import {
     getTopWeeklyTransactions,
     getUserProfile,
     validateSellerAddress,
-} from '../api/dashboardApi'; // Adjust path if needed
+} from '../api/dashboardApi';
+import DashboardLayout from '../../../layouts/DashboardLayout';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../shared/contexts/AuthContext';
+import { LoadingSpinner, PageLoader } from '../../../shared/components/Loader';
+import { showError } from '../../../shared/utils/alert';
+import { storageManager } from '../../../shared/utils/storageManager';
+import Button from '../../../shared/components/Button';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // --- Helper Functions ---
 
@@ -64,22 +65,21 @@ const getStatusColor = (status) => {
 
 const Dashboard = () => {
     const { user: authUser } = useAuth();
+    const navigate = useNavigate();
 
     // --- Stats State Management ---
     const [stats, setStats] = useState(null);
     const [topProducts, setTopProducts] = useState([]);
     const [recentOrders, setRecentOrders] = useState([]);
     const [topTransactions, setTopTransactions] = useState([]);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const [userProfile, setUserProfile] = useState(() => storageManager.getUserData());
     const [isLoading, setIsLoading] = useState({
         stats: true,
         products: true,
         orders: true,
         transactions: true,
     });
-    const [isInitialLoading, setIsInitialLoading] = useState(true);
-
-    // --- User Profile State Management ---
-    const [userProfile, setUserProfile] = useState(() => storageManager.getUserData());
 
     // --- Data Fetching ---
     useEffect(() => {
@@ -223,9 +223,9 @@ const Dashboard = () => {
                     <div className="lg:col-span-2 bg-white rounded-xl shadow-xs border border-gray-100">
                         <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                             <h2 className="text-lg font-semibold text-gray-900">Recent Weekly Orders</h2>
-                            <button onClick={() => window.location.hash = '/orders'} className="text-brand-600 hover:text-brand-700 text-sm font-medium flex items-center gap-1">
+                            <Button onClick={() => navigate('/orders')} className="text-brand-600 hover:text-brand-700 text-sm font-medium flex items-center gap-1" variant='ghost'>
                                 View all <ArrowUpRight className="w-4 h-4" />
-                            </button>
+                            </Button>
                         </div>
                         <div className="p-6">
                             {isLoading.orders ? (
@@ -277,7 +277,7 @@ const Dashboard = () => {
                                     {topProducts.map((item) => (
                                         <div key={item.product_id} className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <img src={API_BASE_URL + item.product.thumbnail || 'https://via.placeholder.com/40'} alt={item.product.name} className="w-10 h-10 object-cover rounded-lg bg-gray-100" />
+                                                <img src={item.product.thumbnail || 'https://via.placeholder.com/40'} alt={item.product.name} className="w-10 h-10 object-cover rounded-lg bg-gray-100" />
                                                 <div>
                                                     <p className="font-medium text-gray-900 truncate max-w-[150px]">{item.product.name}</p>
                                                     <div className="flex items-center gap-1">

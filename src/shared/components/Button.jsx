@@ -21,7 +21,7 @@ const Button = ({
         default: "bg-brand-500 text-white hover:bg-brand-600", // Your original style
         outline: "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100",
         secondary: "bg-gray-100 text-gray-800 hover:bg-gray-200",
-        ghost: "bg-transparent text-gray-800 hover:bg-gray-100 shadow-none",
+        ghost: "bg-transparent text-brand-700 hover:bg-gray-100 shadow-none",
     };
 
     // --- Size Styles ---

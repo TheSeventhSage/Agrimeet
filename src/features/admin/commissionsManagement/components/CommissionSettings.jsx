@@ -2,16 +2,17 @@
 import { useState, useEffect } from 'react';
 import { Settings, Save } from 'lucide-react';
 import adminCommissionService from '../api/adminCommissionService';
+import Button from '../../../../shared/components/Button';
 import { showSuccess, showError } from '../../../../shared/utils/alert';
 
 const CommissionSettings = () => {
+    const [isLoading, setIsLoading] = useState(true);
     const [settings, setSettings] = useState({
         commission_enabled: false,
         default_commission_rate: 0,
         minimum_payout: 0,
         payout_schedule: 'weekly'
     });
-    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         loadSettings();
@@ -112,13 +113,13 @@ const CommissionSettings = () => {
                 </div>
 
                 <div className="pt-4 border-t border-gray-100">
-                    <button
+                    <Button
                         type="submit"
                         className="w-full flex justify-center items-center gap-2 px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
                     >
                         <Save className="w-4 h-4" />
                         Save Changes
-                    </button>
+                    </Button>
                 </div>
             </form>
         </div>
