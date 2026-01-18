@@ -81,6 +81,8 @@ const Dashboard = () => {
         transactions: true,
     });
 
+    console.log(userProfile)
+
     // --- Data Fetching ---
     useEffect(() => {
         // 1. Existing Auth Check
@@ -93,78 +95,87 @@ const Dashboard = () => {
 
         const fetchDashboardData = async () => {
             try {
-                // 3. YOUR EXISTING DATA FETCHING (Unchanged)
-                const [statsData, productsData, ordersData, transactionsData, profileData] = await Promise.all([
+                // Set Loading True
+                setIsLoading(true);
+
+                // ---------------------------------------------------------
+                // STEP 1: Fetch Critical User Profile
+                // We await this separately because the rest of the logic (like address validation)
+                // depends on the Seller ID returned here.
+                // ---------------------------------------------------------
+                const profileData = await getUserProfile(userId).catch(err => {
+                    console.error('Error fetching user profile:', err);
+                    showError('Could not refresh user profile.');
+                    return null;
+                });
+
+                // If profile fails, we cannot proceed with seller-specific logic
+                if (!profileData || !profileData.data || !profileData.data.seller) {
+                    throw new Error("Unable to retrieve seller details.");
+                }
+
+                // Update Profile State Immediately
+                setUserProfile(profileData);
+                storageManager.setUserData(profileData);
+
+                // EXTRACT SELLER ID SAFELY FROM THE FRESH VARIABLE (NOT STATE)
+                const sellerId = profileData.data.seller.id;
+
+                // ---------------------------------------------------------
+                // STEP 2: Fetch Dashboard Data in Parallel
+                // We use the sellerId retrieved above if needed by endpoints
+                // ---------------------------------------------------------
+                const [statsData, productsData, ordersData, transactionsData] = await Promise.all([
                     getVendorStats().catch(err => {
-                        console.error('Error fetching vendor stats:', err);
-                        showError('Failed to load dashboard stats.');
-                        setIsLoading(prev => ({ ...prev, stats: false }));
+                        console.warn('Stats failed:', err);
                         return null;
                     }),
-                    getTopWeeklyProducts().catch(err => {
-                        console.error('Error fetching top products:', err);
-                        showError('Failed to load top products.');
-                        setIsLoading(prev => ({ ...prev, products: false }));
+                    getTopWeeklyProducts(sellerId).catch(err => {
+                        console.warn('Products failed:', err);
                         return [];
                     }),
-                    getRecentWeeklyOrders().catch(err => {
-                        console.error('Error fetching recent orders:', err);
-                        showError('Failed to load recent orders.');
-                        setIsLoading(prev => ({ ...prev, orders: false }));
+                    getRecentWeeklyOrders(sellerId).catch(err => {
+                        console.warn('Orders failed:', err);
                         return [];
                     }),
-                    getTopWeeklyTransactions().catch(err => {
-                        console.error('Error fetching top transactions:', err);
-                        showError('Failed to load top transactions.');
-                        setIsLoading(prev => ({ ...prev, transactions: false }));
+                    getTopWeeklyTransactions(sellerId).catch(err => {
+                        console.warn('Transactions failed:', err);
                         return [];
-                    }),
-                    getUserProfile(userId).catch(err => {
-                        console.error('Error fetching user profile:', err);
-                        showError('Could not refresh user profile.');
-                        return null;
-                    }),
+                    })
                 ]);
 
-                // 4. YOUR EXISTING STATE UPDATES (Unchanged)
+                // ---------------------------------------------------------
+                // STEP 3: Update States (Only if data exists)
+                // ---------------------------------------------------------
                 if (statsData) setStats(statsData);
                 if (productsData) setTopProducts(productsData);
                 if (ordersData) setRecentOrders(ordersData);
                 if (transactionsData) setTopTransactions(transactionsData);
 
-                if (profileData) {
-                    storageManager.setUserData(profileData);
-                    setUserProfile(profileData);
-                }
+                // ---------------------------------------------------------
+                // STEP 4: Address Validation (Sequential)
+                // We wait for this to ensure the flow is complete before finishing loading
+                // ---------------------------------------------------------
+                const validationKey = `addr_val_${sellerId}`;
+                const hasValidated = localStorage.getItem(validationKey);
 
-                // 5. --- NEW: BACKGROUND ADDRESS VALIDATION ---
-                // This runs after the main data is fetched, but we don't 'await' it 
-                // so it doesn't block the UI if it's slow.
-                if (userId) {
-                    const sellerId = userProfile.data.seller.id;
-                    const validationKey = `addr_val_${sellerId}`;
-                    const hasValidated = localStorage.getItem(validationKey);
-
-                    if (!hasValidated) {
-                        validateSellerAddress(sellerId)
-                            .then(() => {
-                                // On success, mark as done in local storage
-                                localStorage.setItem(validationKey, 'true');
-                                console.log("Address validation synced successfully");
-                            })
-                            .catch(err => {
-                                // Silent fail - doesn't disturb the user
-                                console.error("Address validation deferred:", err);
-                            });
+                if (!hasValidated) {
+                    try {
+                        await validateSellerAddress(sellerId);
+                        // Mark as done only if successful
+                        localStorage.setItem(validationKey, 'true');
+                        console.log("Address validation synced successfully");
+                    } catch (valErr) {
+                        // Log but do not crash the app
+                        console.warn("Address validation deferred:", valErr);
                     }
                 }
-                // ---------------------------------------------
 
             } catch (error) {
-                console.error("An unexpected error occurred:", error);
-                showError("An unexpected error occurred while loading the dashboard.");
+                console.error("Critical Dashboard Error:", error);
+                // Only show alert for critical failures (like Profile load failure)
+                showError(error.message || "An unexpected error occurred while loading.");
             } finally {
-                // 6. Existing Cleanup
                 setIsLoading({ stats: false, products: false, orders: false, transactions: false });
                 setIsInitialLoading(false);
             }

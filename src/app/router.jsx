@@ -61,6 +61,7 @@ const DisputeManagement = lazy(() => import('../features/admin/disputeManagement
 const ReportsAnalytics = lazy(() => import('../features/admin/pages/ReportsAnalytics'));
 const AdminDebug = lazy(() => import('../features/admin/pages/AdmiDebug'));
 const AdminSettings = lazy(() => import('../features/admin/settings/pages/Settings'));
+const AdminNotifications = lazy(() => import('../features/admin/notifications/AdminNotifications'));
 const PrivacyPolicies = lazy(() => import('../features/admin/legalContents/PrivacyPolicies'));
 const TermsOfService = lazy(() => import('../features/admin/legalContents/TermsOfService'));
 const FAQs = lazy(() => import('../features/admin/legalContents/Faqs'));
@@ -71,7 +72,7 @@ export default function Router() {
     return (
         <Suspense fallback={<LoadingSpinner />}>
             <Routes>
-                {/* -*-*-*-*-* WEBSITE ROUTES -*-*-*-*-*- */}
+                {/* ************ MAIN ROUTES ************- */}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/search" element={<Search />} />
                 <Route path="/test" element={<AppDemo />} />
@@ -86,8 +87,7 @@ export default function Router() {
                 <Route path="/contact" element={<Contact />} />
 
 
-
-                {/* -*-*-*-*-* AUTH ROUTES -*-*-*-*-*- */}
+                {/* ************ AUTH ROUTES ************- */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot" element={<ForgotPassword />} />
@@ -95,11 +95,11 @@ export default function Router() {
                 <Route path="/kyc-register" element={<KycRegister />} />
                 <Route path="/kyc-pending" element={<KycPending />} />
 
-                {/* -*-*-*-*-* VENDOR ROUTES -*-*-*-*-*- */}
+                {/* ************ VENDOR ROUTES ************- */}
                 <Route path="/dashboard" element={<ProtectedRoutes allowedRoles={['seller']}><Dashboard /></ProtectedRoutes>} />
                 <Route path="/profile" element={<ProtectedRoutes allowedRoles={['seller']}><ViewProfile /></ProtectedRoutes>} />
                 <Route path="/settings" element={<ProtectedRoutes allowedRoles={['seller']}><Settings /></ProtectedRoutes>} />
-                {/* Product routes */}
+                {/**** Product routes ****/}
                 <Route path="/products" element={<ProtectedRoutes allowedRoles={['seller']}><ProductGrid /></ProtectedRoutes>} />
                 <Route path="/products/add" element={<ProtectedRoutes allowedRoles={['seller']}><AddProduct /></ProtectedRoutes>} />
                 <Route path="/products/:productId/variants/add" element={<ProtectedRoutes allowedRoles={['seller']}><AddVariant /></ProtectedRoutes>} />
@@ -107,22 +107,22 @@ export default function Router() {
                 <Route path="/products/edit/:id" element={<ProtectedRoutes allowedRoles={['seller']}><EditProduct /></ProtectedRoutes>} />
                 <Route path="/products/:productId/variants" element={<ProtectedRoutes allowedRoles={['seller']}><VariantsList /></ProtectedRoutes>} />
                 <Route path="/products/:productId/variants/:variantId/edit" element={<ProtectedRoutes allowedRoles={['seller']}><EditVariant /></ProtectedRoutes>} />
-                {/* Messages */}
+                {/**** Messages ****/}
                 <Route path="/messages" element={<ProtectedRoutes allowedRoles={['seller']}><Messages /></ProtectedRoutes>} />
                 <Route path="/reviews" element={<ProtectedRoutes allowedRoles={['seller']}><Reviews /></ProtectedRoutes>} />
                 <Route path="/notifications" element={<ProtectedRoutes allowedRoles={['seller']}><Notifications /></ProtectedRoutes>} />
-                {/* Analytics */}
+                {/**** Analytics ****/}
                 <Route path="/analytics" element={<ProtectedRoutes allowedRoles={['seller']}><Analytics /></ProtectedRoutes>} />
-                {/* KYC routes */}
+                {/**** KYC routes ****/}
                 <Route path="/kyc" element={<ProtectedRoutes allowedRoles={['seller']}><KYCPage /></ProtectedRoutes>} />
                 <Route path="/kyc/status" element={<ProtectedRoutes allowedRoles={['seller']}><KYCStatusPage /></ProtectedRoutes>} />
-                {/* Payouts */}
+                {/**** Payouts ****/}
                 <Route path="/payouts" element={<ProtectedRoutes allowedRoles={['seller']}><Payouts /></ProtectedRoutes>} />
-                {/* Orders */}
+                {/**** Orders ****/}
                 <Route path="/orders" element={<ProtectedRoutes allowedRoles={['seller']}><Orders /></ProtectedRoutes>} />
 
 
-                {/* -*-*-*-*-* ADMIN ROUTES -*-*-*-*-*- */}
+                {/************* ADMIN ROUTES *************/}
                 <Route path="/admin" element={<ProtectedRoutes allowedRoles={['admin']}><AdminDashboard /></ProtectedRoutes>} />
                 <Route path="/admin/dashboard" element={<ProtectedRoutes allowedRoles={['admin']}><AdminDashboard /></ProtectedRoutes>} />
                 <Route path="/admin/users" element={<ProtectedRoutes allowedRoles={['admin']}><UserManagement /></ProtectedRoutes>} />
@@ -134,12 +134,13 @@ export default function Router() {
                 <Route path="/admin/commissions" element={<ProtectedRoutes allowedRoles={['admin']}><CommissionManagement /></ProtectedRoutes>} />
                 <Route path="/admin/reports" element={<ProtectedRoutes allowedRoles={['admin']}><ReportsAnalytics /></ProtectedRoutes>} />
                 <Route path="/admin/settings" element={<ProtectedRoutes allowedRoles={['admin']}><AdminSettings /></ProtectedRoutes>} />
+                <Route path="/admin/notifications" element={<ProtectedRoutes allowedRoles={['admin']}><AdminNotifications /></ProtectedRoutes>} />
                 <Route path="/admin/privacy-policy" element={<ProtectedRoutes allowedRoles={['admin']}><PrivacyPolicies /></ProtectedRoutes>} />
                 <Route path="/admin/terms-of-service" element={<ProtectedRoutes allowedRoles={['admin']}><TermsOfService /></ProtectedRoutes>} />
                 <Route path="/admin/faqs" element={<ProtectedRoutes allowedRoles={['admin']}><FAQs /></ProtectedRoutes>} />
 
 
-                {/* -*-*-*-*-* 404 FALLBACK -*-*-*-*-*- */}
+                {/************* 404 FALLBACK *************/}
                 <Route path="/admin/debug" element={<ProtectedRoutes allowedRoles={[]}><AdminDebug /></ProtectedRoutes>} />
                 <Route path="*" element={<NotFound />} />
                 <Route path="/unauthorized" element={<Unauthorized />} />

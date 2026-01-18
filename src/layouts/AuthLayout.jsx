@@ -14,7 +14,7 @@ const AuthLayout = ({ className, title, subtitle, footer, mode = 'art', children
             {/* Background based on mode */}
             {mode === 'art' ? (
                 <div className="absolute inset-0">
-                    <BackgroundArt className="absolute w-[120%] h-auto opacity-90" />
+                    <BackgroundArt className="absolute w-[100%] h-auto opacity-[0.2]" />
                     <div className="absolute inset-0 bg-linear-to-b from-white/40 via-white/20 to-transparent" />
                 </div>
             ) : mode === 'photo' ? (

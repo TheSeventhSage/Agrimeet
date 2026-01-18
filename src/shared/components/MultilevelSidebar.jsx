@@ -27,6 +27,11 @@ import {
     HandCoins,
     ShoppingBag,
     X,
+    BarChart3,
+    MessageCircle,
+    Bell,
+    FileText,
+    Eye
 } from 'lucide-react';
 
 const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
@@ -36,14 +41,14 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
     const user = storageManager.getUserData();
 
     // Normalize roles
-    const userRoles = Array.isArray(user?.roles)
-        ? user.roles
-        : user?.role
-            ? [user.role]
-            : [];
+    const userRoles = storageManager.getTokens();
 
-    const isAdmin = userRoles.includes('admin');
-    const isSeller = userRoles.includes('seller');
+    const isAdmin = userRoles.role.includes('admin');
+    const isSeller = userRoles.role.includes('seller');
+    console.log(isSeller, isAdmin, userRoles, user);
+
+
+
 
     // --- MENU CONFIGURATIONS (Same as before) ---
     const sellerMenuItems = [
@@ -51,7 +56,7 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             key: 'dashboard',
             label: 'Dashboard',
             icon: Home,
-            path: '/seller/dashboard'
+            path: '/dashboard'
         },
         {
             key: 'products',
@@ -59,35 +64,76 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             icon: Package,
             hasSubmenu: true,
             submenu: [
-                { key: 'all-products', label: 'All Products', icon: Package, path: '/seller/products' },
-                { key: 'add-product', label: 'Add Product', icon: Plus, path: '/seller/products/create' },
-                { key: 'reviews', label: 'Reviews', icon: Star, path: '/seller/reviews' }
-            ]
+                {
+                    key: 'view-products',
+                    label: 'View Products',
+                    icon: Eye,
+                    path: '/products'
+                },
+                {
+                    key: 'add-product',
+                    label: 'Add Product',
+                    icon: Plus,
+                    path: '/products/add'
+                },
+            ],
         },
         {
             key: 'orders',
             label: 'Orders',
             icon: ShoppingCart,
-            path: '/seller/orders'
+            path: '/orders'
         },
         {
-            key: 'wallet',
-            label: 'Wallet & Payouts',
+            key: 'analytics',
+            label: 'Analytics',
+            icon: BarChart3,
+            path: '/analytics'
+        },
+        {
+            key: 'payouts',
+            label: 'Payouts',
             icon: Wallet,
-            path: '/seller/wallet'
+            path: '/payouts'
         },
         {
-            key: 'messages',
-            label: 'Messages',
-            icon: MessageSquare,
-            path: '/seller/messages'
+            key: 'communication',
+            label: 'Communication',
+            icon: MessageCircle, // or MessagesSquare
+            hasSubmenu: true,
+            submenu: [
+                {
+                    key: 'messages',
+                    label: 'Messages',
+                    icon: MessageSquare,
+                    path: '/messages'
+                },
+                {
+                    key: 'reviews',
+                    label: 'Reviews',
+                    icon: Star, // or ThumbsUp
+                    path: '/reviews'
+                },
+                {
+                    key: 'notifications',
+                    label: 'Notifications',
+                    icon: Bell,
+                    path: '/notifications'
+                },
+            ],
+        },
+        {
+            key: 'kyc',
+            label: 'KYC Details',
+            icon: FileText,
+            path: '/kyc/status',
         },
         {
             key: 'settings',
             label: 'Settings',
             icon: Settings,
-            path: '/seller/settings'
-        }
+            path: '/settings'
+        },
     ];
 
     const adminMenuItems = [
@@ -203,37 +249,9 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
         }
     ];
 
-    const buyerMenuItems = [
-        {
-            key: 'dashboard',
-            label: 'Dashboard',
-            icon: Home,
-            path: '/dashboard'
-        },
-        {
-            key: 'orders',
-            label: 'My Orders',
-            icon: ShoppingCart,
-            path: '/orders'
-        },
-        {
-            key: 'messages',
-            label: 'Messages',
-            icon: MessageSquare,
-            path: '/messages'
-        },
-        {
-            key: 'settings',
-            label: 'Settings',
-            icon: Settings,
-            path: '/settings'
-        }
-    ];
-
     const getMenuItems = () => {
         if (isAdmin) return adminMenuItems;
-        if (isSeller) return sellerMenuItems;
-        return buyerMenuItems;
+        return sellerMenuItems;
     };
 
     const menuItems = getMenuItems();

@@ -184,5 +184,33 @@ export const orderService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  async downloadInvoice(orderId) {
+    try {
+      const token = getAuthToken();
+      if (!token) throw new Error('Authentication token not found');
+
+      const response = await fetch(`${API_BASE_URL}/seller/orders/${orderId}/invoice`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json' // Or application/pdf, but usually bearer auth needs standard headers
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) throw new Error('Invoice not found');
+        if (response.status === 401) throw new Error('Unauthorized');
+        throw new Error('Failed to generate invoice');
+      }
+
+      // Return the file blob
+      return await response.blob();
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      throw error;
+    }
   }
 };
+

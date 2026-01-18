@@ -1,4 +1,6 @@
+// components/Messages.jsx
 import { useState, useEffect } from 'react';
+import { Menu } from 'lucide-react'; // Added Menu icon for mobile toggle
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import ChatList from '../components/ChatList';
 import ChatHeader from '../components/ChatHeader';
@@ -16,12 +18,11 @@ const Messages = () => {
     const [loading, setLoading] = useState(true);
     const [loadingMessages, setLoadingMessages] = useState(false);
     const [error, setError] = useState(null);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // New state for mobile drawer
 
     // Get current user ID from storage
     const currentUser = storageManager.getUserData();
-    console.log(currentUser)
     const currentUserId = currentUser?.data?.id;
-    console.log(currentUserId)
 
     // Fetch all conversations on mount
     useEffect(() => {
@@ -38,157 +39,151 @@ const Messages = () => {
     const fetchConversations = async () => {
         try {
             setLoading(true);
-            setError(null);
             const response = await messagesApi.getConversations();
-
-            // Handle both array response and { data: [...] } structure
-            const rawData = Array.isArray(response) ? response : (response.data || []);
-
-            // Transform API data to match Component expectations
-            const formattedData = rawData.map(conv => ({
-                ...conv,
-                // Map 'other_party' to 'other_user' and create full name
-                other_user: {
-                    ...conv.other_party,
-                    name: conv.other_party
-                        ? `${conv.other_party.first_name || ''} ${conv.other_party.last_name || ''}`.trim()
-                        : 'Unknown User',
-                    online: false // Add default property to prevent undefined errors
-                },
-                // Map 'product' to 'context_details' if context is product
-                context_details: conv.context_type === 'product' ? conv.product : conv.order
-            }));
-
-            setConversations(formattedData);
+            console.log(response);
+            setConversations(response || []);
+            console.log(conversations);
         } catch (err) {
-            setError(err.message);
-            console.error('Error fetching conversations:', err);
+            console.error('Failed to fetch conversations:', err);
+            setError('Failed to load conversations');
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchMessages = async (conversationId) => {
+    const fetchMessages = async (chatId) => {
         try {
             setLoadingMessages(true);
-            const response = await messagesApi.getConversationMessages(conversationId);
-
-            // Based on API schema, response structure would be:
-            // { data: [...messages] }
+            const response = await messagesApi.getMessages(chatId);
             setMessages(response.data || []);
+
+            // --- REQUIREMENT 1: Update unread count locally on load ---
+            // This ensures the red circle disappears immediately without refetching all conversations
+            setConversations(prevConversations =>
+                prevConversations.map(conv =>
+                    conv.id === chatId
+                        ? { ...conv, unread_count: 0 }
+                        : conv
+                )
+            );
         } catch (err) {
-            console.error('Error fetching messages:', err);
-            setMessages([]);
+            console.error('Failed to fetch messages:', err);
         } finally {
             setLoadingMessages(false);
         }
     };
 
-    const handleSelectChat = async (conversation) => {
-        setSelectedChat(conversation);
-        setMessages([]); // Clear previous messages
-    };
-
-    const handleSendMessage = async (messageText) => {
-        if (!selectedChat || !messageText.trim()) return;
-
-        try {
-            const response = await messagesApi.sendMessage(selectedChat.id, {
-                message: messageText
-            });
-
-            // Add the new message to the list
-            if (response.data) {
-                setMessages(prev => [...prev, response.data]);
-            }
-
-            // Refresh conversations to update last message
-            fetchConversations();
-        } catch (err) {
-            console.error('Error sending message:', err);
-            alert('Failed to send message. Please try again.');
-        }
-    };
-
-    const handleTyping = async (isTyping) => {
+    const handleSendMessage = async (content, file) => {
         if (!selectedChat) return;
 
         try {
-            await messagesApi.sendTypingIndicator(selectedChat.id, {
-                is_typing: isTyping
-            });
+            const formData = new FormData();
+            formData.append('conversation_id', selectedChat.id);
+            formData.append('message', content);
+            if (file) {
+                formData.append('attachment', file);
+            }
+
+            const response = await messagesApi.sendMessage(formData);
+
+            // Append new message locally
+            setMessages([...messages, response.data]);
+
+            // Update last message in conversation list
+            setConversations(prev => prev.map(conv => {
+                if (conv.id === selectedChat.id) {
+                    return {
+                        ...conv,
+                        last_message: response.data,
+                        updated_at: new Date().toISOString()
+                    };
+                }
+                return conv;
+            }).sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at)));
+
         } catch (err) {
-            console.error('Error sending typing indicator:', err);
+            console.error('Failed to send message:', err);
         }
+    };
+
+    const handleSelectChat = (chat) => {
+        setSelectedChat(chat);
+        setIsSidebarOpen(false); // Close mobile drawer when chat is selected
+    };
+
+    const handleTyping = () => {
+        // Implement typing indicator logic if needed
     };
 
     return (
         <DashboardLayout>
-            <div className="h-[calc(100vh-8rem)]">
-                {/* Header */}
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">Messages</h1>
-                    <p className="text-gray-600 mt-2">Connect with your customers</p>
-                </div>
+            <div className="h-[calc(100vh-theme(spacing.24))] -m-6 md:m-0">
+                <div className="h-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex relative">
 
-                {/* Error State */}
-                {error && (
-                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-red-600 text-sm">{error}</p>
-                    </div>
-                )}
+                    {/* Chat List - Now acts as a drawer on mobile */}
+                    <ChatList
+                        conversations={conversations}
+                        selectedChat={selectedChat}
+                        onSelectChat={handleSelectChat}
+                        searchQuery={searchQuery}
+                        onSearchChange={setSearchQuery}
+                        isOpen={isSidebarOpen}
+                        onClose={() => setIsSidebarOpen(false)}
+                    />
 
-                {/* Main Container */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden h-[calc(100%-5rem)]">
-                    <div className="flex h-full">
-                        {/* Sidebar */}
-                        {loading ? (
-                            <div className="w-80 border-r border-gray-200 flex items-center justify-center">
-                                <div className="text-center">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600 mx-auto"></div>
-                                    <p className="text-sm text-gray-500 mt-2">Loading conversations...</p>
-                                </div>
-                            </div>
-                        ) : (
-                            <ChatList
-                                conversations={conversations}
-                                selectedChat={selectedChat}
-                                onSelectChat={handleSelectChat}
-                                searchQuery={searchQuery}
-                                onSearchChange={setSearchQuery}
-                            />
-                        )}
-
-                        {/* Main Content */}
-                        <div className="flex-1 flex flex-col">
-                            {selectedChat ? (
-                                <>
-                                    <ChatHeader conversation={selectedChat} />
-
-                                    {loadingMessages ? (
-                                        <div className="flex-1 flex items-center justify-center bg-gray-50">
-                                            <div className="text-center">
-                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600 mx-auto"></div>
-                                                <p className="text-sm text-gray-500 mt-2">Loading messages...</p>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <MessageList
-                                            messages={messages}
-                                            currentUserId={currentUserId}
-                                        />
-                                    )}
-
-                                    <MessageInput
-                                        onSendMessage={handleSendMessage}
-                                        onTyping={handleTyping}
-                                    />
-                                </>
-                            ) : (
-                                <EmptyChatState />
-                            )}
+                    {/* Main Chat Area */}
+                    <div className="flex-1 flex flex-col min-w-0 bg-white">
+                        {/* Mobile Toggle Button Header */}
+                        <div className="md:hidden flex items-center px-4 py-3 border-b border-gray-200 bg-gray-50">
+                            <button
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="p-2 -ml-2 mr-2 text-gray-600 hover:bg-gray-200 rounded-lg"
+                            >
+                                <Menu className="w-5 h-5" />
+                            </button>
+                            <span className="font-semibold text-gray-700">
+                                {selectedChat ? (selectedChat.context_details?.name || 'Chat') : 'Messages'}
+                            </span>
                         </div>
+
+                        {selectedChat ? (
+                            <>
+                                <ChatHeader
+                                    conversation={selectedChat}
+                                    currentUserId={currentUserId}
+                                />
+
+                                {loadingMessages ? (
+                                    <div className="flex-1 flex items-center justify-center bg-gray-50">
+                                        <div className="text-center">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600 mx-auto"></div>
+                                            <p className="text-sm text-gray-500 mt-2">Loading messages...</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <MessageList
+                                        messages={messages}
+                                        currentUserId={currentUserId}
+                                    />
+                                )}
+
+                                <MessageInput
+                                    onSendMessage={handleSendMessage}
+                                    onTyping={handleTyping}
+                                />
+                            </>
+                        ) : (
+                            <EmptyChatState />
+                        )}
                     </div>
+
+                    {/* Mobile Drawer Overlay */}
+                    {isSidebarOpen && (
+                        <div
+                            className="absolute inset-0 bg-black/50 z-30 md:hidden"
+                            onClick={() => setIsSidebarOpen(false)}
+                        />
+                    )}
                 </div>
             </div>
         </DashboardLayout>
