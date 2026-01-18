@@ -6,7 +6,7 @@ import { suspendUser, unsuspendUser } from '../../userManagement/api/adminUserSe
  * Get all sellers with filters and pagination
  * @param {number} page - Page number
  * @param {number} perPage - Items per page
- * @param {object} filters - Filter options (search_global, status, business_type, sortBy, sortOrder)
+ * @param {object} filters - Filter options
  * @returns {Promise} - Sellers data with pagination
  */
 export const getAllSellers = async (page = 1, perPage = 20, filters = {}) => {
@@ -16,37 +16,38 @@ export const getAllSellers = async (page = 1, perPage = 20, filters = {}) => {
             per_page: perPage,
         };
 
-        // Only add filters if they have values and are not 'all'
-        if (filters.search_global && filters.search_global.trim()) {
-            params.search_global = filters.search_global.trim();
+        // Safe access to filters
+        const activeFilters = filters || {};
+
+        // 1. Search Global: Only add if it has actual text
+        if (activeFilters.search_global && activeFilters.search_global.trim().length > 0) {
+            params.search_global = activeFilters.search_global.trim();
         }
 
-        if (filters.status && filters.status !== 'all') {
-            params.status = filters.status;
+        // 2. Status: Only add if specific status is selected (not 'all' or empty)
+        if (activeFilters.status && activeFilters.status !== 'all') {
+            params.status = activeFilters.status;
         }
 
-        if (filters.business_type && filters.business_type !== 'all') {
-            params.business_type = filters.business_type;
+        // 3. Business Type: Only add if specific type is selected (not 'all' or empty)
+        if (activeFilters.business_type && activeFilters.business_type !== 'all') {
+            params.business_type = activeFilters.business_type;
         }
 
-        if (filters.sortBy) {
-            params.sortBy = filters.sortBy;
+        // 4. Sorting: Only add if defined
+        if (activeFilters.sortBy) {
+            params.sortBy = activeFilters.sortBy;
         }
 
-        if (filters.sortOrder) {
-            params.sortOrder = filters.sortOrder;
+        if (activeFilters.sortOrder) {
+            params.sortOrder = activeFilters.sortOrder;
         }
 
-        const response = await api.get(`/admin/allsellers`, {
-            query: {
-                type: filters.business_type,
-                status: filters.status,
-                search: filters.search_global,
-                page,
-                per_page: perPage,
-            },
-        });
-        return response;
+        // The request will now strictly look like: /admin/allsellers?page=1&per_page=20
+        // unless a specific filter is actually active.
+        const response = await api.get('/admin/allsellers', { params });
+
+        return response.data; // Ensure we return the data property directly if that's what the component expects
     } catch (error) {
         console.error('Error fetching sellers:', error);
         throw error;

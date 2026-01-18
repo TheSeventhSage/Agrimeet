@@ -14,7 +14,7 @@ const DashboardLayout = ({ children }) => {
     return (
         // BACKGROUND TUNE UP: 
         // Changed to 'bg-green-50/60' for a fresher, organic feel that rhymes with the sidebar
-        <div className="min-h-screen relative isolate bg-green-50/60">
+        <div className="min-h-screen relative isolate bg-brand-50/30">
 
             {/* MINIMAL ART: 
                 - Variant='minimal' removes the busy fruits/leaves.
@@ -32,7 +32,7 @@ const DashboardLayout = ({ children }) => {
             <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 relative z-0">
                 <Header onMobileMenuToggle={toggleMobileMenu} />
 
-                <div className="flex-1 p-3 sm:p-4 lg:p-6">
+                <div className="flex-1 p-3 sm:p-2 lg:p-6">
                     <div className="max-w-7xl mx-auto">
                         {children}
                     </div>

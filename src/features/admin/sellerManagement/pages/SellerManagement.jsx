@@ -39,10 +39,11 @@ const SellerManagement = () => {
     };
 
     const [filters, setFilters] = useState({
-        search_global: '',
-        status: '',
-        business_type: '',
-        page: 1
+        search_global: '', // Will be skipped
+        status: 'all',     // Will be skipped
+        business_type: 'all', // Will be skipped
+        sortBy: 'created_at', // Will be sent (if you want to skip this, change initial to null)
+        sortOrder: 'desc'     // Will be sent
     });
 
     const [pagination, setPagination] = useState({

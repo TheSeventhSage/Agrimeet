@@ -291,7 +291,7 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             {/* Mobile Overlay */}
             {isMobileOpen && (
                 <div
-                    className="fixed inset-0 bg-sidebar-950/80 backdrop-blur-sm z-40 lg:hidden"
+                    className="fixed inset-0 bg-sidebar-800/40 backdrop-blur-sm z-40 lg:hidden"
                     onClick={onMobileMenuToggle}
                 />
             )}
