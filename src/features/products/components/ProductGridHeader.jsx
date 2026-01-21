@@ -34,7 +34,7 @@ const ProductGridHeader = ({
             </div>
 
             {/* Bottom Row: Filters and Count */}
-            <div className="flex items-center justify-between mt-6 gap-4">
+            <div className="flex flex-col justify-between mt-6 gap-4 md:items-center md:flex-row">
                 <div className="flex items-center gap-4 flex-1">
                     {/* Search Input */}
                     <div className="relative w-full max-w-xs">
@@ -48,7 +48,7 @@ const ProductGridHeader = ({
                         <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     </div>
                     {/* Status Filter */}
-                    <div className="relative">
+                    <div className="relative w-full">
                         <select
                             value={statusFilter}
                             onChange={(e) => onStatusChange(e.target.value)}

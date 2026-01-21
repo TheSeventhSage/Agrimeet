@@ -186,7 +186,7 @@ export const orderService = {
     }
   },
 
-  async downloadInvoice(orderId) {
+async downloadInvoice(orderId) {
     try {
       const token = getAuthToken();
       if (!token) throw new Error('Authentication token not found');
@@ -195,17 +195,24 @@ export const orderService = {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json' // Or application/pdf, but usually bearer auth needs standard headers
+          // Fix: Explicitly ask for PDF so the server knows (and for clarity)
+          'Accept': 'application/pdf', 
         }
       });
 
       if (!response.ok) {
-        if (response.status === 404) throw new Error('Invoice not found');
-        if (response.status === 401) throw new Error('Unauthorized');
-        throw new Error('Failed to generate invoice');
+         if (response.status === 404) throw new Error('Invoice not found');
+         if (response.status === 401) throw new Error('Unauthorized');
+         // Try to parse JSON error if possible, otherwise generic error
+         try {
+            const errJson = await response.json();
+            throw new Error(errJson.error || 'Failed to generate invoice');
+         } catch (e) {
+            throw new Error('Failed to generate invoice');
+         }
       }
 
-      // Return the file blob
+      // Fix: Return BLOB, do NOT try to parse as JSON
       return await response.blob();
     } catch (error) {
       console.error('Error downloading invoice:', error);

@@ -295,7 +295,7 @@ const Notifications = () => {
                                         key={notification.id}
                                         className={`p-6 hover:bg-gray-50 transition-colors ${isUnread ? 'bg-blue-50/30' : ''}`}
                                     >
-                                        <div className="flex items-start gap-4">
+                                        <div className="flex flex-col items-start gap-4 md:flex-row">
                                             {/* Icon */}
                                             <div className={`p-3 rounded-lg ${colorClass} flex-shrink-0`}>
                                                 <Icon className="w-5 h-5" />
@@ -304,7 +304,7 @@ const Notifications = () => {
                                             {/* Content */}
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex md:flex-row flex-col items-start justify-between gap-4">
-                                                    <div className="flex-1">
+                                                    <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-2 mb-1">
                                                             <h3 className="font-semibold text-gray-900">
                                                                 {getNotificationTitle(notification)}
@@ -313,7 +313,7 @@ const Notifications = () => {
                                                                 <span className="w-2 h-2 bg-brand-500 rounded-full flex-shrink-0"></span>
                                                             )}
                                                         </div>
-                                                        <p className="text-gray-700 text-sm leading-relaxed mb-2">
+                                                        <p className="text-gray-700 text-sm leading-relaxed mb-2 break-all">
                                                             {notifData.message || 'No message available'}
                                                         </p>
 
@@ -405,7 +405,7 @@ const Notifications = () => {
 
                     {/* Pagination */}
                     {notifications.length > 0 && pagination.last_page > 1 && (
-                        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+                        <div className="flex flex-col gap-2 items-center justify-between px-6 py-4 border-t border-gray-100 md:flex-row md:gap-0">
                             <div className="text-sm text-gray-600">
                                 Page {pagination.current_page} of {pagination.last_page}
                                 <span className="ml-2 text-gray-500">

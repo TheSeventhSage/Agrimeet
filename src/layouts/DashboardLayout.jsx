@@ -12,14 +12,7 @@ const DashboardLayout = ({ children }) => {
     };
 
     return (
-        // BACKGROUND TUNE UP: 
-        // Changed to 'bg-green-50/60' for a fresher, organic feel that rhymes with the sidebar
         <div className="min-h-screen relative isolate bg-brand-50/30">
-
-            {/* MINIMAL ART: 
-                - Variant='minimal' removes the busy fruits/leaves.
-                - Opacity-15 makes the color 'come out a bit more' as requested.
-            */}
             <BackgroundArt
                 variant="minimal"
                 className="opacity-15 pointer-events-none fixed inset-0 -z-10"
