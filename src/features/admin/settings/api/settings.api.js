@@ -1,7 +1,7 @@
 import { storageManager } from '../../../../shared/utils/storageManager'; // Adjust this path
 
 // Use the same BASE_URL as your existing admin.api.js
-const BASE_URL = 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const getAuthToken = () => {
     return storageManager.getAccessToken() || '';

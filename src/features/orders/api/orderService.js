@@ -1,7 +1,7 @@
 // api/orderService.js
 import { storageManager } from "../../../shared/utils/storageManager.js";
 
-const API_BASE_URL = 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const STATUS_CONFIG = {
   // Payment Status Colors
@@ -186,7 +186,7 @@ export const orderService = {
     }
   },
 
-async downloadInvoice(orderId) {
+  async downloadInvoice(orderId) {
     try {
       const token = getAuthToken();
       if (!token) throw new Error('Authentication token not found');
@@ -196,20 +196,20 @@ async downloadInvoice(orderId) {
         headers: {
           'Authorization': `Bearer ${token}`,
           // Fix: Explicitly ask for PDF so the server knows (and for clarity)
-          'Accept': 'application/pdf', 
+          'Accept': 'application/pdf',
         }
       });
 
       if (!response.ok) {
-         if (response.status === 404) throw new Error('Invoice not found');
-         if (response.status === 401) throw new Error('Unauthorized');
-         // Try to parse JSON error if possible, otherwise generic error
-         try {
-            const errJson = await response.json();
-            throw new Error(errJson.error || 'Failed to generate invoice');
-         } catch (e) {
-            throw new Error('Failed to generate invoice');
-         }
+        if (response.status === 404) throw new Error('Invoice not found');
+        if (response.status === 401) throw new Error('Unauthorized');
+        // Try to parse JSON error if possible, otherwise generic error
+        try {
+          const errJson = await response.json();
+          throw new Error(errJson.error || 'Failed to generate invoice');
+        } catch (e) {
+          throw new Error('Failed to generate invoice');
+        }
       }
 
       // Fix: Return BLOB, do NOT try to parse as JSON

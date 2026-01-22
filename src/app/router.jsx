@@ -24,6 +24,7 @@ const KycPending = lazy(() => import('../pages/KycPending'));
 const Login = lazy(() => import('../pages/Login'));
 const Register = lazy(() => import('../pages/Register'));
 const ForgotPassword = lazy(() => import('../pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('../pages/ResetPassword'));
 const VerifyOtp = lazy(() => import('../pages/VerifyOtp'));
 const Unauthorized = lazy(() => import('../pages/Unauthorized'));
 
@@ -58,7 +59,6 @@ const OrderModeration = lazy(() => import('../features/admin/productOrderManagem
 const TransactionOversight = lazy(() => import('../features/admin/commissionsManagement/pages/TransactionOversight'));
 const CommissionManagement = lazy(() => import('../features/admin/commissionsManagement/pages/CommissionManagement'));
 const DisputeManagement = lazy(() => import('../features/admin/disputeManagement/pages/DisputeManagement'));
-const ReportsAnalytics = lazy(() => import('../features/admin/pages/ReportsAnalytics'));
 const AdminDebug = lazy(() => import('../features/admin/pages/AdmiDebug'));
 const AdminSettings = lazy(() => import('../features/admin/settings/pages/Settings'));
 const AdminNotifications = lazy(() => import('../features/admin/notifications/AdminNotifications'));
@@ -90,7 +90,8 @@ export default function Router() {
                 {/* ************ AUTH ROUTES ************- */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/forgot" element={<ForgotPassword />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/user/reset-password/:token" element={<ResetPassword />} />
                 <Route path="/verify-otp" element={<VerifyOtp />} />
                 <Route path="/kyc-register" element={<KycRegister />} />
                 <Route path="/kyc-pending" element={<KycPending />} />
@@ -132,7 +133,6 @@ export default function Router() {
                 <Route path="/admin/transactions" element={<ProtectedRoutes allowedRoles={['admin']}><TransactionOversight /></ProtectedRoutes>} />
                 <Route path="/admin/disputes" element={<ProtectedRoutes allowedRoles={['admin']}><DisputeManagement /></ProtectedRoutes>} />
                 <Route path="/admin/commissions" element={<ProtectedRoutes allowedRoles={['admin']}><CommissionManagement /></ProtectedRoutes>} />
-                <Route path="/admin/reports" element={<ProtectedRoutes allowedRoles={['admin']}><ReportsAnalytics /></ProtectedRoutes>} />
                 <Route path="/admin/settings" element={<ProtectedRoutes allowedRoles={['admin']}><AdminSettings /></ProtectedRoutes>} />
                 <Route path="/admin/notifications" element={<ProtectedRoutes allowedRoles={['admin']}><AdminNotifications /></ProtectedRoutes>} />
                 <Route path="/admin/privacy-policy" element={<ProtectedRoutes allowedRoles={['admin']}><PrivacyPolicies /></ProtectedRoutes>} />

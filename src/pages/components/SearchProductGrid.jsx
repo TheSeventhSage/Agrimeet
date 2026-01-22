@@ -36,7 +36,7 @@ const SearchProductGrid = () => {
                 setLoading(true);
                 const filters = {
                     status: "active",
-                    search: query, // Send search term to the API
+                    search_global: query, // Send search term to the API
                 };
 
                 const result = await api.getAllProducts(currentPage, 12, filters);

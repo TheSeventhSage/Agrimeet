@@ -104,7 +104,7 @@ export default function Login() {
 
                 <p className="text-sm text-brand-700 text-end -mt-[15px]">
                     <Link
-                        to="/forgot"
+                        to="/forgot-password"
                         className="font-semibold ml-2 no-underline hover:underline"
                     >
                         Forgot password?

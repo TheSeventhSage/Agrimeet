@@ -19,7 +19,7 @@ import InfoField from '../components/InfoField';
 import InfoSection from '../components/InfoSection';
 import { LoadingSpinner } from '../../../shared/components/Loader';
 import ConfirmationModal from '../../../shared/components/ConfirmationModal';
-import { businessInfoConfig, ownerInfoConfig, bankInfoConfig } from '../components/kycDataConfig';
+import { businessInfoConfig, ownerInfoConfig, bankInfoConfig } from '../utils/kycDataConfig';
 import { showSuccess, showError } from '../../../shared/utils/alert';
 import { storageManager } from '../../../shared/utils/storageManager';
 import DocumentViewerModal from '../components/DocumentViewerModal';

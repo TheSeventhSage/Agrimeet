@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Logo } from '../shared/components/Logo';
 import BackgroundArt from '../shared/components/BackgroundArt';
 // import BgAgri from '../assets/images/bg-agri.jpg';
@@ -11,6 +12,16 @@ import BackgroundArt from '../shared/components/BackgroundArt';
 const AuthLayout = ({ className, title, subtitle, footer, mode = 'art', children }) => {
     return (
         <div className={`min-h-screen relative overflow-hidden bg-linear-to-br from-brand-50 to-brand-100 ${className}`}>
+            <Link
+                to="/"
+                className="absolute top-7 left-6 z-50 flex items-center gap-1 text-brand-600 hover:text-brand-500 transition-colors font-[400] underline"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                Back to Home
+            </Link>
+
             {/* Background based on mode */}
             {mode === 'art' ? (
                 <div className="absolute inset-0">

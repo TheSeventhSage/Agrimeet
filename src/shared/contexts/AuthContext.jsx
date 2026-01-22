@@ -3,7 +3,6 @@ import { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../../pages/api/auth';
 import { getUserProfile } from '../../pages/api/profile.api';
-import { getKYCStatus } from '../../pages/api/kyc.api';
 import { storageManager } from '../utils/storageManager';
 import { showSuccess, showError } from '../utils/alert';
 
@@ -260,6 +259,29 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const forgotPassword = async (email) => {
+        try {
+            const response = await authApi.forgotPassword(email);
+            // Success message is handled by the UI component usually, 
+            // but we can add a generic one here if preferred.
+            // showSuccess(response.message || 'Reset link sent'); 
+            return response;
+        } catch (error) {
+            // We re-throw so the UI can display specific validation errors
+            throw error;
+        }
+    };
+
+    const resetPassword = async (resetData) => {
+        try {
+            const response = await authApi.resetPassword(resetData);
+            showSuccess(response.message || 'Password reset successful!');
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    };
+
     const logout = () => {
         // Clear all sessions
         storageManager.clearAll();
@@ -284,6 +306,8 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         verifyOtp,
+        forgotPassword,
+        resetPassword,
         logout,
         isEmailVerified: () => verificationStatus === 'verified'
     };

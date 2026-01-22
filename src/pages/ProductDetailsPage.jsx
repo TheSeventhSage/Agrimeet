@@ -4,8 +4,6 @@ import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
     Star,
     ChevronRight,
-    ThumbsUp,
-    ThumbsDown,
     Loader2,
     AlertCircle,
     CheckCircle,
@@ -25,7 +23,7 @@ import {
 // API and Auth
 import { api } from './api/home.api.js';
 import { storageManager } from '../shared/utils/storageManager.js';
-// Utils (assuming you have these from other files)
+// Utils
 import { LogoLightIcon } from "../shared/components/Logo";
 import { showSuccess, showError } from '../shared/utils/alert';
 import Button from '../shared/components/Button';
@@ -97,7 +95,7 @@ const Breadcrumbs = ({ product }) => (
             </li>
             <li>
                 <span className="hover:text-green-600 cursor-pointer">
-                    {product.category?.name || 'Category'}
+                    {product.category || 'Category'}
                 </span>
             </li>
             <li>
@@ -112,12 +110,15 @@ const Breadcrumbs = ({ product }) => (
 
 /**
  * Renders the product image gallery
+ * FIXED: Handles array of strings (URLs) correctly
  */
 const ProductGallery = ({ images = [], productName }) => {
     const [activeIndex, setActiveIndex] = useState(0);
     // Use a placeholder if images array is empty or undefined
     const validImages = Array.isArray(images) ? images : [];
-    const mainImage = validImages[activeIndex]?.url || 'https://via.placeholder.com/600?text=No+Image';
+
+    // FIX: Access the string directly, not .url
+    const mainImage = validImages[activeIndex] || 'https://via.placeholder.com/600?text=No+Image';
 
     return (
         <div className="flex flex-col gap-4">
@@ -131,7 +132,7 @@ const ProductGallery = ({ images = [], productName }) => {
             <div className="grid grid-cols-5 gap-2">
                 {validImages.map((image, index) => (
                     <button
-                        key={image.id || index}
+                        key={index}
                         onClick={() => setActiveIndex(index)}
                         className={`aspect-square bg-gray-100 rounded-md overflow-hidden cursor-pointer border-2 transition-all ${index === activeIndex
                             ? 'border-green-600 shadow-md'
@@ -139,7 +140,8 @@ const ProductGallery = ({ images = [], productName }) => {
                             }`}
                     >
                         <img
-                            src={image.url}
+                            // FIX: Access the string directly
+                            src={image}
                             alt={`Thumbnail ${index + 1} of ${productName}`}
                             className="w-full h-full object-cover"
                         />
@@ -152,21 +154,27 @@ const ProductGallery = ({ images = [], productName }) => {
 
 /**
  * Renders the main product info, price, and actions
+ * FIXED: Accepts calculated averageRating and totalReviews as props
  */
-const ProductInfo = ({ product }) => {
+const ProductInfo = ({ product, averageRating, totalReviews }) => {
     const variantStock = Array.isArray(product.variants)
         ? product.variants.reduce((sum, v) => sum + (Number(v.stock_quantity) || 0), 0)
         : 0;
 
-    // overall availability boolean
-    const isAvailable = variantStock > 0;
+    // Fallback to main stock_quantity if no variants or variants sum is 0
+    // (Your JSON shows a main stock_quantity field)
+    const finalStock = variantStock > 0 ? variantStock : (product.stock_quantity || 0);
+
+    const isAvailable = finalStock > 0;
+
     return (
         <div className="flex flex-col gap-4">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{product.name}</h1>
             <div className="flex items-center gap-3">
-                <StarRating rating={product.average_rating || 0} size="md" />
+                {/* FIX: Use passed props instead of missing product fields */}
+                <StarRating rating={Number(averageRating) || 0} size="md" />
                 <span className="text-sm text-gray-600">
-                    ({product.reviews_count || 0} reviews)
+                    ({totalReviews || 0} reviews)
                 </span>
             </div>
 
@@ -186,7 +194,7 @@ const ProductInfo = ({ product }) => {
                 {isAvailable ? (
                     <span className="flex items-center gap-1.5 text-sm text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
                         <CheckCircle className="w-4 h-4" />
-                        In Stock ({variantStock})
+                        In Stock ({finalStock})
                     </span>
                 ) : (
                     <span className="flex items-center gap-1.5 text-sm text-red-700 bg-red-100 px-2 py-0.5 rounded-full">
@@ -201,13 +209,15 @@ const ProductInfo = ({ product }) => {
                     <Tag className="w-4 h-4 text-green-600" />
                     Category: <span className="font-medium text-gray-800">{product.category}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Package className="w-4 h-4 text-green-600" />
-                    Unit: <span className="font-medium text-gray-800">{product.unit.name} ({product.unit.symbol})</span>
-                </div>
+                {product.unit && (
+                    <div className="flex items-center gap-2">
+                        <Package className="w-4 h-4 text-green-600" />
+                        Unit: <span className="font-medium text-gray-800">{product.unit.name} ({product.unit.symbol})</span>
+                    </div>
+                )}
                 <div className="flex items-center gap-2 col-span-2">
                     <Store className="w-4 h-4 text-green-600" />
-                    Seller: <span className="font-medium text-gray-800">{product.seller.store_name}</span>
+                    Seller: <span className="font-medium text-gray-800">{product.seller?.store_name || 'AgriMeet Seller'}</span>
                 </div>
             </div>
 
@@ -351,23 +361,6 @@ const ReviewCard = ({ review, onLike, onUnlike }) => {
 
                     <p className="text-sm text-gray-700 mt-3">{review.review_comment}</p>
 
-                    {/* Like/Unlike buttons */}
-                    {/* <div className="flex items-center gap-4 mt-4">
-                        <button
-                            onClick={onLike}
-                            className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-green-600 transition-colors focus:outline-none"
-                        >
-                            <ThumbsUp className="w-4 h-4" />
-                            <span>{review.likes_count || 0}</span>
-                        </button>
-                        <button
-                            onClick={onUnlike}
-                            className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-red-600 transition-colors focus:outline-none"
-                        >
-                            <ThumbsDown className="w-4 h-4" />
-                        </button>
-                    </div> */}
-
                     {/* Seller Reply */}
                     {review.review_reply && (
                         <div className="mt-4 ml-4 pl-4 border-l-2 border-green-200 bg-green-50/50 p-4 rounded-r-lg">
@@ -397,18 +390,15 @@ export default function ProductDetailsPage() {
     const [user, setUser] = useState(null);
     const [userRoles, setUserRoles] = useState([]);
 
-    // Fetch user from storage on mount
     useEffect(() => {
         const userData = storageManager.getUserData();
-        const tokens = storageManager.getTokens(); // Get tokens to check roles
+        const tokens = storageManager.getTokens();
 
         if (userData) {
-            // user object contains id, name, email, and maybe 'seller' object
             setUser(userData);
         }
 
         if (tokens) {
-            // Use the same robust role-checking logic as ProtectedRoutes
             const roles = tokens?.role
                 ? (Array.isArray(tokens.role) ? tokens.role : [tokens.role])
                 : (tokens?.roles ? tokens.roles : []);
@@ -416,26 +406,20 @@ export default function ProductDetailsPage() {
         }
     }, []);
 
-    // Fetch product and review data
     const fetchData = async () => {
         try {
             setLoading(true);
             setError(null);
 
-            // This Promise.all is now safe, because getProductReviews
-            // will no longer throw a 404 error.
             const [productData, reviewsData] = await Promise.all([
                 api.getProduct(productId),
                 api.getProductReviews(productId)
             ]);
 
             setProduct(productData.data);
-            console.log(productData.data);
             setReviews(reviewsData.data || []);
 
         } catch (err) {
-            // This catch block will now only run for *actual* errors,
-            // like the product 404 or a 500 server error.
             console.error('Error loading product page:', err);
             if (err.status === 404 || err.message.includes('Product not found')) {
                 setError('Product not found');
@@ -447,12 +431,10 @@ export default function ProductDetailsPage() {
         }
     };
 
-    // Initial data load
     useEffect(() => {
         fetchData();
     }, [productId]);
 
-    // Function to check auth and redirect if needed
     const checkAuthAndRedirect = () => {
         if (!user) {
             showError('Please log in to perform this action.');
@@ -463,50 +445,19 @@ export default function ProductDetailsPage() {
         return true;
     };
 
-    // --- Event Handlers ---
-
-    const handleLike = async (reviewId) => {
-        if (!checkAuthAndRedirect()) return;
-
-        try {
-            await api.likeReview(reviewId);
-            showSuccess('Review liked!');
-            // Refetch all data to get updated like count
-            fetchData();
-        } catch (error) {
-            console.error('Error liking review:', error);
-            showError(error.data?.message || 'You may have already liked this review.');
-        }
-    };
-
-    const handleUnlike = async (reviewId) => {
-        if (!checkAuthAndRedirect()) return;
-
-        try {
-            await api.unlikeReview(reviewId);
-            showSuccess('Review unliked!');
-            // Refetch all data to get updated like count
-            fetchData();
-        } catch (error) {
-            console.error('Error unliking review:', error);
-            showError(error.data?.message || 'Could not unlike review.');
-        }
-    };
-
     const handleReviewSubmitted = () => {
-        // Refetch reviews to show the new "pending" one if the API returns it
         api.getProductReviews(productId).then(reviewsData => {
             setReviews(reviewsData.data || []);
         });
     };
 
-    // --- Memoized Values ---
-
+    // --- Memoized Values for Ratings ---
     const { averageRating, totalReviews } = useMemo(() => {
         if (!reviews || reviews.length === 0) {
             return { averageRating: 0, totalReviews: 0 };
         }
-        const total = reviews.reduce((acc, review) => acc + review.rating, 0);
+        // Calculate average from the reviews array provided by the second API response
+        const total = reviews.reduce((acc, review) => acc + (Number(review.rating) || 0), 0);
         return {
             averageRating: (total / reviews.length).toFixed(1),
             totalReviews: reviews.length,
@@ -515,8 +466,6 @@ export default function ProductDetailsPage() {
 
     const canReview = user && userRoles.includes('buyer');
     const isOwner = user && product && user.seller?.id === product.seller.id;
-
-    // --- Render Logic ---
 
     if (loading) {
         return <LoadingSpinner />;
@@ -527,7 +476,7 @@ export default function ProductDetailsPage() {
     }
 
     if (!product) {
-        return null; // Should be covered by loading/error states
+        return null;
     }
 
     return (
@@ -542,8 +491,15 @@ export default function ProductDetailsPage() {
                     {/* -- Product Overview Section -- */}
                     <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8 mb-6">
                         <div className="grid grid-cols-1 items-center md:grid-cols-2 gap-8 md:gap-12">
+                            {/* Updated to use string arrays */}
                             <ProductGallery images={product.images} productName={product.name} />
-                            <ProductInfo product={product} />
+
+                            {/* Updated to pass calculated ratings */}
+                            <ProductInfo
+                                product={product}
+                                averageRating={averageRating}
+                                totalReviews={totalReviews}
+                            />
                         </div>
                     </section>
 
@@ -557,7 +513,6 @@ export default function ProductDetailsPage() {
                             dangerouslySetInnerHTML={{ __html: product.description }}
                         />
 
-                        {/* -- UPDATED: VARIANTS TABLE -- */}
                         {product.variants && product.variants.length > 0 && (
                             <div className="mt-8">
                                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
@@ -607,7 +562,6 @@ export default function ProductDetailsPage() {
                                 </div>
                             </div>
                         )}
-                        {/* -- END VARIANTS TABLE -- */}
                     </section>
 
                     {/* -- Customer Reviews Section -- */}
@@ -627,7 +581,6 @@ export default function ProductDetailsPage() {
                             </div>
                         )}
 
-                        {/* Review List and Form */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8">
                                 {totalReviews > 0 ? (
@@ -636,8 +589,6 @@ export default function ProductDetailsPage() {
                                             <ReviewCard
                                                 key={review.id}
                                                 review={review}
-                                            // onLike={() => handleLike(review.id)}
-                                            // onUnlike={() => handleUnlike(review.id)}
                                             />
                                         ))}
                                     </div>
@@ -646,16 +597,13 @@ export default function ProductDetailsPage() {
                                         <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                                         <h3 className="text-lg font-medium text-gray-900">No reviews yet</h3>
                                         <p className="text-sm text-gray-600 mt-1">Be the first to review this product!</p>
-
                                     </div>
                                 )}
                             </div>
 
-                            {/* Review Form */}
                             <div className="lg:col-span-1">
                                 {canReview ? (
                                     isOwner ? (
-                                        // Case 1: User is a buyer, but is the product owner
                                         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
                                             <AlertCircle className="w-10 h-10 text-yellow-500 mx-auto mb-3" />
                                             <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -666,11 +614,9 @@ export default function ProductDetailsPage() {
                                             </p>
                                         </div>
                                     ) : (
-                                        // Case 2: User is a buyer and NOT the owner
                                         <ReviewForm product={product} onSubmitSuccess={handleReviewSubmitted} />
                                     )
                                 ) : (
-                                    // Case 3: User is not logged in or is not a buyer
                                     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
                                         <h3 className="text-lg font-medium text-gray-900 mb-2">Want to share your thoughts?</h3>
                                         <p className="text-sm text-gray-600 mb-4">
@@ -692,8 +638,8 @@ export default function ProductDetailsPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                         <div>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-linear-to-r from-green-600 to-green-700 rounded-xl flex items-center justify-center text-white">
+                            <div className="flex  flex-col justify-center gap-3 mb-4">
+                                <div className="w-12 h-12 bg-linear-to-r from-green-600 to-green-700 rounded-2xl flex items-center justify-center shadow-lg">
                                     <LogoLightIcon className="w-7 h-7 text-white" />
                                 </div>
                                 <div>
@@ -708,34 +654,34 @@ export default function ProductDetailsPage() {
                                 high-quality produce.
                             </p>
                             <div className="flex items-center gap-3 mt-4">
-                                <a
-                                    href="#"
+                                <Link
+                                    to="#"
                                     aria-label="Facebook"
-                                    className="p-2 rounded-lg hover:bg-gray-100"
+                                    className="p-1 rounded-lg hover:bg-gray-100"
                                 >
                                     <Facebook className="w-5 h-5 text-gray-600" />
-                                </a>
-                                <a
-                                    href="#"
+                                </Link>
+                                <Link
+                                    to="#"
                                     aria-label="Twitter"
-                                    className="p-2 rounded-lg hover:bg-gray-100"
+                                    className="p-1 rounded-lg hover:bg-gray-100"
                                 >
                                     <Twitter className="w-5 h-5 text-gray-600" />
-                                </a>
-                                <a
-                                    href="#"
+                                </Link>
+                                <Link
+                                    to="#"
                                     aria-label="Instagram"
-                                    className="p-2 rounded-lg hover:bg-gray-100"
+                                    className="p-1 rounded-lg hover:bg-gray-100"
                                 >
                                     <Instagram className="w-5 h-5 text-gray-600" />
-                                </a>
-                                <a
-                                    href="#"
+                                </Link>
+                                <Link
+                                    to="#"
                                     aria-label="LinkedIn"
-                                    className="p-2 rounded-lg hover:bg-gray-100"
+                                    className="p-1 rounded-lg hover:bg-gray-100"
                                 >
                                     <Linkedin className="w-5 h-5 text-gray-600" />
-                                </a>
+                                </Link>
                             </div>
                         </div>
 
@@ -743,25 +689,33 @@ export default function ProductDetailsPage() {
                             <h5 className="font-semibold mb-3">Marketplace</h5>
                             <ul className="space-y-2 text-sm text-gray-600">
                                 <li>
-                                    <a href="#" className="hover:text-green-600">
+                                    <a href="#products" className="hover:text-green-600">
                                         Browse Products
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" className="hover:text-green-600">
+                                    <button className="hover:text-green-600" onClick={() => performRedirect(ROUTES.REGISTER)}>
                                         Become a Seller
-                                    </a>
+                                    </button>
+                                    {/* <Link to="/register" >
+                   
+                  </Link> */}
                                 </li>
                                 <li>
-                                    <a href="#" className="hover:text-green-600">
-                                        Pricing
-                                    </a>
+                                    <Link to="/terms" className="hover:text-green-600">
+                                        Terms & Conditions
+                                    </Link>
                                 </li>
-                                <li>
-                                    <a href="#" className="hover:text-green-600">
-                                        Gift Cards
-                                    </a>
-                                </li>
+                                {/* <li>
+                  <Link to="/pricing" className="hover:text-green-600">
+                    Pricing
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/gift-cards" className="hover:text-green-600">
+                    Gift Cards
+                  </Link>
+                </li> */}
                             </ul>
                         </div>
 
@@ -769,24 +723,24 @@ export default function ProductDetailsPage() {
                             <h5 className="font-semibold mb-3">Support</h5>
                             <ul className="space-y-2 text-sm text-gray-600">
                                 <li>
-                                    <a href="#" className="hover:text-green-600">
+                                    <Link to="/help-support" className="hover:text-green-600">
                                         Help Center
-                                    </a>
+                                    </Link>
                                 </li>
                                 <li>
-                                    <a href="#" className="hover:text-green-600">
-                                        Shipping
-                                    </a>
+                                    <Link to="/privacy-policy" className="hover:text-green-600">
+                                        Privacy
+                                    </Link>
                                 </li>
                                 <li>
-                                    <a href="#" className="hover:text-green-600">
-                                        Returns
-                                    </a>
+                                    <Link to="/faqs" className="hover:text-green-600">
+                                        FAQs
+                                    </Link>
                                 </li>
                                 <li>
-                                    <a href="#" className="hover:text-green-600">
+                                    <Link to="/contact" className="hover:text-green-600">
                                         Contact Us
-                                    </a>
+                                    </Link>
                                 </li>
                             </ul>
                         </div>
@@ -810,20 +764,9 @@ export default function ProductDetailsPage() {
                         </div>
                     </div>
 
-                    <div className="border-t border-gray-100 mt-8 pt-8 text-sm text-gray-500 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="border-t border-gray-100 mt-8 pt-8 text-sm text-gray-500 flex flex-col md:flex-row items-center justify-center gap-4">
                         <div>
                             © {new Date().getFullYear()} AgriMeet. All rights reserved.
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <a href="#" className="hover:text-green-600">
-                                Terms
-                            </a>
-                            <a href="#" className="hover:text-green-600">
-                                Privacy
-                            </a>
-                            <a href="#" className="hover:text-green-600">
-                                Security
-                            </a>
                         </div>
                     </div>
                 </div>

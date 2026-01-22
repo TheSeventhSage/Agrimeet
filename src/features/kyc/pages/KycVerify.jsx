@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import { Upload, CheckCircle, Clock, AlertCircle, FileText, Building, User, CreditCard } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, FileText, Building, User, CreditCard } from 'lucide-react';
 import Input from '../../../shared/components/Input';
 import Select from '../../../shared/components/Select';
 import Button from '../../../shared/components/Button';
-import {Textarea} from '../../../shared/components'
-// import FileUpload from '../../../shared/components/FileUpload';
+import { Textarea } from '../../../shared/components';
 import ConfirmationModal from '../../../shared/components/ConfirmationModal';
 import { showSuccess, showError } from '../../../shared/utils/alert';
 import DocumentUpload from '../../../shared/components/DocumentUpload';
@@ -29,7 +28,7 @@ const KYCPage = () => {
         lastName: '',
         phoneNumber: '',
         gender: '',
-        state:  '',
+        state: '',
         city: '',
     });
 
@@ -186,12 +185,12 @@ const KYCPage = () => {
                                 required
                             />
                         </div>
-                            <Textarea
-                                label="Business Bio"
-                                value={businessInfo.businessBio}
-                                onChange={(e) => setBusinessInfo({ ...businessInfo, businessBio: e.target.value })}
-                                required
-                            />
+                        <Textarea
+                            label="Business Bio"
+                            value={businessInfo.businessBio}
+                            onChange={(e) => setBusinessInfo({ ...businessInfo, businessBio: e.target.value })}
+                            required
+                        />
                     </div>
                 );
 

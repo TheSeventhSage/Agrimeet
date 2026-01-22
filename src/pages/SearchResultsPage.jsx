@@ -60,14 +60,14 @@ const SearchResultsPage = () => {
                             © {new Date().getFullYear()} AgriMeet. All rights reserved.
                         </div>
                         <div className="flex items-center gap-4">
-                            <a href="#" className="hover:text-green-600">
+                            <a href="/terms" className="hover:text-green-600">
                                 Terms
                             </a>
-                            <a href="#" className="hover:text-green-600">
+                            <a href="/privacy-policy" className="hover:text-green-600">
                                 Privacy
                             </a>
-                            <a href="#" className="hover:text-green-600">
-                                Security
+                            <a href="/faqs" className="hover:text-green-600">
+                                FAQ's
                             </a>
                         </div>
                     </div>

@@ -1,6 +1,5 @@
 // modules/auth/api/profile.api.js
 import { api, getErrorMessage } from '../../shared/utils/apiClient';
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
 
 /**
  * Get user profile details

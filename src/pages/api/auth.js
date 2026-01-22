@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 import { storageManager } from '../../shared/utils/storageManager';
 import { showError } from '../../shared/utils/alert'; // ADD IMPORT
 
@@ -164,23 +164,6 @@ export const authApi = {
         }, 'OTP verification');
     },
 
-    forgotPassword: async (email) => {
-        return withAsyncErrorHandling(async () => {
-            const response = await fetch(`${BASE_URL}/auth/forgot-password`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({ email })
-            });
-
-            const data = await response.json();
-            if (!response.ok) throw data;
-            return data;
-        }, 'Password reset');
-    },
-
     resendOtp: async (email) => {
         return withAsyncErrorHandling(async () => {
             const response = await fetch(`${BASE_URL}/auth/resend-code`, {
@@ -196,6 +179,40 @@ export const authApi = {
             if (!response.ok) throw data;
             return data;
         }, 'OTP resend');
+    },
+
+    forgotPassword: async (email) => {
+        return withAsyncErrorHandling(async () => {
+            const response = await fetch(`${BASE_URL}/auth/forget_password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw data;
+            return data;
+        }, 'Password reset request');
+    },
+
+    resetPassword: async (resetData) => {
+        return withAsyncErrorHandling(async () => {
+            const response = await fetch(`${BASE_URL}/auth/reset_password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify(resetData)
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw data;
+            return data;
+        }, 'Password reset');
     },
 
     logout: async () => {

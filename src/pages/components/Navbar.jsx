@@ -116,7 +116,7 @@ const Navbar = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <a href="/help" className="hover:underline">
+            <a href="/contact" className="hover:underline">
               Help & Support
             </a>
           </div>
@@ -124,7 +124,7 @@ const Navbar = () => {
       </div>
 
       {/* Main Navigation */}
-      <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <nav className="container mx-auto sm:px- l py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <div className="flex items-center gap-2">
@@ -149,7 +149,7 @@ const Navbar = () => {
               />
               <button
                 type="submit"
-                className="absolute right-0 top-0 h-full px-4 flex items-center justify-center text-gray-500 hover:text-green-600"
+                className="absolute right-0 top-0 h-full px-3 flex items-center justify-center border-l border-gray-200 text-gray-500 hover:text-green-600 cursor-pointer"
               >
                 <Search className="w-5 h-5" />
               </button>
@@ -157,12 +157,12 @@ const Navbar = () => {
           </form>
 
           {/* Nav Buttons (Desktop) */}
-          <div className="hidden md:flex items-center gap-4 ml-6">
+          <div className="hidden md:flex items-center gap-4 ml-">
             {authState.isAuthenticated ? (
               authState.isSeller ? (
                 <button
                   onClick={() => navigate('/dashboard')}
-                  className="text-gray-900 font-semibold hover:text-green-600 transition-colors flex items-center gap-2"
+                  className="text-gray-900 font-semibold hover:text-green-600 transition-colors flex items-center gap-2 cursor-pointer"
                 >
                   <User className="w-4 h-4" />
                   <span>Dashboard</span>
@@ -170,7 +170,7 @@ const Navbar = () => {
               ) : (
                 <button
                   onClick={() => authState.user.roles.includes('seller') ? navigate('/dashboard') : authState.user.roles.includes('admin') ? navigate('/admin/dashboard') : navigate('/')}
-                  className="text-gray-900 font-semibold hover:text-green-600 transition-colors flex items-center gap-2"
+                  className="text-gray-900 font-semibold hover:text-green-600 transition-colors flex items-center gap-2 cursor-pointer"
                 >
                   <User className="w-4 h-4" />
                   <span>Hi, {authState.userName}</span>
@@ -180,13 +180,13 @@ const Navbar = () => {
               <>
                 <button
                   onClick={() => navigate('/login')}
-                  className="text-gray-900 font-semibold hover:text-green-600 transition-colors flex items-center gap-2"
+                  className="text-gray-900 font-semibold hover:text-green-600 transition-colors flex items-center gap-2 cursor-pointer"
                 >
                   <User className="w-4 h-4" />
                   <span>Account</span>
                 </button>
                 <button
-                  className="bg-green-600 text-white font-semibold py-3 px-6 rounded-2xl hover:bg-green-700 transition-all transform active:scale-95"
+                  className="bg-green-600 text-white font-semibold py-3 px-6 rounded-2xl hover:bg-green-700 transition-all transform active:scale-95 cursor-pointer"
                   onClick={() => navigate('/register')}
                 >
                   Get Started

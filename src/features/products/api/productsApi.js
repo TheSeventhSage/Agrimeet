@@ -1,7 +1,7 @@
 // api/seller/products.api.js
 import { storageManager } from '../../../shared/utils/storageManager';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {

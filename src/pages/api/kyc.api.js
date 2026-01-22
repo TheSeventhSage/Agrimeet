@@ -1,5 +1,5 @@
 // kyc.api.js
-const API_BASE_URL = 'https://agrimeet.udehcoglobalfoodsltd.com/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 import { storageManager } from '../../shared/utils/storageManager';
 
 // 1. MAIN SUBMISSION (Step 1)
