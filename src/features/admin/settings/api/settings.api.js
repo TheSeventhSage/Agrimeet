@@ -93,7 +93,7 @@ export const unitsApi = {
 
     async update(id, data) {
         const res = await fetch(`${BASE_URL}/admin/units/${id}`, {
-            method: 'PUT',
+            method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(data),
         });

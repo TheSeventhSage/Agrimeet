@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import {
     Users,
@@ -15,8 +16,7 @@ import {
     Loader2,
     Tag
 } from 'lucide-react';
-
-// Import from the existing admin.api.js file
+// Importadmin.api.js file
 import { adminApi, getErrorMessage } from '../api/admin.api';
 
 const AdminDashboard = () => {
@@ -31,14 +31,13 @@ const AdminDashboard = () => {
     const [outOfStockProducts, setOutOfStockProducts] = useState([]);
     const [ordersByState, setOrdersByState] = useState([]);
 
-    // --- NEW STATES ---
     const [monthlyRevenue, setMonthlyRevenue] = useState([]);
     const [topCategories, setTopCategories] = useState([]);
     const [soldProducts, setSoldProducts] = useState([]);
-    // --- END NEW STATES ---
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     // Load all dashboard data on mount
     useEffect(() => {
@@ -67,11 +66,9 @@ const AdminDashboard = () => {
                 adminApi.getTopWeeklyTransactions(),
                 adminApi.getWeeklyOutOfStock(),
                 adminApi.getWeeklyOrdersByState(),
-                // --- NEW API CALLS ---
-                adminApi.getMonthlyRevenue({ filter: 'month', months: 6 }), // Last 6 months
-                adminApi.getTopCategories({ last_days: 30 }), // Last 30 days
-                adminApi.getSoldProducts({ last_days: 30 }) // Last 30 days
-                // --- END NEW API CALLS ---
+                adminApi.getMonthlyRevenue({ filter: 'month', months: 6 }),
+                adminApi.getTopCategories({ last_days: 30 }),
+                adminApi.getSoldProducts({ last_days: 30 })
             ]);
 
             // Extract data from settled promises
@@ -145,7 +142,6 @@ const AdminDashboard = () => {
                 setOrdersByState(Array.isArray(ordersByStateRes.value) ? ordersByStateRes.value : []);
             }
 
-            // --- SET NEW STATES ---
             // Set monthly revenue
             if (monthlyRevenueRes.status === 'fulfilled') {
                 setMonthlyRevenue(Array.isArray(monthlyRevenueRes.value) ? monthlyRevenueRes.value : []);
@@ -160,7 +156,6 @@ const AdminDashboard = () => {
             if (soldProductsRes.status === 'fulfilled') {
                 setSoldProducts(Array.isArray(soldProductsRes.value) ? soldProductsRes.value : []);
             }
-            // --- END SET NEW STATES ---
 
             // Check if all critical requests failed
             const allFailed = results.every(result => result.status === 'rejected');
@@ -219,7 +214,7 @@ const AdminDashboard = () => {
         },
         {
             title: 'Total Revenue',
-            value: `₦${metrics.totalRevenue.toLocaleString()}`,
+            value: `₦${Math.floor(Number(metrics.totalRevenue)).toLocaleString()}`,
             icon: DollarSign,
             color: 'bg-purple-500',
             link: '/admin/transactions'
@@ -239,12 +234,12 @@ const AdminDashboard = () => {
     const quickStats = [
         {
             label: 'Weekly Revenue',
-            value: `₦${(weeklyTotals.total_revenue || 0).toLocaleString()}`,
+            value: `₦${(Math.floor(Number(weeklyTotals.total_revenue)) || 0).toLocaleString()}`,
             icon: DollarSign
         },
         {
             label: 'Weekly Orders',
-            value: (weeklyTotals.total_transactions || 0).toLocaleString(),
+            value: (Number(weeklyTotals.total_transactions) || 0).toLocaleString(),
             icon: ShoppingCart
         },
         {
@@ -254,7 +249,7 @@ const AdminDashboard = () => {
         },
         {
             label: 'Avg Order Value (All Time)',
-            value: `₦${metrics.avgOrderValue.toFixed(2)}`,
+            value: `₦${(Math.floor(Number(metrics.avgOrderValue)) || 0).toLocaleString()}`,
             icon: TrendingUp
         }
     ];
@@ -365,12 +360,12 @@ const AdminDashboard = () => {
                             <div className="flex items-center justify-between">
                                 <div className="flex-1">
                                     <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                                    <p className="text-2xl font-bold text-gray-900 mt-2">
+                                    <p className="text-lg font-bold text-gray-900 mt-2">
                                         {stat.value}
                                     </p>
                                 </div>
                                 <button
-                                    onClick={() => window.location.href = stat.link}
+                                    onClick={() => navigate(stat.link)}
                                     className="mt-4 text-brand-600 hover:text-brand-700 text-sm font-medium flex items-center gap-1"
                                 >
                                     <ArrowUpRight className="w-4 h-4" />
@@ -383,15 +378,15 @@ const AdminDashboard = () => {
                 {/* Quick Stats */}
                 <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Statistics (This Week)</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {quickStats.map((stat, index) => (
-                            <div key={index} className="flex items-center gap-4">
-                                <div className="p-3 bg-gray-100 rounded-lg">
+                            <div key={index} className="flex flex-col items-start gap-4">
+                                <div className="p-3 bg-gray-100 rounded-lg text-end">
                                     <stat.icon className="w-6 h-6 text-gray-700" />
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-600">{stat.label}</p>
-                                    <p className="text-2xl font-bold text-gray-900">
+                                    <p className="text-lg  font-bold text-gray-900">
                                         {stat.value}
                                     </p>
                                 </div>
@@ -410,8 +405,8 @@ const AdminDashboard = () => {
                                     <p className="text-sm font-medium text-purple-700">
                                         {getMonthName(item.month)} {item.year}
                                     </p>
-                                    <p className="text-xl font-bold text-purple-900 mt-2">
-                                        ₦{(item.total_amount || 0).toLocaleString()}
+                                    <p className="text-base font-bold text-purple-900 mt-2">
+                                        ₦{(Math.floor(Number(item.total_amount)) || 0).toLocaleString()}
                                     </p>
                                 </div>
                             ))}
@@ -425,7 +420,7 @@ const AdminDashboard = () => {
                 </div>
                 {/* --- END NEW SECTION --- */}
 
-                {/* --- NEW SECTION: Top Categories & Best Sellers --- */}
+                {/* --- Top Categories & Best Sellers --- */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Top Categories */}
                     <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
@@ -451,8 +446,8 @@ const AdminDashboard = () => {
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-lg font-bold text-gray-900">
-                                                ₦{(category.total_amount || 0).toLocaleString()}
+                                            <p className="text-sm font-bold text-gray-900">
+                                                ₦{(Math.floor(Number(category.total_amount)) || 0).toLocaleString()}
                                             </p>
                                         </div>
                                     </div>
@@ -480,8 +475,8 @@ const AdminDashboard = () => {
                                             {index + 1}
                                         </div>
                                         {product.product_photo && (
-                                            <img 
-                                                src={product.product_photo} 
+                                            <img
+                                                src={product.product_photo}
                                                 alt={product.product_name}
                                                 className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
                                             />
@@ -496,7 +491,7 @@ const AdminDashboard = () => {
                                         </div>
                                         <div className="text-right flex-shrink-0">
                                             <p className="text-sm font-bold text-gray-900">
-                                                ₦{(product.total_amount || 0).toLocaleString()}
+                                                ₦{(Math.floor(Number(product.total_amount)) || 0).toLocaleString()}
                                             </p>
                                         </div>
                                     </div>
@@ -519,7 +514,7 @@ const AdminDashboard = () => {
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-semibold text-gray-900">Recent Weekly Orders</h2>
                             <button
-                                onClick={() => window.location.href = '/admin/orders'}
+                                onClick={() => navigate('/admin/orders')}
                                 className="text-brand-600 hover:text-brand-700 text-sm font-medium"
                             >
                                 View All
@@ -546,11 +541,11 @@ const AdminDashboard = () => {
                                                 </p>
                                             </div>
                                             <div className="text-right">
-                                                <span className={`inline-block px-2 py-1 text-xs font-medium rounded ${order.status === 'completed' ? 'bg-green-100 text-green-700' :
-                                                    order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                <span className={`inline-block px-2 py-1 text-xs font-medium rounded ${order.order_status === 'completed' ? 'bg-green-100 text-green-700' :
+                                                    order.order_status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
                                                         'bg-gray-100 text-gray-700'
                                                     }`}>
-                                                    {order.status || 'N/A'}
+                                                    {order.order_status || 'N/A'}
                                                 </span>
                                             </div>
                                         </div>
@@ -629,7 +624,7 @@ const AdminDashboard = () => {
                                         </div>
                                         <div className="text-right">
                                             <span className="text-lg font-bold text-gray-900">
-                                                ₦{(order.total_amount || 0).toLocaleString()}
+                                                ₦{(Math.floor(Number(order.total_amount)) || 0).toLocaleString()}
                                             </span>
                                         </div>
                                     </div>
@@ -662,10 +657,10 @@ const AdminDashboard = () => {
                                             </p>
                                         </div>
                                         <button
-                                            onClick={() => window.location.href = `/admin/products/edit/${product.id}`}
+                                            onClick={() => navigate(`/admin/products`)}
                                             className="text-brand-600 hover:text-brand-700 text-sm font-medium"
                                         >
-                                            Manage
+                                            View
                                         </button>
                                     </div>
                                 ))
@@ -708,7 +703,7 @@ const AdminDashboard = () => {
                     <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <button
-                            onClick={() => window.location.href = '/admin/users'}
+                            onClick={() => navigate('/admin/users')}
                             className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
                         >
                             <div className="p-2 bg-blue-100 rounded-lg">
@@ -721,7 +716,7 @@ const AdminDashboard = () => {
                         </button>
 
                         <button
-                            onClick={() => window.location.href = '/admin/products'}
+                            onClick={() => navigate('/admin/products')}
                             className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
                         >
                             <div className="p-2 bg-green-100 rounded-lg">
@@ -734,7 +729,7 @@ const AdminDashboard = () => {
                         </button>
 
                         <button
-                            onClick={() => window.location.href = '/admin/reports'}
+                            onClick={() => navigate('/admin/reports')}
                             className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
                         >
                             <div className="p-2 bg-purple-100 rounded-lg">

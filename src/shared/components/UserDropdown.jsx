@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { User, ChevronDown, Settings, LogOut, UserCircle, HelpCircle, Shield } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User, ChevronDown, Settings, LogOut, UserCircle, HelpCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { storageManager } from '../utils/storageManager';
 
@@ -7,6 +8,7 @@ const UserDropdown = () => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
     const { logout } = useAuth();
+    const navigate = useNavigate();
 
     const user = storageManager.getUserData();
     // console.log(user.data.roles);
@@ -28,7 +30,7 @@ const UserDropdown = () => {
     };
 
     const navigateTo = (path) => {
-        window.location.href = path;
+        navigate(`${path}`);
         setIsOpen(false);
     };
 
@@ -40,7 +42,11 @@ const UserDropdown = () => {
                 className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
             >
                 <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-white" />
+                    {user?.data?.profile_photo ? (
+                        <img src={user?.data?.profile_photo} alt="User" className="w-8 h-8 rounded-full object-cover" />
+                    ) : (
+                        <User className="w-5 h-5 text-white" />
+                    )}
                 </div>
                 <div className="hidden md:block text-left">
                     <p className="text-sm font-medium text-gray-900">{user?.data?.first_name || user.user || 'User'}</p>
@@ -61,7 +67,11 @@ const UserDropdown = () => {
                             <div className="p-4 border-b border-gray-200">
                                 <div className="flex items-center gap-3">
                                     <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
-                                        <User className="w-6 h-6 text-white" />
+                                        {user?.data?.profile_photo ? (
+                                            <img src={user?.data?.profile_photo} alt="User" className="w-12 h-12 rounded-full object-cover" />
+                                        ) : (
+                                            <User className="w-5 h-5 text-white" />
+                                        )}
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-gray-900">{user?.data?.first_name || user.user || 'User'}</h3>

@@ -80,7 +80,7 @@ const SellerManagement = () => {
             );
 
             const sellersData = response.data?.data || response.data || [];
-            const meta = response.data?.meta || {};
+            const meta = response.meta || {};
 
             setSellers(sellersData);
             setPagination({
@@ -260,7 +260,7 @@ const SellerManagement = () => {
                 </div>
 
                 {/* Pagination */}
-                {!isLoading && sellers.length > 0 && (
+                {sellers.length > 0 && (
                     <Pagination
                         pagination={pagination}
                         onPageChange={handlePageChange}

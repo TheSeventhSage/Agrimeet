@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Plus, Edit2, Trash2, Loader2, AlertCircle, Scale } from 'lucide-react';
-import { unitsApi, getErrorMessage } from '../api/settings.api'; 
-import ConfirmationModal from '../../../../shared/components/ConfirmationModal'; 
+import { unitsApi, getErrorMessage } from '../api/settings.api';
+import ConfirmationModal from '../../../../shared/components/ConfirmationModal';
 import Pagination from '../../../../shared/components/Pagination';
 
 const PAGE_SIZE = 12; // Data sets per page
@@ -82,7 +82,7 @@ const UnitsTab = () => {
     const openEditModal = (unit) => {
         setModalMode('edit');
         setCurrentItem(unit);
-        setFormData({ name: unit.name, symbol: unit.symbol });
+        setFormData({ _method: 'PUT', name: unit.name, symbol: unit.symbol });
         setFormErrors({});
         setError(null); // Clear main error
         setIsModalOpen(true);
@@ -179,15 +179,15 @@ const UnitsTab = () => {
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
-            <div className="flex items-center justify-between mb-6">
+        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-4 md:p-6">
+            <div className="flex flex-col gap-3 justify-between mb-6 md:flex-row md:items-center">
                 <div>
                     <h2 className="text-xl font-semibold text-gray-900">All Units</h2>
                     <p className="text-sm text-gray-600">Manage product measurement units</p>
                 </div>
                 <button
                     onClick={openCreateModal}
-                    className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700"
                 >
                     <Plus className="w-5 h-5" />
                     Create Unit

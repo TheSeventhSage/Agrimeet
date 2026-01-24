@@ -26,21 +26,21 @@ const SellerCard = ({ seller, onViewDetails, onSuspendSeller, onUnsuspendSeller,
                 return (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <CheckCircle className="w-3 h-3" />
-                        KYC Approved
+                        Approved
                     </span>
                 );
             } else if (status === 'pending') {
                 return (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                         <Clock className="w-3 h-3" />
-                        KYC Pending
+                        Pending
                     </span>
                 );
             } else if (status === 'rejected') {
                 return (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                         <XCircle className="w-3 h-3" />
-                        KYC Rejected
+                        Rejected
                     </span>
                 );
             }

@@ -189,23 +189,23 @@ const TermsOfService = () => {
                                 <table className="w-full text-left text-sm">
                                     <thead className="bg-gray-50 border-b border-gray-100">
                                         <tr>
-                                            <th className="px-6 py-4 font-medium text-gray-600">ID</th>
-                                            <th className="px-6 py-4 font-medium text-gray-600 w-1/2">Content Preview</th>
-                                            <th className="px-6 py-4 font-medium text-gray-600">Status</th>
-                                            <th className="px-6 py-4 font-medium text-gray-600">Created At</th>
-                                            <th className="px-6 py-4 font-medium text-gray-600 text-right">Actions</th>
+                                            <th className="md:px-6 md:py-4 px-4 py-3 font-medium text-gray-600">ID</th>
+                                            <th className="md:px-6 md:py-4 px-4 py-3 font-medium text-gray-600 w-1/2">Content Preview</th>
+                                            <th className="md:px-6 md:py-4 px-4 py-3 font-medium text-gray-600">Status</th>
+                                            <th className="md:px-6 md:py-4 px-4 py-3 font-medium text-gray-600">Created At</th>
+                                            <th className="md:px-6 md:py-4 px-4 py-3 font-medium text-gray-600 text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {terms.map((term) => (
                                             <tr key={term.id} className="hover:bg-gray-50/50 transition-colors">
-                                                <td className="px-6 py-4 text-gray-900 font-medium">#{term.id}</td>
-                                                <td className="px-6 py-4 text-gray-600 max-w-sm">
+                                                <td className="md:px-6 md:py-4 px-4 py-3 text-gray-900 font-medium">#{term.id}</td>
+                                                <td className="md:px-6 md:py-4 px-4 py-3 text-gray-600 max-w-sm">
                                                     <div className="line-clamp-1 max-w-[100%]">
                                                         {term.content}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4">
+                                                <td className="md:px-6 md:py-4 px-4 py-3">
                                                     <button
                                                         onClick={() => handleTogglePublish(term)}
                                                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border cursor-pointer transition-all ${term.is_published
@@ -222,24 +222,24 @@ const TermsOfService = () => {
                                                         {term.is_published ? 'Published' : 'Draft'}
                                                     </button>
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-500">
+                                                <td className="md:px-6 md:py-4 px-4 py-3 text-gray-500">
                                                     <div className="flex items-center gap-2">
                                                         <Calendar className="w-4 h-4 text-gray-400" />
                                                         {formatDate(term.created_at)}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 text-right">
+                                                <td className="md:px-6 md:py-4 px-4 py-3 text-right">
                                                     <div className="flex items-center justify-end gap-2">
                                                         <button
                                                             onClick={() => handleOpenModal(term)}
-                                                            className="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
+                                                            className="p-2 text-gray-800 hover:text-brand-700 hover:bg-brand-300 rounded-lg transition-colors"
                                                             title="Edit"
                                                         >
                                                             <Edit2 className="w-4 h-4" />
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(term.id)}
-                                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                            className="p-2 text-gray-800 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
                                                             title="Delete"
                                                         >
                                                             <Trash2 className="w-4 h-4" />
@@ -254,7 +254,7 @@ const TermsOfService = () => {
 
                             {/* Pagination */}
                             {pagination.last_page > 1 && (
-                                <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+                                <div className="md:px-6 md:py-4 px-4 py-3 border-t border-gray-100 flex items-center justify-between">
                                     <span className="text-sm text-gray-500">
                                         Page {pagination.current_page} of {pagination.last_page}
                                     </span>

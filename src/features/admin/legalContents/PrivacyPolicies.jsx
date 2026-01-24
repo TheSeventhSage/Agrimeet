@@ -174,23 +174,23 @@ const PrivacyPolicies = () => {
                             <table className="w-full text-left">
                                 <thead className="bg-gray-50 border-b border-gray-200">
                                     <tr>
-                                        <th className="px-6 py-4 text-sm font-semibold text-gray-900">ID</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-gray-900">Content Preview</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-gray-900">Status</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-gray-900">Last Updated</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-gray-900 text-right">Actions</th>
+                                        <th className="px-4 py-3 md:px-6 md:py-4 text-sm font-semibold text-gray-900">ID</th>
+                                        <th className="px-4 py-3 md:px-6 md:py-4 text-sm font-semibold text-gray-900">Content Preview</th>
+                                        <th className="px-4 py-3 md:px-6 md:py-4 text-sm font-semibold text-gray-900">Status</th>
+                                        <th className="px-4 py-3 md:px-6 md:py-4 text-sm font-semibold text-gray-900">Last Updated</th>
+                                        <th className="px-4 py-3 md:px-6 md:py-4 text-sm font-semibold text-gray-900 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
                                     {policies.map((policy) => (
                                         <tr key={policy.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-6 py-4 text-sm text-gray-500">#{policy.id}</td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-4 py-3 md:px-6 md:py-4 text-sm text-gray-500">#{policy.id}</td>
+                                            <td className="px-4 py-3 md:px-6 md:py-4">
                                                 <p className="text-sm text-gray-900 line-clamp-2 max-w-md">
                                                     {policy.content}
                                                 </p>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-4 py-3 md:px-6 md:py-4">
                                                 <button
                                                     onClick={() => handleTogglePublish(policy)}
                                                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border cursor-pointer transition-colors
@@ -206,13 +206,13 @@ const PrivacyPolicies = () => {
                                                     )}
                                                 </button>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-500">
+                                            <td className="px-4 py-3 md:px-6 md:py-4 text-xs text-gray-600 ">
                                                 <div className="flex items-center gap-1.5">
                                                     <Calendar className="w-4 h-4 text-gray-400" />
                                                     {formatDate(policy.updated_at || policy.created_at)}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-right">
+                                            <td className="px-4 py-3 md:px-6 md:py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
                                                     <button
                                                         onClick={() => handleOpenModal(policy)}
@@ -239,7 +239,7 @@ const PrivacyPolicies = () => {
 
                     {/* Simple Pagination */}
                     {pagination.last_page > 1 && (
-                        <div className="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+                        <div className="px-4 py-3 md:px-6 md:py-4 border-t border-gray-200 flex justify-between items-center">
                             <span className="text-sm text-gray-600">
                                 Page {pagination.current_page} of {pagination.last_page}
                             </span>
@@ -268,7 +268,7 @@ const PrivacyPolicies = () => {
             {showModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                        <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
                             <h3 className="text-lg font-bold text-gray-900">
                                 {editingId ? 'Edit Privacy Policy' : 'Create Privacy Policy'}
                             </h3>

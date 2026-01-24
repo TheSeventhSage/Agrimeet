@@ -299,7 +299,7 @@ const OrderDetails = ({ order, onClose }) => {
                         <details className="group">
                             <summary className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer hover:text-gray-900 select-none w-fit">
                                 <Shield className="w-4 h-4" />
-                                <span>Developer Data (JSON)</span>
+                                <span>View Raw Data (JSON)</span>
                             </summary>
                             <div className="mt-4 p-4 bg-slate-900 text-slate-300 rounded-lg overflow-x-auto text-xs font-mono shadow-inner">
                                 <pre>{JSON.stringify(order, null, 2)}</pre>

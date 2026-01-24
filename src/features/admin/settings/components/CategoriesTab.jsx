@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Loader2, AlertCircle, LayoutGrid, Search, Image as ImageIcon, ChevronRight } from 'lucide-react';
-import { categoriesApi, getErrorMessage } from '../api/settings.api'; 
-import ConfirmationModal from '../../../../shared/components/ConfirmationModal'; 
-import Pagination from '../../../../shared/components/Pagination'; 
+import { categoriesApi, getErrorMessage } from '../api/settings.api';
+import ConfirmationModal from '../../../../shared/components/ConfirmationModal';
+import Pagination from '../../../../shared/components/Pagination';
 import ImagePlaceholder from '../../../../assets/images/categories/fruits.png';
 import { showSuccess, showError } from '../../../../shared/utils/alert'
 
@@ -282,7 +282,7 @@ const CategoriesTab = () => {
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
+        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-2 md:p-6">
             {/* Header & Filters */}
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
                 <div>

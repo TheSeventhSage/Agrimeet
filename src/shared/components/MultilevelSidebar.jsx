@@ -45,12 +45,8 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
 
     const isAdmin = userRoles.role.includes('admin');
     const isSeller = userRoles.role.includes('seller');
-    console.log(isSeller, isAdmin, userRoles, user);
+    // console.log(isSeller, isAdmin, userRoles, user);
 
-
-
-
-    // --- MENU CONFIGURATIONS (Same as before) ---
     const sellerMenuItems = [
         {
             key: 'dashboard',
@@ -182,8 +178,8 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
             hasSubmenu: true,
             submenu: [
                 {
-                    key: 'transactions',
-                    label: 'Transactions',
+                    key: 'payouts',
+                    label: 'Payout Requests',
                     icon: ArrowLeftRight,
                     path: '/admin/transactions'
                 },
@@ -209,12 +205,12 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                 },
             ]
         },
-        {
-            key: 'reports',
-            label: 'Reports & Analytics',
-            icon: TrendingUp,
-            path: '/admin/reports'
-        },
+        // {
+        //     key: 'reports',
+        //     label: 'Reports & Analytics',
+        //     icon: TrendingUp,
+        //     path: '/admin/reports'
+        // },
         {
             key: 'content-legal',
             label: 'Content & Legal',
@@ -401,9 +397,13 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                 <div className="absolute bottom-0 left-0 w-full p-4 border-t border-sidebar-900 bg-sidebar-950">
                     <div className="flex items-center gap-3 px-2">
                         <div className="w-9 h-9 bg-sidebar-800 rounded-full flex items-center justify-center border border-sidebar-700 shadow-inner">
-                            <span className="text-sm font-bold text-sidebar-200">
-                                {user?.data?.first_name?.charAt(0) || user?.user?.charAt(0) || 'U'}
-                            </span>
+                            {user?.data?.profile_photo ? (
+                                <img src={user?.data?.profile_photo} alt="" className="w-8 h-8 rounded-full object-cover" />
+                            ) : (
+                                <span className="text-sm font-bold text-sidebar-200">
+                                    {user?.data?.first_name?.charAt(0) || user?.user?.charAt(0) || 'U'}
+                                </span>
+                            )}
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-sidebar-100 truncate">

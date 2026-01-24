@@ -44,7 +44,7 @@ const DisputeDetailsModal = ({ dispute, onClose, onResolve }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div className="fixed inset-0 p-2 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 overflow-y-auto md:p-4">
             <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
 
                 {/* Header */}
@@ -72,7 +72,7 @@ const DisputeDetailsModal = ({ dispute, onClose, onResolve }) => {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
+                <div className="flex-1 overflow-y-auto bg-gray-50/50 p-3 md:p-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                         {/* LEFT COLUMN: Dispute & User Info (2 cols) */}

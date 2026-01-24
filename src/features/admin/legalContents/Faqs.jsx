@@ -151,7 +151,7 @@ const Faqs = () => {
 
     return (
         <DashboardLayout>
-            <div className="p-6 space-y-6">
+            <div className="md:p-6 p-1 space-y-6">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -187,32 +187,32 @@ const Faqs = () => {
                                 <table className="w-full text-left text-sm">
                                     <thead className="bg-gray-50 border-b border-gray-100">
                                         <tr>
-                                            <th className="px-6 py-4 font-medium text-gray-600 w-16">
+                                            <th className="md:px-6 md:py-4 px-4 py-3 font-medium text-gray-600 w-16">
                                                 <div className="flex items-center gap-1">
                                                     <Hash className="w-3 h-3" />
                                                 </div>
                                             </th>
-                                            <th className="px-6 py-4 font-medium text-gray-600 w-1/3">Question</th>
-                                            <th className="px-6 py-4 font-medium text-gray-600">Answer Preview</th>
-                                            <th className="px-6 py-4 font-medium text-gray-600">Status</th>
-                                            <th className="px-6 py-4 font-medium text-gray-600 text-right">Actions</th>
+                                            <th className="md:px-6 md:py-4 px-4 py-3 font-medium text-gray-600 w-1/3">Question</th>
+                                            <th className="md:px-6 md:py-4 px-4 py-3 font-medium text-gray-600">Answer Preview</th>
+                                            <th className="md:px-6 md:py-4 px-4 py-3 font-medium text-gray-600">Status</th>
+                                            <th className="md:px-6 md:py-4 px-4 py-3 font-medium text-gray-600 text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {faqs.map((faq) => (
                                             <tr key={faq.id} className="hover:bg-gray-50/50 transition-colors">
-                                                <td className="px-6 py-4 text-gray-500 font-mono">
+                                                <td className="md:px-6 md:py-4 px-4 py-3 text-xs text-gray-500 font-mono">
                                                     {faq.order}
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-900 font-medium align-top">
+                                                <td className="md:px-6 md:py-4 px-4 py-3 text-xs text-gray-900 font-medium align-top">
                                                     {faq.question}
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-600 align-top">
-                                                    <div className="line-clamp-2 max-w-md text-gray-500">
+                                                <td className="md:px-6 md:py-4 px-4 py-3  text-gray-600 align-top">
+                                                    <div className="line-clamp-2 max-w-md text-xs text-gray-500">
                                                         {faq.answer}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 align-top">
+                                                <td className="md:px-6 md:py-4 px-4 py-3 text-xs align-top">
                                                     <button
                                                         onClick={() => handleTogglePublish(faq)}
                                                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border cursor-pointer transition-all ${faq.is_published
@@ -228,7 +228,7 @@ const Faqs = () => {
                                                         {faq.is_published ? 'Published' : 'Draft'}
                                                     </button>
                                                 </td>
-                                                <td className="px-6 py-4 text-right align-top">
+                                                <td className="md:px-6 md:py-4 px-4 py-3 text-xs text-right align-top">
                                                     <div className="flex items-center justify-end gap-2">
                                                         <button
                                                             onClick={() => handleOpenModal(faq)}
@@ -254,7 +254,7 @@ const Faqs = () => {
 
                             {/* Pagination */}
                             {pagination.last_page > 1 && (
-                                <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+                                <div className="md:px-6 md:py-4 px-4 py-3 border-t border-gray-100 flex items-center justify-between">
                                     <span className="text-sm text-gray-500">
                                         Page {pagination.current_page} of {pagination.last_page}
                                     </span>

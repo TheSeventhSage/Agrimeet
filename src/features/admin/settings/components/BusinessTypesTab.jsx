@@ -174,15 +174,15 @@ const BusinessTypesTab = () => {
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
-            <div className="flex items-center justify-between mb-6">
+        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-3 md:p-6">
+            <div className="flex flex-col gap-3 justify-between mb-6 md:flex-row md:items-center">
                 <div>
                     <h2 className="text-xl font-semibold text-gray-900">All Business Types</h2>
                     <p className="text-sm text-gray-600">Manage seller business classifications</p>
                 </div>
                 <button
                     onClick={openCreateModal}
-                    className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700"
+                    className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white justify-center rounded-lg hover:bg-brand-700"
                 >
                     <Plus className="w-5 h-5" />
                     Create Type
@@ -197,7 +197,7 @@ const BusinessTypesTab = () => {
                 </div>
             ) : (
                 <>
-                    <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                    <div className="overflow-x-auto border border-gray-200 rounded-lg mb-5">
                         <table className="w-full text-left">
                             <thead className="bg-gray-50">
                                 <tr>
