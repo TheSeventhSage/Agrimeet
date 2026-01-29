@@ -7,6 +7,7 @@ import Select from '../../../shared/components/Select';
 import Button from '../../../shared/components/Button';
 import { ConfirmationModal } from '../../../shared/components';
 import { Loading } from '../../../shared/components/Loader';
+import { generateSKU } from '../utils/skuGenerator';
 import { showSuccess, showError } from '../../../shared/utils/alert';
 import { getVariant, updateVariant, getUnits } from '../api/productsApi';
 
@@ -100,7 +101,18 @@ const EditVariant = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+
+        setFormData(prev => {
+            const updatedData = { ...prev, [name]: value };
+
+            // AUTOFILL LOGIC: Use unified utility
+            if (name === 'name') {
+                updatedData.sku = generateSKU(value);
+            }
+
+            return updatedData;
+        });
+
         if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
     };
 
@@ -186,7 +198,7 @@ const EditVariant = () => {
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
                             <Loading />
-                            <p className="text-gray-600">Loading variant data...</p>
+                            <p className="text-gray-600">Loading Variety data...</p>
                         </div>
                     </div>
                 </div>
@@ -203,18 +215,18 @@ const EditVariant = () => {
                             <ArrowLeft className="w-5 h-5 text-gray-600" />
                         </button>
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Edit Product Variant</h1>
-                            <p className="text-gray-600">Update variant for product ID: {productId}</p>
+                            <h1 className="text-3xl font-bold text-gray-900">Edit Product Variety</h1>
+                            <p className="text-gray-600">Update variety for product ID: {productId}</p>
                         </div>
                     </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
                     <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-6">Variant Information</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-6">Variety Information</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <Input
-                                label="Variant Name"
+                                label="Variety Name"
                                 name="name"
                                 value={formData.name}
                                 onChange={handleInputChange}
@@ -299,7 +311,7 @@ const EditVariant = () => {
                         </Button>
                         <Button type="submit" loading={isSubmitting} className="px-6 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-2">
                             <Save className="w-4 h-4" />
-                            {isSubmitting ? 'Updating...' : 'Update Variant'}
+                            {isSubmitting ? 'Updating...' : 'Update Variety'}
                         </Button>
                     </div>
                 </form>
@@ -308,7 +320,7 @@ const EditVariant = () => {
                     isOpen={showCancelModal}
                     onClose={() => setShowCancelModal(false)}
                     onConfirm={handleCancelConfirm}
-                    title="Cancel Variant Edit"
+                    title="Cancel Variety Edit"
                     message="You have unsaved changes. Are you sure you want to leave?"
                     confirmText="Leave"
                     cancelText="Continue Editing"

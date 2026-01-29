@@ -1,6 +1,4 @@
-// components/Messages.jsx
 import { useState, useEffect } from 'react';
-import { Menu } from 'lucide-react'; // Added Menu icon for mobile toggle
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import ChatList from '../components/ChatList';
 import ChatHeader from '../components/ChatHeader';
@@ -14,22 +12,17 @@ const Messages = () => {
     const [conversations, setConversations] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
     const [messages, setMessages] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
     const [loadingMessages, setLoadingMessages] = useState(false);
-    const [error, setError] = useState(null);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // New state for mobile drawer
+    const [searchQuery, setSearchQuery] = useState('');
 
-    // Get current user ID from storage
-    const currentUser = storageManager.getUserData();
-    const currentUserId = currentUser?.data?.id;
+    const userData = storageManager.getUserData();
+    const currentUserId = userData?.data?.id || userData?.id;
 
-    // Fetch all conversations on mount
     useEffect(() => {
         fetchConversations();
     }, []);
 
-    // Fetch messages when a chat is selected
     useEffect(() => {
         if (selectedChat) {
             fetchMessages(selectedChat.id);
@@ -40,124 +33,129 @@ const Messages = () => {
         try {
             setLoading(true);
             const response = await messagesApi.getConversations();
-            console.log(response);
-            setConversations(response || []);
-            console.log(conversations);
+
+            // Handle various response structures safely
+            let data = [];
+            if (Array.isArray(response)) {
+                data = response;
+            } else if (response?.data && Array.isArray(response.data)) {
+                data = response.data;
+            } else if (response?.data?.data && Array.isArray(response.data.data)) {
+                data = response.data.data;
+            }
+
+            setConversations(data);
         } catch (err) {
-            console.error('Failed to fetch conversations:', err);
-            setError('Failed to load conversations');
+            console.error("Error fetching conversations:", err);
+            // Don't leave it loading forever if error
+            setConversations([]);
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchMessages = async (chatId) => {
+    const fetchMessages = async (conversationId) => {
         try {
             setLoadingMessages(true);
-            const response = await messagesApi.getMessages(chatId);
-            setMessages(response.data || []);
+            const response = await messagesApi.getMessages(conversationId);
 
-            // --- REQUIREMENT 1: Update unread count locally on load ---
-            // This ensures the red circle disappears immediately without refetching all conversations
-            setConversations(prevConversations =>
-                prevConversations.map(conv =>
-                    conv.id === chatId
-                        ? { ...conv, unread_count: 0 }
-                        : conv
-                )
-            );
+            let msgs = [];
+            if (Array.isArray(response)) {
+                msgs = response;
+            } else if (response?.data && Array.isArray(response.data)) {
+                msgs = response.data;
+            } else if (response?.messages && Array.isArray(response.messages)) {
+                msgs = response.messages;
+            }
+            setMessages(msgs);
         } catch (err) {
-            console.error('Failed to fetch messages:', err);
+            console.error(err);
         } finally {
             setLoadingMessages(false);
         }
     };
 
-    const handleSendMessage = async (content, file) => {
+    const handleSendMessage = async (text) => {
         if (!selectedChat) return;
-
         try {
-            const formData = new FormData();
-            formData.append('conversation_id', selectedChat.id);
-            formData.append('message', content);
-            if (file) {
-                formData.append('attachment', file);
-            }
+            const tempMsg = {
+                id: Date.now(),
+                conversation_id: selectedChat.id,
+                sender_id: currentUserId,
+                user_id: currentUserId,
+                message: text,
+                created_at: new Date().toISOString(),
+                is_read: false
+            };
+            setMessages(prev => [...prev, tempMsg]);
 
-            const response = await messagesApi.sendMessage(formData);
+            await messagesApi.sendMessage(selectedChat.id, { message: text });
 
-            // Append new message locally
-            setMessages([...messages, response.data]);
-
-            // Update last message in conversation list
-            setConversations(prev => prev.map(conv => {
-                if (conv.id === selectedChat.id) {
-                    return {
-                        ...conv,
-                        last_message: response.data,
-                        updated_at: new Date().toISOString()
-                    };
-                }
-                return conv;
-            }).sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at)));
-
+            fetchMessages(selectedChat.id);
+            fetchConversations(); // Update list for "Last Message"
         } catch (err) {
-            console.error('Failed to send message:', err);
+            console.error('Failed to send message', err);
         }
     };
 
-    const handleSelectChat = (chat) => {
-        setSelectedChat(chat);
-        setIsSidebarOpen(false); // Close mobile drawer when chat is selected
-    };
-
-    const handleTyping = () => {
-        // Implement typing indicator logic if needed
-    };
+    // Mobile Logic: If chat is selected, we are in "Chat View". If null, "List View".
+    const isMobileChatView = !!selectedChat;
 
     return (
         <DashboardLayout>
-            <div className="h-[calc(100vh-theme(spacing.24))] -m-6 md:m-0">
-                <div className="h-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex relative">
 
-                    {/* Chat List - Now acts as a drawer on mobile */}
+            <div>
+                <h1 className="text-3xl font-bold text-gray-900">Messages</h1>
+                <p className="text-gray-600 mt-2 mb-4">
+                    Communicate and stay connected with your business customers
+                </p>
+            </div>
+            {/* Main Container with fixed height calculation.
+                h-[calc(100vh-7rem)] adjusts for Header + Padding.
+                'flex' ensures side-by-side layout on Desktop.
+            */}
+            <div className="flex h-[calc(100vh-7rem)] bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+
+                {/* --- SIDEBAR (CHAT LIST) --- 
+                    Mobile: Hidden if a chat is selected (isMobileChatView = true)
+                    Desktop: Always Visible
+                */}
+                <div className={`
+                    w-full md:w-80 border-r border-gray-200 bg-white flex flex-col h-full
+                    ${isMobileChatView ? 'hidden md:flex' : 'flex'}
+                `}>
                     <ChatList
                         conversations={conversations}
                         selectedChat={selectedChat}
-                        onSelectChat={handleSelectChat}
+                        onSelectChat={setSelectedChat}
                         searchQuery={searchQuery}
                         onSearchChange={setSearchQuery}
-                        isOpen={isSidebarOpen}
-                        onClose={() => setIsSidebarOpen(false)}
+                        loading={loading}
                     />
+                </div>
 
-                    {/* Main Chat Area */}
-                    <div className="flex-1 flex flex-col min-w-0 bg-white">
-                        {/* Mobile Toggle Button Header */}
-                        <div className="md:hidden flex items-center px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <button
-                                onClick={() => setIsSidebarOpen(true)}
-                                className="p-2 -ml-2 mr-2 text-gray-600 hover:bg-gray-200 rounded-lg"
-                            >
-                                <Menu className="w-5 h-5" />
-                            </button>
-                            <span className="font-semibold text-gray-700">
-                                {selectedChat ? (selectedChat.context_details?.name || 'Chat') : 'Messages'}
-                            </span>
-                        </div>
+                {/* --- MAIN CHAT AREA --- 
+                    Mobile: Hidden if NO chat is selected (isMobileChatView = false)
+                    Desktop: Always Visible (shows EmptyState if null)
+                */}
+                <div className={`
+                    flex-1 bg-gray-50 flex-col h-full relative
+                    ${!isMobileChatView ? 'hidden md:flex' : 'flex'}
+                `}>
+                    {selectedChat ? (
+                        <>
+                            <ChatHeader
+                                conversation={selectedChat}
+                                // Back Button clears selection -> triggers Mobile List View
+                                onBack={() => setSelectedChat(null)}
+                            />
 
-                        {selectedChat ? (
-                            <>
-                                <ChatHeader
-                                    conversation={selectedChat}
-                                    currentUserId={currentUserId}
-                                />
-
+                            <div className="flex-1 overflow-y-auto relative w-full">
                                 {loadingMessages ? (
-                                    <div className="flex-1 flex items-center justify-center bg-gray-50">
+                                    <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
                                         <div className="text-center">
                                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600 mx-auto"></div>
-                                            <p className="text-sm text-gray-500 mt-2">Loading messages...</p>
+                                            <p className="text-xs text-gray-500 mt-2">Loading...</p>
                                         </div>
                                     </div>
                                 ) : (
@@ -166,23 +164,15 @@ const Messages = () => {
                                         currentUserId={currentUserId}
                                     />
                                 )}
+                            </div>
 
-                                <MessageInput
-                                    onSendMessage={handleSendMessage}
-                                    onTyping={handleTyping}
-                                />
-                            </>
-                        ) : (
-                            <EmptyChatState />
-                        )}
-                    </div>
-
-                    {/* Mobile Drawer Overlay */}
-                    {isSidebarOpen && (
-                        <div
-                            className="absolute inset-0 bg-black/50 z-30 md:hidden"
-                            onClick={() => setIsSidebarOpen(false)}
-                        />
+                            <MessageInput
+                                onSendMessage={handleSendMessage}
+                                onTyping={() => { }}
+                            />
+                        </>
+                    ) : (
+                        <EmptyChatState />
                     )}
                 </div>
             </div>

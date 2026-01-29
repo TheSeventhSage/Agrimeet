@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     User,
     Lock,
     Bell,
     Save,
-    Eye,
-    EyeOff
+    Key,
+    Shield,
+    LogOut,
 } from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import Input from '../../../shared/components/Input';
@@ -16,10 +18,10 @@ import { storageManager } from '../../../shared/utils/storageManager';
 import { updateUserProfile } from '../../../pages/api/profile.api';
 
 const Settings = () => {
-    const [activeTab, setActiveTab] = useState('profile');
-    const [showPassword, setShowPassword] = useState(false);
+    const [activeTab, setActiveTab] = useState('profile');// State for the Confirmation Modal
+    const [showResetConfirm, setShowResetConfirm] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    const navigate = useNavigate();
     // Stores the raw File object
     const [avatarFile, setAvatarFile] = useState(null);
 
@@ -152,6 +154,22 @@ const Settings = () => {
         }
     };
 
+    // --- Security / Password Flow ---
+    const handlePasswordResetInitiation = () => {
+        setShowResetConfirm(true);
+    };
+
+    const confirmPasswordResetFlow = () => {
+        // 1. Close Modal
+        setShowResetConfirm(false);
+
+        // 2. Clear Session (Logout)
+        storageManager.clearAll();
+
+        // 3. Redirect to Forgot Password
+        navigate('/forgot-password');
+    };
+
     const renderProfileTab = () => (
         <form onSubmit={handleProfileSubmit} className="space-y-6">
             <div className="flex flex-col md:flex-row gap-8">
@@ -247,34 +265,54 @@ const Settings = () => {
 
     const renderSecurityTab = () => (
         <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-900">Change Password</h3>
-            <div className="grid grid-cols-1 gap-4 max-w-md">
-                <Input
-                    label="Current Password"
-                    type={showPassword ? "text" : "password"}
-                    icon={Lock}
-                    endIcon={
-                        <button
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h3 className="text-lg font-medium text-gray-900">Security Settings</h3>
+                    <p className="text-sm text-gray-500">Manage your password and account security.</p>
+                </div>
+                <div className="h-10 w-10 bg-orange-50 rounded-full flex items-center justify-center">
+                    <Shield className="h-5 w-5 text-orange-600" />
+                </div>
+            </div>
+
+            {/* Password Change Section */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
+                <div className="flex items-start gap-4">
+                    <div className="p-3 bg-blue-50 rounded-lg hidden sm:block">
+                        <Key className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                        <h4 className="text-base font-semibold text-gray-900">Change Password</h4>
+                        <p className="text-sm text-gray-500 mt-1 mb-4">
+                            To ensure the highest level of security, we require you to verify your identity before changing your password.
+                            Proceeding will log you out and redirect you to the password reset page.
+                        </p>
+
+                        <Button
                             type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="text-gray-400 hover:text-gray-600"
+                            variant="outline"
+                            onClick={handlePasswordResetInitiation}
+                            className="border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300"
                         >
-                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                    }
-                />
-                <Input
-                    label="New Password"
-                    type="password"
-                    icon={Lock}
-                />
-                <Input
-                    label="Confirm New Password"
-                    type="password"
-                    icon={Lock}
-                />
-                <div className="pt-2">
-                    <Button>Update Password</Button>
+                            Change Password
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Two-Factor Placeholder (Optional Visual Filler) */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 opacity-75">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gray-200 rounded-md">
+                            <Lock className="w-5 h-5 text-gray-500" />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-semibold text-gray-900">Two-Factor Authentication</h4>
+                            <p className="text-xs text-gray-500">Add an extra layer of security to your account.</p>
+                        </div>
+                    </div>
+                    <span className="text-xs font-medium bg-gray-200 text-gray-600 px-2 py-1 rounded">Coming Soon</span>
                 </div>
             </div>
         </div>
@@ -324,6 +362,39 @@ const Settings = () => {
                     </div>
                 </div>
             </div>
+
+            {showResetConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+                        <div className="flex items-center justify-center w-12 h-12 bg-orange-100 rounded-full mx-auto mb-4">
+                            <LogOut className="w-6 h-6 text-orange-600" />
+                        </div>
+
+                        <h3 className="text-lg font-bold text-gray-900 text-center mb-2">
+                            Change Password?
+                        </h3>
+
+                        <p className="text-gray-500 text-center mb-6 text-sm">
+                            You are about to be logged out to securely reset your password via the Forgot Password page. Are you sure you want to proceed?
+                        </p>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowResetConfirm(false)}
+                                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmPasswordResetFlow}
+                                className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-medium transition-colors"
+                            >
+                                Yes, Proceed
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </DashboardLayout>
     );
 };

@@ -200,19 +200,21 @@ const ProductDetails = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     {/* Image Gallery */}
+                    {/* Image Gallery */}
                     <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                         <div className="flex flex-col gap-6">
                             {/* Main Image */}
                             <div className="aspect-square rounded-xl bg-gray-100 overflow-hidden">
                                 <img
                                     src={
-                                        product?.image
-                                        || (Array.isArray(product?.images) && product.images[selectedImage])
+                                        // FIX: Check for the selected gallery image FIRST
+                                        (Array.isArray(product?.images) && product.images[selectedImage])
+                                        || product?.image
                                         || product?.thumbnail
                                         || ''
                                     }
                                     alt={product?.name}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover transition-opacity duration-300"
                                     onError={(e) => {
                                         e.target.src = `data:image/svg+xml;base64,${btoa(`
                                             <svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -301,7 +303,7 @@ const ProductDetails = () => {
                             {/* Variant selector (if variants exist) */}
                             {Array.isArray(product?.variants) && product.variants.length > 0 && (
                                 <div>
-                                    <h4 className="text-sm font-medium text-gray-700 mb-2">Variants</h4>
+                                    <h4 className="text-sm font-medium text-gray-700 mb-2">Varieties</h4>
 
                                     {/* If many variants, render as horizontal scrollable pills */}
                                     <div className="flex gap-2 overflow-x-auto pb-2">
@@ -323,7 +325,7 @@ const ProductDetails = () => {
                                                         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                 >
                                                     <div className="flex items-center justify-between">
-                                                        <div className="text-sm font-medium">{v.name || `Variant ${v.id}`}</div>
+                                                        <div className="text-sm font-medium">{v.name || v.sku || `Variety ${v.id}`}</div>
                                                         <div className="text-sm font-semibold">${Number(v.price ?? 0).toFixed(2)}</div>
                                                     </div>
                                                     <div className="text-xs text-gray-500 mt-1">
@@ -447,9 +449,9 @@ const ProductDetails = () => {
                                             <span className="font-medium text-gray-900">{totalStock} units</span>
                                         </div>
                                         <div className="flex justify-between py-2 border-b border-gray-100">
-                                            <span className="text-gray-500">Created</span>
+                                            <span className="text-gray-500">Varieties</span>
                                             <span className="font-medium text-gray-900">
-                                                {product.createdAt ? new Date(product.createdAt).toLocaleDateString() : ''}
+                                                {product.variants.length}
                                             </span>
                                         </div>
                                     </div>

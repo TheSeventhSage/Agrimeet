@@ -10,7 +10,8 @@ import { ConfirmationModal } from '../../../shared/components';
 import { Loading } from '../../../shared/components/Loader';
 import { showSuccess, showError } from '../../../shared/utils/alert';
 import { createProduct, getCategories, getUnits } from '../api/productsApi';
-import { storageManager } from '../../../shared/utils/storageManager'; // Restored
+import { storageManager } from '../../../shared/utils/storageManager';
+import { generateSKU } from '../utils/skuGenerator';
 import { useNavigate } from 'react-router-dom';
 
 const AddProduct = () => {
@@ -68,7 +69,18 @@ const AddProduct = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+
+        setFormData(prev => {
+            const updatedData = { ...prev, [name]: value };
+
+            // AUTOFILL LOGIC: Use unified utility
+            if (name === 'name') {
+                updatedData.sku = generateSKU(value);
+            }
+
+            return updatedData;
+        });
+
         if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
     };
 

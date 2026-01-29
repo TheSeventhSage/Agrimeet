@@ -59,11 +59,11 @@ const VariantsList = () => {
         try {
             setDeleting(prev => ({ ...prev, [variantToDelete.id]: true }));
             await deleteVariant(productId, variantToDelete.id);
-            showSuccess('Variant deleted successfully!');
+            showSuccess('Variety deleted successfully!');
             await loadVariants();
         } catch (error) {
-            console.error('Error deleting variant:', error);
-            showError('Failed to delete variant. Please try again.');
+            console.error('Error deleting variety:', error);
+            showError('Failed to delete variety. Please try again.');
         } finally {
             setDeleting(prev => ({ ...prev, [variantToDelete.id]: false }));
             setShowDeleteModal(false);
@@ -103,15 +103,15 @@ const VariantsList = () => {
                             <ArrowLeft className="w-5 h-5 text-gray-600" />
                         </button>
                         <div className="flex-1">
-                            <h1 className="text-3xl font-bold text-gray-900">Product Variants</h1>
-                            <p className="text-gray-600">Manage variants for Product ID: {productId}</p>
+                            <h1 className="text-3xl font-bold text-gray-900">Product Varieties</h1>
+                            <p className="text-gray-600">Manage varieties for Product ID: {productId}</p>
                         </div>
                         <button
                             onClick={handleAddVariant}
                             className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-2"
                         >
                             <Plus className="w-4 h-4" />
-                            Add Variant
+                            Add Variety
                         </button>
                     </div>
                 </div>
@@ -121,8 +121,8 @@ const VariantsList = () => {
                     {variants.length === 0 ? (
                         <div className="text-center py-12">
                             <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">No variants yet</h3>
-                            <p className="text-gray-500 mb-6">Create your first variant for this product</p>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">No varieties yet</h3>
+                            <p className="text-gray-500 mb-6">Create your first variety for this product</p>
                             <button
                                 onClick={handleAddVariant}
                                 className="px-6 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
@@ -197,7 +197,7 @@ const VariantsList = () => {
                                                     <button
                                                         onClick={() => handleEditVariant(variant.id)}
                                                         className="p-1.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                                        title="Edit Variant"
+                                                        title="Edit Variety"
                                                     >
                                                         <Edit className="w-4 h-4" />
                                                     </button>
@@ -206,7 +206,7 @@ const VariantsList = () => {
                                                         onClick={() => handleDeleteClick(variant)}
                                                         disabled={deleting[variant.id]}
                                                         className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        title="Delete Variant"
+                                                        title="Delete Variety"
                                                     >
                                                         {deleting[variant.id] ? (
                                                             <div className="w-4 h-4 animate-spin rounded-full border-2 border-red-300 border-t-red-600"></div>
@@ -232,7 +232,7 @@ const VariantsList = () => {
                         setVariantToDelete(null);
                     }}
                     onConfirm={handleDeleteConfirm}
-                    title="Delete Variant"
+                    title="Delete Variety"
                     message={`Are you sure you want to delete "${variantToDelete?.name}"? This action cannot be undone.`}
                     confirmText="Delete"
                     cancelText="Cancel"

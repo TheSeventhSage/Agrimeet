@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Home } from 'lucide-react';
 import { Logo } from '../shared/components/Logo';
 import BackgroundArt from '../shared/components/BackgroundArt';
 // import BgAgri from '../assets/images/bg-agri.jpg';
@@ -14,12 +15,10 @@ const AuthLayout = ({ className, title, subtitle, footer, mode = 'art', children
         <div className={`min-h-screen relative overflow-hidden bg-linear-to-br from-brand-50 to-brand-100 ${className}`}>
             <Link
                 to="/"
-                className="absolute top-7 left-6 z-50 flex items-center gap-1 text-brand-600 hover:text-brand-500 transition-colors font-[400] underline"
+                className="absolute top-4 left-4 z-50 p-3 bg-brand-300/80 backdrop-blur-md hover:bg-white rounded-full shadow-sm text-green-800 transition-all hover:scale-105 border border-white/50"
+                aria-label="Back to Home"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                </svg>
-                Back to Home
+                <Home className="w-5 h-5" />
             </Link>
 
             {/* Background based on mode */}

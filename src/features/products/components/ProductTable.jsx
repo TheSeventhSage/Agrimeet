@@ -106,7 +106,7 @@ const ProductTable = ({ product, onEdit, onDelete, onView, onManageVariants, isD
                         {/* Variant count if present */}
                         {Array.isArray(product?.variants) && product.variants.length > 0 && (
                             <div className="text-xs text-gray-400 mt-1">
-                                {product.variants.length} variant{product.variants.length > 1 ? 's' : ''}
+                                {product.variants.length} variet{product.variants.length > 1 ? 'ies' : 'y'}
                             </div>
                         )}
                     </div>
@@ -179,7 +179,7 @@ const ProductTable = ({ product, onEdit, onDelete, onView, onManageVariants, isD
                     <button
                         onClick={() => onManageVariants && onManageVariants(product)}
                         className="p-1.5 text-purple-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                        title="Manage Variants"
+                        title="Manage Varieties"
                     >
                         <Package className="w-4 h-4" />
                     </button>

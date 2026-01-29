@@ -67,6 +67,8 @@ export const getUserProfile = (userId) => {
     return apiClient(`/buyer/users/${userId}`);
 };
 
+// dashboardApi.js
+
 /**
  * Validates the seller's address.
  * @param {number|string} sellerId - The ID of the seller to validate.

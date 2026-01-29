@@ -1,3 +1,9 @@
+/**
+ * Add Variety Component
+ * Note the term Variety used here keeps with the backend terminology to maintain consistency.
+ * Variety is the UI term used in place of variant for user understanding.
+ */
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react';
@@ -9,6 +15,7 @@ import { ConfirmationModal } from '../../../shared/components';
 import { Loading } from '../../../shared/components/Loader';
 import { showSuccess, showError } from '../../../shared/utils/alert';
 import { createVariant, getUnits, getProductAttributes } from '../api/productsApi';
+import { generateSKU } from '../utils/skuGenerator';
 
 const AddVariant = () => {
     const { productId } = useParams();
@@ -76,16 +83,19 @@ const AddVariant = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+
+        setFormData(prev => {
+            const updatedData = { ...prev, [name]: value };
+
+            if (name === 'name') {
+                updatedData.sku = generateSKU(value);
+            }
+
+            return updatedData;
+        });
 
         if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
+            setErrors(prev => ({ ...prev, [name]: '' }));
         }
     };
 
@@ -98,7 +108,7 @@ const AddVariant = () => {
     const validateForm = () => {
         const newErrors = {};
 
-        if (!formData.name.trim()) newErrors.name = 'Variant name is required';
+        if (!formData.name.trim()) newErrors.name = 'Variety name is required';
         if (!formData.sku.trim()) newErrors.sku = 'SKU is required';
         if (!formData.price || formData.price <= 0) newErrors.price = 'Valid price is required';
         if (!formData.stock_quantity || formData.stock_quantity < 0) newErrors.stock_quantity = 'Valid stock quantity is required';
@@ -138,18 +148,18 @@ const AddVariant = () => {
 
             const response = await createVariant(productId, variantData);
 
-            showSuccess(response.message || 'Variant created successfully!');
+            showSuccess(response.message || 'Variety created successfully!');
 
             // Redirect back to products page
             navigate('/products');
         } catch (error) {
-            console.error('Error creating variant:', error);
+            console.error('Error creating variety:', error);
 
             if (error.message.includes('Session expired')) {
                 showError('Session expired. Please login again.');
                 navigate('/login');
             } else {
-                showError(error.message || 'Error creating variant. Please try again.');
+                showError(error.message || 'Error creating variety. Please try again.');
             }
         } finally {
             setIsSubmitting(false);
@@ -200,8 +210,8 @@ const AddVariant = () => {
                             <ArrowLeft className="w-5 h-5 text-gray-600" />
                         </button>
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Add Product Variant</h1>
-                            <p className="text-gray-600">Create a new variant for product ID: {productId}</p>
+                            <h1 className="text-3xl font-bold text-gray-900">Add Product Varieties</h1>
+                            <p className="text-gray-600">Create a new variety for product ID: {productId}</p>
                         </div>
                     </div>
                 </div>
@@ -210,11 +220,11 @@ const AddVariant = () => {
                 <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Basic Information */}
                     <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-6">Variant Information</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-6">Variety Information</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <Input
-                                label="Variant Name"
+                                label="Variety Name"
                                 name="name"
                                 value={formData.name}
                                 onChange={handleInputChange}
@@ -324,7 +334,7 @@ const AddVariant = () => {
                             className="px-6 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors flex items-center gap-2"
                         >
                             <Save className="w-4 h-4" />
-                            {isSubmitting ? 'Creating...' : 'Create Variant'}
+                            {isSubmitting ? 'Creating...' : 'Create Variety'}
                         </Button>
                     </div>
                 </form>
@@ -334,7 +344,7 @@ const AddVariant = () => {
                     isOpen={showCancelModal}
                     onClose={() => setShowCancelModal(false)}
                     onConfirm={handleCancelConfirm}
-                    title="Cancel Variant Creation"
+                    title="Cancel Variety Creation"
                     message="You have unsaved changes. Are you sure you want to leave?"
                     confirmText="Leave"
                     cancelText="Continue Editing"

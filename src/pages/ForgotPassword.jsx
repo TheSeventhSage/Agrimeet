@@ -5,6 +5,7 @@ import TextField from '../shared/components/TextFields';
 import Button from '../shared/components/Button';
 import { useAuth } from '../shared/contexts/AuthContext';
 import { forgotPasswordValidation } from '../shared/utils/validation';
+import { ArrowLeft } from 'lucide-react';
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState('');
@@ -104,12 +105,13 @@ export default function ForgotPassword() {
 
     return (
         <AuthLayout
-            title="Forgot password?"
+            title="Reset password?"
             subtitle="Enter your email to receive a reset link"
             footer={
                 <p>
-                    Remembered it?{' '}
-                    <Link to="/login" className="text-gray-900 font-medium hover:underline">
+                    {/* Remembered it?{' '} */}
+                    <Link to="/login" className="text-brand-700 font-medium hover:underline">
+                        <ArrowLeft className="w-4 h-4 inline-block mr-1" />
                         Back to sign in
                     </Link>
                 </p>

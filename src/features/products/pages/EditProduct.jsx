@@ -7,7 +7,7 @@ import Select from '../../../shared/components/Select';
 import Textarea from '../../../shared/components/Textarea';
 import Button from '../../../shared/components/Button';
 import { ConfirmationModal } from '../../../shared/components';
-// import { Loading } from '../../../shared/components/Loader';
+import { generateSKU } from '../utils/skuGenerator';
 import DocumentUpload from '../../../shared/components/DocumentUpload';
 import { showSuccess, showError } from '../../../shared/utils/alert';
 import { getProduct, updateProduct, getCategories, getUnits } from '../api/productsApi';
@@ -126,10 +126,17 @@ const EditProduct = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+
+        setFormData(prev => {
+            const updatedData = { ...prev, [name]: value };
+
+            // AUTOFILL LOGIC: Use unified utility
+            if (name === 'name') {
+                updatedData.sku = generateSKU(value);
+            }
+
+            return updatedData;
+        });
 
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));

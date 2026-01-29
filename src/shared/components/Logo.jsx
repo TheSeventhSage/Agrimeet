@@ -10,7 +10,7 @@ export const Logo = () => {
     return (
         <Link to={"/"}>
             <div
-                className="grid place-self-center rounded-md text-white w-[70%] md:w-[25%] shadow-soft"
+                className="grid place-self-center rounded-md text-white w-[70%] md:w-[25%]"
                 aria-label="Agrimeet"
                 title="Agrimeet"
             >
