@@ -14,7 +14,7 @@ const BankAccounts = ({ accounts }) => {
             <div className="flex items-center justify-between p-1">
                 <h3 className="text-lg font-semibold text-gray-900">Linked Bank Account</h3>
                 <Button
-                    onClick={() => navigate('/profile')}
+                    onClick={() => navigate('/settings')}
                     className="text-sm text-brand-600 border border-brand-500 hover:bg-gray-100 hover:text-brand-600 hover:border hover:border-brand-500 font-medium cursor-pointer"
                 >
                     Update in Profile
@@ -33,7 +33,7 @@ const BankAccounts = ({ accounts }) => {
                     <h4 className="text-gray-900 font-medium mb-1">No Bank Account Linked</h4>
                     <p className="text-gray-500 text-sm mb-4">Please update your seller profile with your bank details.</p>
                     <Button
-                        onClick={() => navigate('/settings/profile')}
+                        onClick={() => navigate('/profile')}
                         className="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm hover:bg-brand-100 hover:text-brand-600 hover:border hover:border-brand-500 cursor-pointer"
                     >
                         Go to Profile

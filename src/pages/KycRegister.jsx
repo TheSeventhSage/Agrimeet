@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     ArrowRight, ArrowLeft, CheckCircle, Phone, FileText, Shield, Info
 } from 'lucide-react';
@@ -8,13 +8,16 @@ import Textarea from '../shared/components/Textarea';
 import Button from '../shared/components/Button';
 import DocumentUpload from '../shared/components/DocumentUpload';
 import { showSuccess, showError } from '../shared/utils/alert';
+import { InlineLoader } from '../shared/components/Loader';
 import BackgroundArt from '../shared/components/BackgroundArt';
-// Import the 3 API functions
 import { submitKYC, getBanks, getBusinessTypes } from './api/kyc.api';
-
+import KycGuideModal from './components/KycGuideModal';
 // --- GEOAPIFY IMPORTS ---
 import { GeoapifyContext, GeoapifyGeocoderAutocomplete } from '@geoapify/react-geocoder-autocomplete';
 import '@geoapify/geocoder-autocomplete/styles/minimal.css';
+import ContactSupportModal from './components/ContactSupportModal';
+
+const STORAGE_KEY = 'kyc_form_persistence';
 
 const KYCRegistrationForm = () => {
     const [currentStep, setCurrentStep] = useState(1);
@@ -22,6 +25,63 @@ const KYCRegistrationForm = () => {
     const [errors, setErrors] = useState({});
     const [businessTypesList, setBusinessTypesList] = useState([]);
     const [banksList, setBanksList] = useState([]);
+    const [isGuideOpen, setIsGuideOpen] = useState(false);
+    const [isAddressLoading, setIsAddressLoading] = useState(false);
+    const [isSupportOpen, setIsSupportOpen] = useState(false);
+
+    // Form data state - Includes latitude and longitude
+    const [formData, setFormData] = useState({
+        business_type_id: '',
+        store_name: '',
+        address: '',
+        city: '',
+        state: '',
+        latitude: null,  // Stored in state
+        longitude: null, // Stored in state
+        business_phone_number: '',
+        bank_name: '',
+        bank_code: '',
+        bank_account_number: '',
+        name_on_account: '',
+        business_bio: '',
+        gender: '',
+        document_type: '',
+        document_file: null,
+        cover_image: null
+    });
+
+    // --- PERSISTENCE LOGIC ---
+    const isFirstRender = useRef(true);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            // Logic 1: RESTORE (Only runs once on mount)
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                try {
+                    const { step, data } = JSON.parse(savedData);
+                    if (step) setCurrentStep(step);
+                    if (data) {
+                        setFormData(prev => ({ ...prev, ...data }));
+                    }
+                } catch (e) {
+                    console.error("Error restoring persisted data", e);
+                }
+            }
+            isFirstRender.current = false; // Mark initialization as complete
+        } else {
+            // Logic 2: SAVE (Runs on subsequent updates)
+            const dataToSave = { ...formData };
+            // Exclude File objects as they can't be serialized
+            delete dataToSave.document_file;
+            delete dataToSave.cover_image;
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                step: currentStep,
+                data: dataToSave
+            }));
+        }
+    }, [formData, currentStep]);
 
     useEffect(() => {
         const fetchInitialData = async () => {
@@ -63,31 +123,12 @@ const KYCRegistrationForm = () => {
 
     console.log(businessTypesList, banksList);
 
-    // Form data state - Includes latitude and longitude
-    const [formData, setFormData] = useState({
-        business_type_id: '',
-        store_name: '',
-        address: '',
-        city: '',
-        state: '',
-        latitude: null,  // Stored in state
-        longitude: null, // Stored in state
-        business_phone_number: '',
-        bank_name: '',
-        bank_code: '',
-        bank_account_number: '',
-        name_on_account: '',
-        business_bio: '',
-        gender: '',
-        document_type: '',
-        document_file: null,
-        cover_image: null
-    });
-
     const totalSteps = 4;
 
     // --- MAP HANDLER ---
     const handleAddressSelect = (value) => {
+        setIsAddressLoading(false);
+
         // 1. Log the RAW response to see exactly what Geoapify sent back
         console.log("📍 GEOAPIFY RAW DATA:", value);
 
@@ -116,6 +157,11 @@ const KYCRegistrationForm = () => {
             if (errors.address) setErrors(prev => ({ ...prev, address: null }));
             if (errors.city && (props.city || props.town)) setErrors(prev => ({ ...prev, city: null }));
         }
+    };
+
+    const handleAddressInput = () => {
+        // Trigger loading when user starts typing
+        setIsAddressLoading(true);
     };
 
     const handleInputChange = (e) => {
@@ -239,11 +285,19 @@ const KYCRegistrationForm = () => {
                 }
             });
 
+            const payload = submissionData;
+            delete payload.document_file;
+            delete payload.cover_image;
+            localStorage.setItem('PAYLOAD', JSON.stringify(payload));
+
             // 4. Single API Call: Submit all registration data at once
-            await submitKYC(submissionData);
+            const response = await submitKYC(submissionData);
 
             // 5. Show Success Alert
-            showSuccess('KYC submitted successfully! Your account is now pending approval.');
+            showSuccess(response?.message || 'KYC submitted successfully! Your account is now pending approval.');
+
+            // Clear persistence upon success
+            localStorage.removeItem(STORAGE_KEY);
 
             // 6. DELAY REDIRECT: Give the user 3 seconds to read the alert
             setTimeout(() => {
@@ -253,7 +307,8 @@ const KYCRegistrationForm = () => {
         } catch (error) {
             // Handle errors and stop loading so user can try again
             console.error("Submission Error:", error);
-            showError('Submission Failed', error.message || 'An unexpected error occurred.');
+            // Use existing alert logic to extract backend errors
+            showError(error.response?.data || error.message || 'An unexpected error occurred.');
             setIsSubmitting(false);
         }
         // Note: We don't setIsSubmitting(false) on success to keep the button 
@@ -263,7 +318,27 @@ const KYCRegistrationForm = () => {
     // Helper to render steps
     const renderStepIndicator = () => (
         <div className="mb-8">
-            <div className="flex items-center justify-between relative">
+            {/* --- MOBILE VIEW: Compact Indicator (< 768px) --- */}
+            <div className="block md:hidden">
+                <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-medium text-gray-500">
+                        Step {currentStep} of {totalSteps}
+                    </span>
+                    <span className="text-sm font-bold text-gray-900">
+                        {['Business Info', 'Location', 'Banking', 'Documents'][currentStep - 1]}
+                    </span>
+                </div>
+                {/* Mobile Progress Bar */}
+                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                        className="h-full bg-green-600 transition-all duration-300 ease-out"
+                        style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                    />
+                </div>
+            </div>
+
+            {/* --- DESKTOP VIEW: Full Stepper (>= 768px) --- */}
+            <div className="hidden md:flex items-center justify-between relative">
                 <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-gray-200 -z-10" />
                 {[1, 2, 3, 4].map((step) => (
                     <div
@@ -277,7 +352,7 @@ const KYCRegistrationForm = () => {
                     </div>
                 ))}
             </div>
-            <div className="flex justify-between mt-2 text-sm font-medium text-gray-500">
+            <div className="hidden md:flex justify-between mt-2 text-sm font-medium text-gray-500">
                 <span>Business Info</span>
                 <span>Location</span>
                 <span>Banking</span>
@@ -294,8 +369,8 @@ const KYCRegistrationForm = () => {
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
                     <div className="p-8">
                         <div className="text-center mb-8">
-                            <h2 className="text-3xl font-bold text-gray-900 mb-2">Complete Verification</h2>
-                            <p className="text-gray-500">Please provide your business details to continue</p>
+                            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Complete Verification</h2>
+                            <p className="text-gray-500 text-sm md:text-base">Please provide your business details to continue</p>
                         </div>
 
                         {renderStepIndicator()}
@@ -340,7 +415,6 @@ const KYCRegistrationForm = () => {
                                         options={[
                                             { value: 'male', label: 'Male' },
                                             { value: 'female', label: 'Female' },
-                                            { value: 'other', label: 'Other' }
                                         ]}
                                     />
                                 </div>
@@ -359,10 +433,19 @@ const KYCRegistrationForm = () => {
                                             <GeoapifyGeocoderAutocomplete
                                                 placeholder="Start typing your address..."
                                                 placeSelect={handleAddressSelect}
+                                                onUserInput={handleAddressInput}
                                                 value={formData.address}
                                                 filterByCountryCode={['ng']}
                                             />
                                         </GeoapifyContext>
+
+                                        {/* Loading Spinner */}
+                                        {isAddressLoading && (
+                                            <div className="absolute right-12 top-[55%] z-[60]">
+                                                <InlineLoader className="w-5 h-5 text-brand-800 animate-spin" />
+                                            </div>
+                                        )}
+
                                         {errors.address && (
                                             <p className="mt-1 text-sm text-red-500">{errors.address}</p>
                                         )}
@@ -470,7 +553,7 @@ const KYCRegistrationForm = () => {
                             )}
 
                             {/* Buttons */}
-                            <div className="mt-8 flex gap-4">
+                            <div className="mt-8 flex flex-col md:flex-row gap-4">
                                 {currentStep > 1 && (
                                     <Button
                                         variant="outline"
@@ -499,12 +582,19 @@ const KYCRegistrationForm = () => {
                             </div>
 
                             {/* Footer links */}
-                            <div className="mt-6 flex items-center justify-between text-sm text-gray-500 pt-6 border-t border-gray-100">
-                                <Button variant="ghost" className="text-gray-500 hover:text-gray-700 p-0">
+                            <div className="mt-6 flex items-center flex-col gap-2.5 md:flex-row justify-between text-sm text-gray-500 pt-6 border-t border-gray-100">
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => setIsSupportOpen(true)}
+                                    className="w-full md:w-fit text-gray-500 hover:text-gray-700 p-0"
+                                >
                                     <Info className="w-4 h-4 mr-2" />
                                     Call Support
                                 </Button>
-                                <Button className="bg-blue-50 text-blue-600 hover:bg-blue-100">
+                                <Button
+                                    className="w-full md:w-fit hover:bg-blue-100"
+                                    onClick={() => setIsGuideOpen(true)}
+                                >
                                     <FileText className="w-4 h-4 mr-2" />
                                     View Guide
                                 </Button>
@@ -515,10 +605,12 @@ const KYCRegistrationForm = () => {
 
                 {/* Security Notice */}
                 <div className="mt-6 bg-green-50/95 backdrop-blur-xs rounded-2xl p-6 border border-green-200">
-                    <div className="flex items-start gap-3">
-                        <Shield className="w-6 h-6 text-green-600 mt-1" />
+                    <div className="flex flex-col md:flex-col items-start gap-3">
+                        <div className="flex gap-2 items-center">
+                            <Shield className="w-6 h-6 text-green-600" />
+                            <h4 className="font-semibold text-green-900">Your Information is Secure</h4>
+                        </div>
                         <div>
-                            <h4 className="font-semibold text-green-900 mb-2">Your Information is Secure</h4>
                             <p className="text-green-800 text-sm leading-relaxed">
                                 All personal and business information is encrypted and stored securely. We comply with
                                 industry-standard security practices and will never share your data with third parties
@@ -528,6 +620,18 @@ const KYCRegistrationForm = () => {
                     </div>
                 </div>
             </div>
+
+            {/* --- KYC Guide Modal  --- */}
+            <KycGuideModal
+                isOpen={isGuideOpen}
+                onClose={() => setIsGuideOpen(false)}
+            />
+
+            {/* Support Modal */}
+            <ContactSupportModal
+                isOpen={isSupportOpen}
+                onClose={() => setIsSupportOpen(false)}
+            />
         </div>
     );
 };

@@ -30,20 +30,24 @@ const SellerManagement = () => {
     const [showKYCModal, setShowKYCModal] = useState(false);
     const [isKYCLoading, setIsKYCLoading] = useState(false);
 
+    // New state for KYC Confirmation - Rule 3
+    const [pendingKYCAction, setPendingKYCAction] = useState(null);
+    const [showKYCConfirmModal, setShowKYCConfirmModal] = useState(false);
+
     // Function to trigger the modal
     const openKYCReview = (seller) => {
-        console.log('Seller data:', seller); // 🔍 Debug line
-        console.log('Latest KYC:', seller.latest_kyc); // 🔍 Debug line
+        console.log('Seller data:', seller);
+        console.log('Latest KYC:', seller.latest_kyc);
         setSelectedSeller(seller);
         setShowKYCModal(true);
     };
 
     const [filters, setFilters] = useState({
-        search_global: '', // Will be skipped
-        status: 'all',     // Will be skipped
-        business_type: 'all', // Will be skipped
-        sortBy: 'created_at', // Will be sent (if you want to skip this, change initial to null)
-        sortOrder: 'desc'     // Will be sent
+        search_global: '',
+        status: 'all',
+        business_type: 'all',
+        sortBy: 'created_at',
+        sortOrder: 'desc'
     });
 
     const [pagination, setPagination] = useState({
@@ -123,19 +127,33 @@ const SellerManagement = () => {
         }
     };
 
-    // 2. Add the handler function
-    const handleReviewKYC = async (submissionId, reviewData) => {
+    // Modified to trigger confirmation modal instead of direct API call
+    const handleReviewKYC = (submissionId, reviewData) => {
+        setPendingKYCAction({ submissionId, reviewData });
+        setShowKYCConfirmModal(true);
+    };
+
+    // New function to execute the API call after confirmation
+    const confirmKYCAction = async () => {
+        if (!pendingKYCAction) return;
+
+        const { submissionId, reviewData } = pendingKYCAction;
+
         setIsKYCLoading(true);
         try {
             await adminSellerService.reviewKyc(submissionId, reviewData);
             showSuccess(`KYC ${reviewData.status} successfully`);
+            setShowKYCConfirmModal(false);
             setShowKYCModal(false);
-            // // Refresh the seller data
-            // loadSellers();
+
+            // Refresh the seller data - Rule 4
+            loadSellers();
+            loadStats();
         } catch (error) {
             showError(error.message || 'Failed to process KYC review');
         } finally {
             setIsKYCLoading(false);
+            setPendingKYCAction(null);
         }
     };
 
@@ -303,11 +321,24 @@ const SellerManagement = () => {
                 isLoading={isActionLoading}
             />
 
+            {/* KYC Review Modal */}
             <KYCReviewModal
                 isOpen={showKYCModal}
                 onClose={() => setShowKYCModal(false)}
-                submission={selectedSeller?.latest_kyc} // Path based on the profile JSON you shared earlier
+                submission={selectedSeller?.latest_kyc}
                 onConfirm={handleReviewKYC}
+                isLoading={false} // Loading is now handled by the confirmation modal
+            />
+
+            {/* KYC Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={showKYCConfirmModal}
+                onClose={() => setShowKYCConfirmModal(false)}
+                onConfirm={confirmKYCAction}
+                title={`${pendingKYCAction?.reviewData?.status === 'approved' ? 'Approve' : 'Reject'} KYC Submission`}
+                message={`Are you sure you want to ${pendingKYCAction?.reviewData?.status} this KYC submission? This action cannot be undone.`}
+                confirmText="Confirm Decision"
+                confirmButtonClass={pendingKYCAction?.reviewData?.status === 'approved' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}
                 isLoading={isKYCLoading}
             />
         </DashboardLayout>

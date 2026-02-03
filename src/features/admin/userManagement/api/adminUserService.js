@@ -20,7 +20,7 @@ export const getAllCustomers = async (page = 1, perPage = 20, filters = {}) => {
         };
 
         const response = await api.get('/admin/allCustomers', {
-            searchParams: params,
+            query: params,
         });
         return response;
     } catch (error) {
@@ -71,7 +71,7 @@ export const getUserStats = async () => {
         // Note: This endpoint might need to be added to your API
         // For now, we'll calculate stats from the customers list
         const response = await api.get('/admin/allCustomers', {
-            searchParams: { per_page: 1 },
+            query: { per_page: 1 },
         });
         return response;
     } catch (error) {

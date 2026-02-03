@@ -112,6 +112,20 @@ body {
   /* Dynamic viewport height for mobile */
 }
 
+.modern-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.modern-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.modern-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 @media (max-width: 768px) {
   .bg-art-responsive svg {
     min-height: 100vh;

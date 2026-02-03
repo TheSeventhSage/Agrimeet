@@ -23,7 +23,7 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="ml-0 lg:ml-64 fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
             <div
                 className={`bg-white rounded-2xl shadow-xl w-full ${sizeClasses[size]} overflow-hidden animate-in zoom-in-95 duration-200`}
                 onClick={(e) => e.stopPropagation()}

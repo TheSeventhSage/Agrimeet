@@ -45,7 +45,7 @@ export const getAllSellers = async (page = 1, perPage = 20, filters = {}) => {
 
         // The request will now strictly look like: /admin/allsellers?page=1&per_page=20
         // unless a specific filter is actually active.
-        const response = await api.get('/admin/allsellers', { params });
+        const response = await api.get('/admin/allsellers', { query: params });
 
         return response.data; // Ensure we return the data property directly if that's what the component expects
     } catch (error) {

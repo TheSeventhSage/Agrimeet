@@ -5,6 +5,7 @@ import {
     Lock,
     Bell,
     Save,
+    Banknote,
     Key,
     Shield,
     LogOut,
@@ -34,6 +35,9 @@ const Settings = () => {
         last_name: '',
         email: '',
         phone_number: '',
+        bank_name: '',
+        bank_account_number: 0,
+        name_on_account: '',
     });
 
     useEffect(() => {
@@ -47,6 +51,9 @@ const Settings = () => {
                 last_name: actualUserData.last_name || '',
                 email: actualUserData.email || '',
                 phone_number: actualUserData.phone_number || '',
+                bank_account_number: actualUserData.seller.bank_account_number || '',
+                bank_name: actualUserData.seller.bank_name || '',
+                name_on_account: actualUserData.seller.name_on_account || '',
             });
         }
     }, []);
@@ -101,6 +108,13 @@ const Settings = () => {
 
             const userId = currentUserData.id;
 
+            const updatedSellerData = {
+                ...(currentUserData.seller || {}), // Keep existing seller data (id, business type, etc.)
+                bank_name: profile.bank_name,
+                bank_account_number: profile.bank_account_number,
+                name_on_account: profile.name_on_account,
+            };
+
             // 1. Merge Data
             const mergedData = {
                 ...currentUserData,
@@ -108,6 +122,7 @@ const Settings = () => {
                 last_name: profile.last_name,
                 email: profile.email,
                 phone_number: profile.phone_number,
+                seller: updatedSellerData
             };
 
             // 2. Create FormData
@@ -227,26 +242,58 @@ const Settings = () => {
                         />
                     </div>
 
-                    <Input
-                        label="Email Address"
-                        name="email"
-                        type="email"
-                        value={profile.email}
-                        onChange={handleInputChange}
-                        icon={User}
-                        placeholder="name@example.com"
-                        disabled={true}
-                        className="bg-gray-50"
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Input
+                            label="Email Address"
+                            name="email"
+                            type="email"
+                            value={profile.email}
+                            onChange={handleInputChange}
+                            icon={User}
+                            placeholder="name@example.com"
+                            disabled={true}
+                            className="bg-gray-50"
+                        />
+
+                        <Input
+                            label="Phone Number"
+                            name="phone_number"
+                            type="tel"
+                            value={profile.phone_number}
+                            onChange={handleInputChange}
+                            icon={User}
+                            placeholder="+1 (555) 000-0000"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Input
+                            label="Bank Name"
+                            name="bank_name"
+                            value={profile.bank_name}
+                            onChange={handleInputChange}
+                            icon={Banknote}
+                            placeholder="Enter your bank name"
+                        />
+                        <Input
+                            label="Bank Account Number"
+                            name="bank_account_number"
+                            type="number"
+                            value={profile.bank_account_number}
+                            onChange={handleInputChange}
+                            icon={Banknote}
+                            placeholder="Enter your bank account number"
+                        />
+                    </div>
 
                     <Input
-                        label="Phone Number"
-                        name="phone_number"
-                        type="tel"
-                        value={profile.phone_number}
+                        label="Name on Account"
+                        name="name_on_account"
+                        type="text"
+                        value={profile.name_on_account}
                         onChange={handleInputChange}
-                        icon={User}
-                        placeholder="+1 (555) 000-0000"
+                        icon={Banknote}
+                        placeholder="Enter your name on account"
                     />
 
                     <div className="pt-4 flex justify-end">

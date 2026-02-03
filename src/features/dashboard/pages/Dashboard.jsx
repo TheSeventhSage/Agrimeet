@@ -1,7 +1,6 @@
 import {
     Package,
     ShoppingCart,
-    DollarSign,
     Users,
     Star,
     ArrowUpRight,
@@ -31,12 +30,35 @@ import Button from '../../../shared/components/Button';
 // --- Helper Functions ---
 
 const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-NG', {
         style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 0,
+        currency: 'NGN',
+        notation: 'compact',      // Automatically turns 1,000,000 into 1M
+        maximumFractionDigits: 1, // Ensures you get 2.3M instead of 2.345M
+        minimumFractionDigits: 0, // Removes .0 if the number is whole
     }).format(amount);
 };
+
+const NairaIcon = ({ size = 24, color = "currentColor", ...props }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...props}
+    >
+        <path d="M6 3v18" />
+        <path d="M18 3v18" />
+        <path d="M6 15l12-6" />
+        <path d="M6 11h12" />
+        <path d="M6 15h12" />
+    </svg>
+);
 
 const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -185,7 +207,7 @@ const Dashboard = () => {
     }, []);
 
     const statsCards = [
-        { title: 'Total Revenue', value: stats ? formatCurrency(stats.total_revenue) : '...', icon: DollarSign, color: 'bg-green-500' },
+        { title: 'Total Revenue', value: stats ? formatCurrency(stats.total_revenue) : '...', icon: NairaIcon, color: 'bg-green-500' },
         { title: 'Total Products', value: stats ? stats.total_products : '...', icon: Package, color: 'bg-brand-500' },
         { title: 'Total Orders', value: stats ? stats.total_orders : '...', icon: ShoppingCart, color: 'bg-blue-500' },
         { title: 'Total Reviews', value: stats ? stats.total_reviews : '...', icon: Users, color: 'bg-purple-500' },
@@ -194,6 +216,10 @@ const Dashboard = () => {
     if (isInitialLoading) {
         return <PageLoader message="Loading your dashboard..." />;
     }
+
+    /**
+     *
+     */
 
     const displayName = userProfile?.data?.first_name || authUser?.name || 'User';
     const storeName = userProfile?.data?.seller?.store_name;

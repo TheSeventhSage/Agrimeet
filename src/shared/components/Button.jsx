@@ -34,10 +34,10 @@ const Button = ({
 
     // Combine all classes
     const combinedClasses = [
+        className,
         baseStyles,
         variants[variant] || variants.default,
         sizes[size] || sizes.default,
-        className
     ].join(' ');
 
     return (

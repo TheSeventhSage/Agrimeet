@@ -118,7 +118,7 @@ const DocumentUpload = ({
                                     )}
 
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-medium text-gray-700 truncate">
+                                        <p className="text-sm font-medium text-gray-700 w-[100px] truncate">
                                             {file.name}
                                         </p>
                                         <p className="text-xs text-gray-500">

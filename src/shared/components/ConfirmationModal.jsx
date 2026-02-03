@@ -38,7 +38,7 @@ const ConfirmationModal = ({
     const styles = getTypeStyles();
 
     return (
-        <div className="fixed inset-0 bg-[rgba(0,0,0,.7)] flex items-center justify-center z-50"
+        <div className="ml-0 lg:ml-64 fixed inset-0 bg-[rgba(0,0,0,.7)] flex items-center justify-center z-50"
             onClick={onClose}
         >
             <div className={`bg-white rounded-xl shadow-xl max-w-md w-full mx-4 border ${styles.border}`}

@@ -1,5 +1,5 @@
 // pages/Register.jsx - Updated with storage
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AuthLayout from '../layouts/AuthLayout';
 import TextField from '../shared/components/TextFields';
@@ -10,6 +10,8 @@ import { registerValidation } from '../shared/utils/validation';
 import { storageManager } from '../shared/utils/storageManager';
 import { handlePostRegistration } from '../shared/utils/routingManager';
 import { showError } from '../shared/utils/alert';
+
+const STORAGE_KEY = 'user_registration_persistence';
 
 export default function Register() {
     const [form, setForm] = useState({
@@ -27,6 +29,33 @@ export default function Register() {
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
     const { register } = useAuth();
+
+    // --- PERSISTENCE LOGIC (Restore) ---
+    const isFirstRender = useRef(true);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            // Logic 1: RESTORE (Only runs once on mount)
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                try {
+                    const parsedData = JSON.parse(savedData);
+                    setForm(prev => ({ ...prev, ...parsedData }));
+                } catch (error) {
+                    console.error("Failed to restore registration data", error);
+                }
+            }
+            isFirstRender.current = false; // Mark initialization as complete
+        } else {
+            // Logic 2: SAVE (Runs on subsequent updates)
+            const dataToSave = { ...form };
+            // Security: Never persist passwords
+            delete dataToSave.password;
+            delete dataToSave.password_confirmation;
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        }
+    }, [form]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -56,6 +85,10 @@ export default function Register() {
 
         try {
             await register(form);
+
+            // Clear persisted data on success
+            localStorage.removeItem(STORAGE_KEY);
+
             setSuccess(true);
             let message = 'Redirecting...';
             setMessage(message);
@@ -196,7 +229,14 @@ export default function Register() {
                             type="checkbox"
                             checked={form.terms_accepted}
                             onChange={handleChange}
-                            className="focus:ring-brand-500 h-4 w-4 text-brand-600 border-gray-300 rounded-sm"
+                            className="
+        appearance-none h-5 w-5 border border-gray-300 rounded
+        bg-white shrink-0 cursor-pointer
+        checked:bg-brand-600 checked:border-brand-600
+        focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-brand-500
+        checked:bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%23fff%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M16.707%205.293a1%201%200%20010%201.414l-8%208a1%201%200%2001-1.414%200l-4-4a1%201%200%20011.414-1.414L8%2012.586l7.293-7.293a1%201%200%20011.414%200z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')]
+        checked:bg-center checked:bg-no-repeat
+    "
                         />
                     </div>
                     <div className="ml-3 text-sm">
@@ -206,7 +246,7 @@ export default function Register() {
                                 Terms and Conditions
                             </Link>{' '}
                             and{' '}
-                            <Link to="/privacy" className="text-brand-600 hover:text-brand-500">
+                            <Link to="/privacy-policy" className="text-brand-600 hover:text-brand-500">
                                 Privacy Policy
                             </Link>
                         </label>
