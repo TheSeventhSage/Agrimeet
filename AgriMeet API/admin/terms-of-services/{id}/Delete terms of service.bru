@@ -1,0 +1,141 @@
+meta {
+  name: Delete terms of service
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/admin/terms-of-services/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 3463
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: Terms of service deleted successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/terms-of-services/:id
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "string"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthorized
+  
+  request: {
+    url: {{baseUrl}}/admin/terms-of-services/:id
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  }
+  
+  response: {
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden
+  
+  request: {
+    url: {{baseUrl}}/admin/terms-of-services/:id
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  }
+  
+  response: {
+    status: {
+      code: Forbidden
+      text: 403
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: Terms of service not found
+  
+  request: {
+    url: {{baseUrl}}/admin/terms-of-services/:id
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  }
+  
+  response: {
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

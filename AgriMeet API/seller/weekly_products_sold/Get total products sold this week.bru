@@ -1,0 +1,95 @@
+meta {
+  name: Get total products sold this week
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/seller/weekly_products_sold
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieves the total quantity of products sold by the seller from the start of the current week until now.
+}
+
+example {
+  name: Total weekly products sold retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/seller/weekly_products_sold
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "total_products_sold": 342
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/seller/weekly_products_sold
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}

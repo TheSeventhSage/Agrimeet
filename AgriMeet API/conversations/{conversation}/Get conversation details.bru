@@ -1,0 +1,58 @@
+meta {
+  name: Get conversation details
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/conversations/:conversation
+  body: none
+  auth: bearer
+}
+
+params:path {
+  conversation: 1
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieves detailed information about a specific conversation including order/product details and participant information.
+}
+
+example {
+  name: Conversation details retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/conversations/:conversation
+    method: GET
+    mode: none
+    params:path: {
+      conversation: 1
+    }
+  
+    headers: {
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

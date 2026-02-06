@@ -21,7 +21,7 @@ import { updateUserProfile } from '../../../pages/api/profile.api';
 const Settings = () => {
     const [activeTab, setActiveTab] = useState('profile');// State for the Confirmation Modal
     const [showResetConfirm, setShowResetConfirm] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState();
     const navigate = useNavigate();
     // Stores the raw File object
     const [avatarFile, setAvatarFile] = useState(null);
@@ -95,7 +95,11 @@ const Settings = () => {
                 formData.append(parentKey, value);
             }
         }
+
+        console.log(formData);
     };
+
+    console.log(currentUserData);
 
     const handleProfileSubmit = async (e) => {
         e.preventDefault();
@@ -108,12 +112,16 @@ const Settings = () => {
 
             const userId = currentUserData.id;
 
+
+
             const updatedSellerData = {
                 ...(currentUserData.seller || {}), // Keep existing seller data (id, business type, etc.)
                 bank_name: profile.bank_name,
                 bank_account_number: profile.bank_account_number,
                 name_on_account: profile.name_on_account,
             };
+
+            console.log(updatedSellerData);
 
             // 1. Merge Data
             const mergedData = {
@@ -299,7 +307,7 @@ const Settings = () => {
                     <div className="pt-4 flex justify-end">
                         <Button
                             type="submit"
-                            isLoading={isSubmitting}
+                            loading={isSubmitting}
                             icon={Save}
                         >
                             Save Changes

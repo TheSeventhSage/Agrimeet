@@ -1,0 +1,95 @@
+meta {
+  name: Get total number of transactions this week
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/seller/weekly_transactions
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieves the count of distinct orders containing seller's products from the start of the current week until now.
+}
+
+example {
+  name: Total weekly transactions retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/seller/weekly_transactions
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "total_transactions": 85
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/seller/weekly_transactions
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}

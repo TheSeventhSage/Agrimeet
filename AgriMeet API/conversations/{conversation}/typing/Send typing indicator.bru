@@ -1,0 +1,71 @@
+meta {
+  name: Send typing indicator
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/conversations/:conversation/typing
+  body: json
+  auth: bearer
+}
+
+params:path {
+  conversation: 3463
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+body:json {
+  {
+    "is_typing": true
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: Typing indicator sent
+  
+  request: {
+    url: {{baseUrl}}/conversations/:conversation/typing
+    method: POST
+    mode: json
+    params:path: {
+      conversation: 3463
+    }
+  
+    headers: {
+      Content-Type: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "is_typing": true
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

@@ -1,0 +1,125 @@
+meta {
+  name: Get consolidated statistics for charts and insights
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/seller/vendor_allstats
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieves comprehensive analytics data including revenue by month for the current year, top 5 all-time best-selling products, and total unique customers. Ideal for dashboard charts and business insights.
+}
+
+example {
+  name: Consolidated statistics retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/seller/vendor_allstats
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "revenue_by_month": [
+            {
+              "month": 1,
+              "total": 125500.75
+            },
+            {
+              "month": 1,
+              "total": 125500.75
+            }
+          ],
+          "top_products": [
+            {
+              "product_id": 456,
+              "total_sold": 2547,
+              "product": {
+                "id": 456,
+                "name": "Premium Wireless Headphones",
+                "thumbnail": "https://example.com/images/product-456.jpg"
+              }
+            },
+            {
+              "product_id": 456,
+              "total_sold": 2547,
+              "product": {
+                "id": 456,
+                "name": "Premium Wireless Headphones",
+                "thumbnail": "https://example.com/images/product-456.jpg"
+              }
+            }
+          ],
+          "total_customers": 1245
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/seller/vendor_allstats
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}

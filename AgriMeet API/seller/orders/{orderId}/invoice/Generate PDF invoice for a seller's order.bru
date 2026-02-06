@@ -1,0 +1,133 @@
+meta {
+  name: Generate PDF invoice for a seller's order
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/seller/orders/:orderId/invoice
+  body: none
+  auth: inherit
+}
+
+params:path {
+  orderId: 3463
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Returns a PDF invoice for the authenticated seller. Only includes products belonging to the seller.
+}
+
+example {
+  name: Invoice PDF generated successfully
+  
+  request: {
+    url: {{baseUrl}}/seller/orders/:orderId/invoice
+    method: GET
+    mode: none
+    params:path: {
+      orderId: 3463
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/pdf
+      Content-Disposition: invoice_{orderId}.pdf
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/seller/orders/:orderId/invoice
+    method: GET
+    mode: none
+    params:path: {
+      orderId: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Order not found for this seller
+  
+  request: {
+    url: {{baseUrl}}/seller/orders/:orderId/invoice
+    method: GET
+    mode: none
+    params:path: {
+      orderId: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Order not found"
+        }
+      '''
+    }
+  }
+}

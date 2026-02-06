@@ -1,0 +1,95 @@
+meta {
+  name: Get total revenue for current week
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/seller/total_revenue
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieves the total revenue accumulated from the start of the current week until now.
+}
+
+example {
+  name: Total weekly revenue retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/seller/total_revenue
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "total_revenue": 125750.5
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/seller/total_revenue
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}

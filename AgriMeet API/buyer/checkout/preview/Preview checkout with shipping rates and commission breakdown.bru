@@ -1,0 +1,291 @@
+meta {
+  name: Preview checkout with shipping rates and commission breakdown
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/buyer/checkout/preview
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+body:json {
+  {
+    "cart_items": [
+      {
+        "product_id": 456,
+        "quantity": 2,
+        "shipbubble_category_id": 1,
+        "product_variant_id": 789
+      },
+      {
+        "product_id": 456,
+        "quantity": 2,
+        "shipbubble_category_id": 1,
+        "product_variant_id": 789
+      }
+    ],
+    "delivery_address_id": 12,
+    "pickup_date": "2026-01-08",
+    "coupon_code": "SAVE20",
+    "selected_courier_code": "DHL"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Calculates complete checkout preview including item pricing, platform commission, coupon discounts, available courier options with shipping rates, and grand total. Validates seller and delivery addresses, fetches real-time shipping rates from Shipbubble, and caches preview for 30 minutes for final checkout. Pickup date must be between 4-7 days from today.
+}
+
+example {
+  name: Checkout preview calculated successfully with shipping options
+  
+  request: {
+    url: {{baseUrl}}/buyer/checkout/preview
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "cart_items": [
+          {
+            "product_id": 456,
+            "quantity": 2,
+            "shipbubble_category_id": 1,
+            "product_variant_id": 789
+          },
+          {
+            "product_id": 456,
+            "quantity": 2,
+            "shipbubble_category_id": 1,
+            "product_variant_id": 789
+          }
+        ],
+        "delivery_address_id": 12,
+        "pickup_date": "2026-01-08",
+        "coupon_code": "SAVE20",
+        "selected_courier_code": "DHL"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_preview": {
+            "items": [
+              {
+                "product_id": 456,
+                "product_name": "Fresh Tomatoes",
+                "thumbnail": "https://example.com/image.jpg",
+                "variant_id": 789,
+                "quantity": 2,
+                "unit_price": 5000,
+                "total_price": 10000,
+                "unit_weight": 1.5,
+                "platform_commission_rate": 5,
+                "platform_commission_amount": 500,
+                "seller_earnings": 9500
+              },
+              {
+                "product_id": 456,
+                "product_name": "Fresh Tomatoes",
+                "thumbnail": "https://example.com/image.jpg",
+                "variant_id": 789,
+                "quantity": 2,
+                "unit_price": 5000,
+                "total_price": 10000,
+                "unit_weight": 1.5,
+                "platform_commission_rate": 5,
+                "platform_commission_amount": 500,
+                "seller_earnings": 9500
+              }
+            ],
+            "subtotal": 15000,
+            "discount": 500,
+            "total_weight": 3.5,
+            "coupon_applied": {
+              "code": "SAVE20",
+              "discount_type": "percentage",
+              "discount_value": 20
+            },
+            "total_commission": 750,
+            "total_seller_earnings": 14250,
+            "total_amount": 14500
+          },
+          "couriers": [
+            {
+              "courier_code": "DHL",
+              "courier_name": "DHL Express",
+              "rate_card_amount": 3500,
+              "estimated_delivery_days": 3,
+              "discount": {
+                "discounted": 500
+              }
+            },
+            {
+              "courier_code": "DHL",
+              "courier_name": "DHL Express",
+              "rate_card_amount": 3500,
+              "estimated_delivery_days": 3,
+              "discount": {
+                "discounted": 500
+              }
+            }
+          ],
+          "shipping_amount": 3500,
+          "shipping_discount": 500,
+          "grand_total": 17500,
+          "shipping_request_token": "tok_abc123xyz"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/buyer/checkout/preview
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "cart_items": [
+          {
+            "product_id": 456,
+            "quantity": 2,
+            "shipbubble_category_id": 1,
+            "product_variant_id": 789
+          },
+          {
+            "product_id": 456,
+            "quantity": 2,
+            "shipbubble_category_id": 1,
+            "product_variant_id": 789
+          }
+        ],
+        "delivery_address_id": 12,
+        "pickup_date": "2026-01-08",
+        "coupon_code": "SAVE20",
+        "selected_courier_code": "DHL"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Validation error or business rule violation
+  
+  request: {
+    url: {{baseUrl}}/buyer/checkout/preview
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "cart_items": [
+          {
+            "product_id": 456,
+            "quantity": 2,
+            "shipbubble_category_id": 1,
+            "product_variant_id": 789
+          },
+          {
+            "product_id": 456,
+            "quantity": 2,
+            "shipbubble_category_id": 1,
+            "product_variant_id": 789
+          }
+        ],
+        "delivery_address_id": 12,
+        "pickup_date": "2026-01-08",
+        "coupon_code": "SAVE20",
+        "selected_courier_code": "DHL"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unprocessable Entity (WebDAV) (RFC 4918)
+      text: 422
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "pickup_date must be between 4 and 7 days from today",
+          "min_date": "2026-01-07",
+          "max_date": "2026-01-10"
+        }
+      '''
+    }
+  }
+}

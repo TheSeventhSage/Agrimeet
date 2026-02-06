@@ -1,0 +1,123 @@
+meta {
+  name: Update a product attribute (admin)
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/admin/product-attributes/:id
+  body: json
+  auth: bearer
+}
+
+params:path {
+  id: 3463
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+body:json {
+  {
+    "name": "Color",
+    "description": "Product color"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: Updated
+  
+  request: {
+    url: {{baseUrl}}/admin/product-attributes/:id
+    method: PUT
+    mode: json
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "name": "Color",
+        "description": "Product color"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": 1,
+          "name": "Weight",
+          "created_at": "2025-01-01T12:00:00Z",
+          "updated_at": "2025-01-01T12:00:00Z"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Not found
+  
+  request: {
+    url: {{baseUrl}}/admin/product-attributes/:id
+    method: PUT
+    mode: json
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Content-Type: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "name": "Color",
+        "description": "Product color"
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

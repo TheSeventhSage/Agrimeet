@@ -1,0 +1,350 @@
+meta {
+  name: Get all products with filtering and search
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/allproducts?page=1&per_page=12&search_global=tomato&priceMinimum=10&priceMaximum=100&category_name=Vegetables&product_rating=4&status=active&archive=false&sortBy=price&sortOrder=asc
+  body: none
+  auth: inherit
+}
+
+params:query {
+  page: 1
+  per_page: 12
+  search_global: tomato
+  priceMinimum: 10
+  priceMaximum: 100
+  category_name: Vegetables
+  product_rating: 4
+  status: active
+  archive: false
+  sortBy: price
+  sortOrder: asc
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieve a paginated list of all products with optional filtering, searching, and sorting capabilities
+}
+
+example {
+  name: Products retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/allproducts?page=1&per_page=12&search_global=tomato&priceMinimum=10&priceMaximum=100&category_name=Vegetables&product_rating=4&status=active&archive=false&sortBy=price&sortOrder=asc
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+      per_page: 12
+      search_global: tomato
+      priceMinimum: 10
+      priceMaximum: 100
+      category_name: Vegetables
+      product_rating: 4
+      status: active
+      archive: false
+      sortBy: price
+      sortOrder: asc
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": 1,
+              "name": "Fresh Tomatoes",
+              "slug": "fresh-tomatoes",
+              "description": "Fresh organic tomatoes from our farm",
+              "base_price": 25.99,
+              "discount_price": 20.99,
+              "stock_quantity": 100,
+              "status": "active",
+              "thumbnail": "products/thumbnails/thumb_123.jpg",
+              "seller_id": 1,
+              "category_id": 5,
+              "unit_id": 1,
+              "created_at": "1985-11-03T18:18:42.203Z",
+              "updated_at": "1973-02-21T04:25:22.430Z",
+              "category": {
+                "id": 5,
+                "name": "Vegetables",
+                "slug": "vegetables"
+              },
+              "seller": {
+                "id": 1,
+                "store_name": "John's Farm",
+                "business_phone_number": "+234803456789"
+              },
+              "unit": {
+                "id": 1,
+                "name": "Kilogram",
+                "symbol": "kg"
+              },
+              "images": [
+                {
+                  "id": 1,
+                  "product_id": 1,
+                  "url": "products/images/image_123.jpg",
+                  "created_at": "2011-03-07T02:19:57.465Z",
+                  "updated_at": "1965-05-20T07:16:35.188Z"
+                },
+                {
+                  "id": 1,
+                  "product_id": 1,
+                  "url": "products/images/image_123.jpg",
+                  "created_at": "1981-10-12T17:55:45.165Z",
+                  "updated_at": "1999-05-16T07:50:09.940Z"
+                }
+              ],
+              "variants": [
+                {
+                  "id": 1,
+                  "product_id": 1,
+                  "name": "Small Pack",
+                  "price": 15.99,
+                  "stock_quantity": 50,
+                  "unit": {
+                    "id": 2,
+                    "name": "Gram",
+                    "symbol": "g"
+                  }
+                },
+                {
+                  "id": 1,
+                  "product_id": 1,
+                  "name": "Small Pack",
+                  "price": 15.99,
+                  "stock_quantity": 50,
+                  "unit": {
+                    "id": 2,
+                    "name": "Gram",
+                    "symbol": "g"
+                  }
+                }
+              ]
+            },
+            {
+              "id": 1,
+              "name": "Fresh Tomatoes",
+              "slug": "fresh-tomatoes",
+              "description": "Fresh organic tomatoes from our farm",
+              "base_price": 25.99,
+              "discount_price": 20.99,
+              "stock_quantity": 100,
+              "status": "active",
+              "thumbnail": "products/thumbnails/thumb_123.jpg",
+              "seller_id": 1,
+              "category_id": 5,
+              "unit_id": 1,
+              "created_at": "1949-02-23T09:18:57.754Z",
+              "updated_at": "1954-04-05T19:14:29.744Z",
+              "category": {
+                "id": 5,
+                "name": "Vegetables",
+                "slug": "vegetables"
+              },
+              "seller": {
+                "id": 1,
+                "store_name": "John's Farm",
+                "business_phone_number": "+234803456789"
+              },
+              "unit": {
+                "id": 1,
+                "name": "Kilogram",
+                "symbol": "kg"
+              },
+              "images": [
+                {
+                  "id": 1,
+                  "product_id": 1,
+                  "url": "products/images/image_123.jpg",
+                  "created_at": "1983-01-15T14:42:53.351Z",
+                  "updated_at": "2017-11-07T05:18:07.822Z"
+                },
+                {
+                  "id": 1,
+                  "product_id": 1,
+                  "url": "products/images/image_123.jpg",
+                  "created_at": "1995-11-02T17:09:05.396Z",
+                  "updated_at": "1990-11-20T17:53:23.464Z"
+                }
+              ],
+              "variants": [
+                {
+                  "id": 1,
+                  "product_id": 1,
+                  "name": "Small Pack",
+                  "price": 15.99,
+                  "stock_quantity": 50,
+                  "unit": {
+                    "id": 2,
+                    "name": "Gram",
+                    "symbol": "g"
+                  }
+                },
+                {
+                  "id": 1,
+                  "product_id": 1,
+                  "name": "Small Pack",
+                  "price": 15.99,
+                  "stock_quantity": 50,
+                  "unit": {
+                    "id": 2,
+                    "name": "Gram",
+                    "symbol": "g"
+                  }
+                }
+              ]
+            }
+          ],
+          "links": {
+            "first": "http://localhost/api/v1/products/all?page=1",
+            "last": "http://localhost/api/v1/products/all?page=10",
+            "prev": "string",
+            "next": "http://localhost/api/v1/products/all?page=2"
+          },
+          "meta": {
+            "current_page": 1,
+            "from": 1,
+            "last_page": 10,
+            "path": "http://localhost/api/v1/products/all",
+            "per_page": 12,
+            "to": 12,
+            "total": 95
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid parameters
+  
+  request: {
+    url: {{baseUrl}}/allproducts?page=1&per_page=12&search_global=tomato&priceMinimum=10&priceMaximum=100&category_name=Vegetables&product_rating=4&status=active&archive=false&sortBy=price&sortOrder=asc
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+      per_page: 12
+      search_global: tomato
+      priceMinimum: 10
+      priceMaximum: 100
+      category_name: Vegetables
+      product_rating: 4
+      status: active
+      archive: false
+      sortBy: price
+      sortOrder: asc
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unprocessable Entity (WebDAV) (RFC 4918)
+      text: 422
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "The given data was invalid.",
+          "errors": {
+            "priceMinimum": [
+              "The price minimum must be a number.",
+              "The price minimum must be a number."
+            ],
+            "sortBy": [
+              "The selected sort by is invalid.",
+              "The selected sort by is invalid."
+            ]
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Server error
+  
+  request: {
+    url: {{baseUrl}}/allproducts?page=1&per_page=12&search_global=tomato&priceMinimum=10&priceMaximum=100&category_name=Vegetables&product_rating=4&status=active&archive=false&sortBy=price&sortOrder=asc
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+      per_page: 12
+      search_global: tomato
+      priceMinimum: 10
+      priceMaximum: 100
+      category_name: Vegetables
+      product_rating: 4
+      status: active
+      archive: false
+      sortBy: price
+      sortOrder: asc
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Internal Server Error
+      text: 500
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Internal server error"
+        }
+      '''
+    }
+  }
+}

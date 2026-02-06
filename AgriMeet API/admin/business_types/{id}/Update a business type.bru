@@ -1,0 +1,235 @@
+meta {
+  name: Update a business type
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/admin/business_types/:id
+  body: json
+  auth: bearer
+}
+
+params:path {
+  id: 3463
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+body:json {
+  {
+    "name": "Updated Agriculture",
+    "description": "Updated description for agricultural products and farming services"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Update an existing business type. Requires authentication.
+}
+
+example {
+  name: Business type updated successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/business_types/:id
+    method: PUT
+    mode: json
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "name": "Updated Agriculture",
+        "description": "Updated description for agricultural products and farming services"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": 1,
+            "name": "Agriculture",
+            "description": "Agricultural products and farming services",
+            "created_at": "2024-01-15T10:30:00.000000Z",
+            "updated_at": "2024-01-15T10:30:00.000000Z"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/admin/business_types/:id
+    method: PUT
+    mode: json
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "name": "Updated Agriculture",
+        "description": "Updated description for agricultural products and farming services"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Business type not found
+  
+  request: {
+    url: {{baseUrl}}/admin/business_types/:id
+    method: PUT
+    mode: json
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "name": "Updated Agriculture",
+        "description": "Updated description for agricultural products and farming services"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Business type not found."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Validation error
+  
+  request: {
+    url: {{baseUrl}}/admin/business_types/:id
+    method: PUT
+    mode: json
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "name": "Updated Agriculture",
+        "description": "Updated description for agricultural products and farming services"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unprocessable Entity (WebDAV) (RFC 4918)
+      text: 422
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "The given data was invalid.",
+          "errors": {
+            "name": [
+              "The name may not be greater than 255 characters.",
+              "The name may not be greater than 255 characters."
+            ]
+          }
+        }
+      '''
+    }
+  }
+}

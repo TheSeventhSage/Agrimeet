@@ -1,0 +1,166 @@
+meta {
+  name: Get category details
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/categories/:category
+  body: none
+  auth: inherit
+}
+
+params:path {
+  category: 3463
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Get detailed information about a specific category including its children and parent. Results are cached for 24 hours.
+}
+
+example {
+  name: Category details retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/categories/:category
+    method: GET
+    mode: none
+    params:path: {
+      category: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": 1,
+            "name": "Electronics",
+            "slug": "electronics",
+            "description": "All electronic items and gadgets",
+            "image": "categories/category_123.jpg",
+            "parent_id": null,
+            "user_id": 1,
+            "created_at": "1996-05-22T00:18:24.412Z",
+            "updated_at": "1973-09-12T05:07:47.014Z",
+            "parent": {
+              "id": 1,
+              "name": "Main Category",
+              "slug": "main-category"
+            },
+            "children": [
+              {
+                "id": 2,
+                "name": "Mobile Phones",
+                "slug": "mobile-phones",
+                "description": "Smartphones and feature phones",
+                "image": "categories/phones_456.jpg",
+                "parent_id": 1,
+                "created_at": "1953-04-05T14:37:36.930Z",
+                "updated_at": "1964-11-11T17:10:27.706Z",
+                "children": [
+                  {
+                    "id": 3,
+                    "name": "Android Phones",
+                    "slug": "android-phones",
+                    "parent_id": 2
+                  },
+                  {
+                    "id": 3,
+                    "name": "Android Phones",
+                    "slug": "android-phones",
+                    "parent_id": 2
+                  }
+                ]
+              },
+              {
+                "id": 2,
+                "name": "Mobile Phones",
+                "slug": "mobile-phones",
+                "description": "Smartphones and feature phones",
+                "image": "categories/phones_456.jpg",
+                "parent_id": 1,
+                "created_at": "2016-10-21T12:14:26.599Z",
+                "updated_at": "1958-02-25T02:32:49.634Z",
+                "children": [
+                  {
+                    "id": 3,
+                    "name": "Android Phones",
+                    "slug": "android-phones",
+                    "parent_id": 2
+                  },
+                  {
+                    "id": 3,
+                    "name": "Android Phones",
+                    "slug": "android-phones",
+                    "parent_id": 2
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Category not found
+  
+  request: {
+    url: {{baseUrl}}/admin/categories/:category
+    method: GET
+    mode: none
+    params:path: {
+      category: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Category not found."
+        }
+      '''
+    }
+  }
+}

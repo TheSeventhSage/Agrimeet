@@ -1,0 +1,210 @@
+meta {
+  name: Initiate payment for an existing order (Phase 2: Payment Initialization)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/buyer/payments/initiate
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+body:json {
+  {
+    "order_id": 123,
+    "payment_method": "paystack"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Initiates payment for an order. Supports two payment methods: 'paystack' (redirects to Paystack payment gateway) and 'wallet' (direct payment from user's wallet balance). Returns payment authorization URL for Paystack or confirmation for wallet payment.
+}
+
+example {
+  name: Payment initiated successfully
+  
+  request: {
+    url: {{baseUrl}}/buyer/payments/initiate
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "order_id": 123,
+        "payment_method": "paystack"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "status": "success",
+          "message": "Redirect user to Paystack authorization URL.",
+          "order_id": 123,
+          "payment_details": {
+            "authorization_url": "https://checkout.paystack.com/abc123xyz",
+            "access_code": "abc123xyz",
+            "reference": "TXN-2025-123456"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/buyer/payments/initiate
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "order_id": 123,
+        "payment_method": "paystack"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Order not found
+  
+  request: {
+    url: {{baseUrl}}/buyer/payments/initiate
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "order_id": 123,
+        "payment_method": "paystack"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Order not found"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Payment initiation failed
+  
+  request: {
+    url: {{baseUrl}}/buyer/payments/initiate
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "order_id": 123,
+        "payment_method": "paystack"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unprocessable Entity (WebDAV) (RFC 4918)
+      text: 422
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Insufficient wallet balance or payment gateway error"
+        }
+      '''
+    }
+  }
+}

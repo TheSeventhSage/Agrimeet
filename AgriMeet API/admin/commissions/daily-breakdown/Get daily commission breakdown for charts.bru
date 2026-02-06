@@ -1,0 +1,54 @@
+meta {
+  name: Get daily commission breakdown for charts
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/commissions/daily-breakdown?days=30
+  body: none
+  auth: bearer
+}
+
+params:query {
+  days: 30
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: Daily breakdown retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/commissions/daily-breakdown?days=30
+    method: GET
+    mode: none
+    params:query: {
+      days: 30
+    }
+  
+    headers: {
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

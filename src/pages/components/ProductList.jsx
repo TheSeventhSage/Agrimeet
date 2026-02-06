@@ -70,7 +70,7 @@ const ProductsList = () => {
             <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
 
                 {/* Header */}
-                <div className="px-8 py-6 border-b border-gray-100">
+                <div className="px-4 md:px-8 py-6 border-b border-gray-100">
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-3xl font-bold text-gray-900 mb-2">
@@ -85,7 +85,7 @@ const ProductsList = () => {
                 </div>
 
                 {/* Body (Loading, Empty, or Grid) */}
-                <div className="p-8">
+                <div className="p-4 sm:p-8">
                     {loading ? (
                         // --- Loading State ---
                         <div className="flex items-center justify-center py-20">

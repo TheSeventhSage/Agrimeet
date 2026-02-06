@@ -1,0 +1,99 @@
+meta {
+  name: Get a product attribute by ID (admin)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/product-attributes/:id
+  body: none
+  auth: bearer
+}
+
+params:path {
+  id: 3463
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: Product attribute
+  
+  request: {
+    url: {{baseUrl}}/admin/product-attributes/:id
+    method: GET
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": 1,
+          "name": "Weight",
+          "created_at": "2025-01-01T12:00:00Z",
+          "updated_at": "2025-01-01T12:00:00Z"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Not found
+  
+  request: {
+    url: {{baseUrl}}/admin/product-attributes/:id
+    method: GET
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

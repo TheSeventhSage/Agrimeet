@@ -1,0 +1,210 @@
+meta {
+  name: Reorder FAQs
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/admin/faqs/reorder
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "faqs": [
+      {
+        "id": 5344,
+        "order": 4202
+      },
+      {
+        "id": 9879,
+        "order": 234
+      }
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: FAQs reordered successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/faqs/reorder
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+    }
+  
+    body:json: {
+      {
+        "faqs": [
+          {
+            "id": 5344,
+            "order": 4202
+          },
+          {
+            "id": 9879,
+            "order": 234
+          }
+        ]
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "string"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthorized
+  
+  request: {
+    url: {{baseUrl}}/admin/faqs/reorder
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+    }
+  
+    body:json: {
+      {
+        "faqs": [
+          {
+            "id": 5344,
+            "order": 4202
+          },
+          {
+            "id": 9879,
+            "order": 234
+          }
+        ]
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden
+  
+  request: {
+    url: {{baseUrl}}/admin/faqs/reorder
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+    }
+  
+    body:json: {
+      {
+        "faqs": [
+          {
+            "id": 5344,
+            "order": 4202
+          },
+          {
+            "id": 9879,
+            "order": 234
+          }
+        ]
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: Forbidden
+      text: 403
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: Validation error
+  
+  request: {
+    url: {{baseUrl}}/admin/faqs/reorder
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+    }
+  
+    body:json: {
+      {
+        "faqs": [
+          {
+            "id": 5344,
+            "order": 4202
+          },
+          {
+            "id": 9879,
+            "order": 234
+          }
+        ]
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: Unprocessable Entity (WebDAV) (RFC 4918)
+      text: 422
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

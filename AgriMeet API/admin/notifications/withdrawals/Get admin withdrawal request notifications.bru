@@ -1,0 +1,151 @@
+meta {
+  name: Get admin withdrawal request notifications
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/notifications/withdrawals?per_page=15&page=1
+  body: none
+  auth: bearer
+}
+
+params:query {
+  per_page: 15
+  page: 1
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieve paginated withdrawal request notifications for admin users
+}
+
+example {
+  name: Withdrawal notifications retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/notifications/withdrawals?per_page=15&page=1
+    method: GET
+    mode: none
+    params:query: {
+      per_page: 15
+      page: 1
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "data": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/admin/notifications/withdrawals?per_page=15&page=1
+    method: GET
+    mode: none
+    params:query: {
+      per_page: 15
+      page: 1
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthorized access
+  
+  request: {
+    url: {{baseUrl}}/admin/notifications/withdrawals?per_page=15&page=1
+    method: GET
+    mode: none
+    params:query: {
+      per_page: 15
+      page: 1
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Forbidden
+      text: 403
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": false,
+          "message": "Unauthorized access"
+        }
+      '''
+    }
+  }
+}

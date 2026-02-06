@@ -152,9 +152,10 @@ const SellerCard = ({ seller, onViewDetails, onSuspendSeller, onUnsuspendSeller,
             )}
 
             <div className="flex items-center gap-2 pt-4 border-t border-gray-200 mt-auto">
+                {/* <div className='w-full'> */}
                 <button
                     onClick={() => onViewDetails(seller)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors w-full text-sm md:text-base"
                 >
                     <Eye className="w-4 h-4" />
                     View Details
@@ -163,13 +164,14 @@ const SellerCard = ({ seller, onViewDetails, onSuspendSeller, onUnsuspendSeller,
                 {isKycPending && (
                     <button
                         onClick={() => { console.log('Seller being reviewed:', seller); onReviewKYC(seller) }}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors text-sm font-medium"
+                        className="flex-1 flex items-center justify-center gap-2 px- py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors text-sm font-medium w-full md:mt-0"
                         title="Review KYC Documents"
                     >
                         <ShieldCheck className="w-4 h-4" />
                         Review
                     </button>
                 )}
+                {/* </div> */}
 
                 {isSuspended ? (
                     <button

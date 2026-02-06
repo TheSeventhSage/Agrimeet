@@ -51,7 +51,7 @@ const PayoutsList = () => {
     };
 
     const handleConfirmModal = () => {
-        setShowConfirm((prevState) => prevState === false ? prevState = true : prevState = false); //prevState arg. keeps track of the prvious state value
+        setShowConfirm((prevState) => prevState === false ? prevState = true : prevState = false); 
     }
 
     return (

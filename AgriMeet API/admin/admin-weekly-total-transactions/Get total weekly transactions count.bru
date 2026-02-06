@@ -1,0 +1,129 @@
+meta {
+  name: Get total weekly transactions count
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/admin-weekly-total-transactions
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieve the total number of orders placed from start of week to current date. Requires admin authentication.
+}
+
+example {
+  name: Total transactions retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/admin-weekly-total-transactions
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "total_transactions": 152
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/admin/admin-weekly-total-transactions
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden - Admin access required
+  
+  request: {
+    url: {{baseUrl}}/admin/admin-weekly-total-transactions
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Forbidden
+      text: 403
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthorized access."
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,156 @@
+meta {
+  name: Get a specific FAQ
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/admin/faqs/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 3463
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: FAQ details
+  
+  request: {
+    url: {{baseUrl}}/admin/faqs/:id
+    method: GET
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": 1,
+            "question": "How do I reset my password?",
+            "answer": "You can reset your password by clicking on the 'Forgot Password' link on the login page.",
+            "order": 1,
+            "is_published": true,
+            "published_at": "2024-01-15T10:30:00.000000Z",
+            "created_by": 1,
+            "creator": {
+              "id": 1,
+              "name": "John Doe",
+              "email": "admin@example.com"
+            },
+            "created_at": "2024-01-15T10:30:00.000000Z",
+            "updated_at": "2024-01-15T10:30:00.000000Z"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthorized
+  
+  request: {
+    url: {{baseUrl}}/admin/faqs/:id
+    method: GET
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  }
+  
+  response: {
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden
+  
+  request: {
+    url: {{baseUrl}}/admin/faqs/:id
+    method: GET
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  }
+  
+  response: {
+    status: {
+      code: Forbidden
+      text: 403
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: FAQ not found
+  
+  request: {
+    url: {{baseUrl}}/admin/faqs/:id
+    method: GET
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  }
+  
+  response: {
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

@@ -6,7 +6,7 @@ import {
     ArrowUpRight,
     Plus,
     Eye,
-    CreditCard
+    CreditCard,
 } from 'lucide-react';
 // Import the new API functions
 import {
@@ -25,6 +25,7 @@ import { LoadingSpinner, PageLoader } from '../../../shared/components/Loader';
 import { showError } from '../../../shared/utils/alert';
 import { storageManager } from '../../../shared/utils/storageManager';
 import Button from '../../../shared/components/Button';
+import { NairaIcon } from '../../../shared/components/Currency';
 
 
 // --- Helper Functions ---
@@ -38,27 +39,6 @@ const formatCurrency = (amount) => {
         minimumFractionDigits: 0, // Removes .0 if the number is whole
     }).format(amount);
 };
-
-const NairaIcon = ({ size = 24, color = "currentColor", ...props }) => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        {...props}
-    >
-        <path d="M6 3v18" />
-        <path d="M18 3v18" />
-        <path d="M6 15l12-6" />
-        <path d="M6 11h12" />
-        <path d="M6 15h12" />
-    </svg>
-);
 
 const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -107,104 +87,108 @@ const Dashboard = () => {
 
     // --- Data Fetching ---
     useEffect(() => {
-        // 1. Existing Auth Check
-        if (!authUser && !userProfile.user_id) {
+        // 1. Guard Clause & ID Extraction
+        // We check availability but do not return immediately if one is missing 
+        // to allow the logic below to handle the specific ID source.
+        const userId = authUser?.user_id || userProfile?.user_id || userProfile?.data?.id;
+
+        if (!userId) {
             return;
         }
 
-        // 2. Existing ID extraction
-        const userId = authUser.user_id || userProfile.user_id || userProfile.data.id;
+        let isMounted = true;
 
         const fetchDashboardData = async () => {
             try {
-                // Set Loading True
                 setIsLoading(true);
 
                 // ---------------------------------------------------------
-                // STEP 1: Fetch Critical User Profile
-                // We await this separately because the rest of the logic (like address validation)
-                // depends on the Seller ID returned here.
+                // STEP 1: Fetch Profile
                 // ---------------------------------------------------------
                 const profileData = await getUserProfile(userId).catch(err => {
                     console.error('Error fetching user profile:', err);
-                    showError('Could not refresh user profile.');
                     return null;
                 });
 
-                // If profile fails, we cannot proceed with seller-specific logic
-                if (!profileData || !profileData.data || !profileData.data.seller) {
+                // Stop if component unmounted
+                if (!isMounted) return;
+
+                // Stop if no profile data
+                if (!profileData?.data?.seller) {
+                    // If this fails, we can't do anything else, so we throw
                     throw new Error("Unable to retrieve seller details.");
                 }
 
-                // Update Profile State Immediately
+                // Update State (This triggered the loop before, but won't now)
                 setUserProfile(profileData);
                 storageManager.setUserData(profileData);
 
-                // EXTRACT SELLER ID SAFELY FROM THE FRESH VARIABLE (NOT STATE)
                 const sellerId = profileData.data.seller.id;
 
                 // ---------------------------------------------------------
                 // STEP 2: Fetch Dashboard Data in Parallel
-                // We use the sellerId retrieved above if needed by endpoints
                 // ---------------------------------------------------------
                 const [statsData, productsData, ordersData, transactionsData] = await Promise.all([
-                    getVendorStats().catch(err => {
-                        console.warn('Stats failed:', err);
-                        return null;
-                    }),
-                    getTopWeeklyProducts(sellerId).catch(err => {
-                        console.warn('Products failed:', err);
-                        return [];
-                    }),
-                    getRecentWeeklyOrders(sellerId).catch(err => {
-                        console.warn('Orders failed:', err);
-                        return [];
-                    }),
-                    getTopWeeklyTransactions(sellerId).catch(err => {
-                        console.warn('Transactions failed:', err);
-                        return [];
-                    })
+                    getVendorStats().catch(() => null),
+                    getTopWeeklyProducts(sellerId).catch(() => []),
+                    getRecentWeeklyOrders(sellerId).catch(() => []),
+                    getTopWeeklyTransactions(sellerId).catch(() => [])
                 ]);
 
-                // ---------------------------------------------------------
-                // STEP 3: Update States (Only if data exists)
-                // ---------------------------------------------------------
+                if (!isMounted) return;
+
                 if (statsData) setStats(statsData);
                 if (productsData) setTopProducts(productsData);
                 if (ordersData) setRecentOrders(ordersData);
                 if (transactionsData) setTopTransactions(transactionsData);
 
                 // ---------------------------------------------------------
-                // STEP 4: Address Validation (Sequential)
-                // We wait for this to ensure the flow is complete before finishing loading
+                // STEP 3: Address Validation (The Fail-Safe)
                 // ---------------------------------------------------------
-                const validationKey = `addr_val_${sellerId}`;
-                const hasValidated = localStorage.getItem(validationKey);
-
-                if (!hasValidated) {
-                    try {
-                        await validateSellerAddress(sellerId);
-                        // Mark as done only if successful
-                        localStorage.setItem(validationKey, 'true');
-                        console.log("Address validation synced successfully");
-                    } catch (valErr) {
-                        // Log but do not crash the app
-                        console.warn("Address validation deferred:", valErr);
-                    }
-                }
+                // We await this so it doesn't cause race conditions, 
+                // but we catch errors internally so the dashboard doesn't crash.
+                await handleAddressValidationSafely(sellerId);
 
             } catch (error) {
                 console.error("Critical Dashboard Error:", error);
-                // Only show alert for critical failures (like Profile load failure)
-                showError(error.message || "An unexpected error occurred while loading.");
+                if (isMounted) {
+                    showError(error.message || "An unexpected error occurred while loading.");
+                }
             } finally {
-                setIsLoading({ stats: false, products: false, orders: false, transactions: false });
-                setIsInitialLoading(false);
+                if (isMounted) {
+                    setIsLoading({ stats: false, products: false, orders: false, transactions: false });
+                    setIsInitialLoading(false);
+                }
+            }
+        };
+
+        // Isolated helper to prevent crashes
+        const handleAddressValidationSafely = async (id) => {
+            const validationKey = `addr_val_${id}`;
+            // If already validated in local storage, skip entirely
+            if (localStorage.getItem(validationKey)) return;
+
+            try {
+                await validateSellerAddress(id);
+                localStorage.setItem(validationKey, 'true');
+                console.log("Address validation synced successfully");
+            } catch (valErr) {
+                // LOG ONLY - Do not throw. This protects the app from crashing.
+                console.warn("Address validation failed (non-critical):", valErr);
             }
         };
 
         fetchDashboardData();
-    }, []);
+
+        // CLEANUP FUNCTION
+        return () => {
+            isMounted = false;
+        };
+
+        // DEPENDENCY ARRAY FIX:
+        // Only run if the authUser's ID changes. 
+        // Do NOT include 'userProfile', or it will loop endlessly.
+    }, [authUser?.user_id]);
 
     const statsCards = [
         { title: 'Total Revenue', value: stats ? formatCurrency(stats.total_revenue) : '...', icon: NairaIcon, color: 'bg-green-500' },
@@ -216,10 +200,6 @@ const Dashboard = () => {
     if (isInitialLoading) {
         return <PageLoader message="Loading your dashboard..." />;
     }
-
-    /**
-     *
-     */
 
     const displayName = userProfile?.data?.first_name || authUser?.name || 'User';
     const storeName = userProfile?.data?.seller?.store_name;

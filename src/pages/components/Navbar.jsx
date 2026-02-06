@@ -124,20 +124,20 @@ const Navbar = () => {
       </div>
 
       {/* Main Navigation */}
-      <nav className="container mx-auto sm:px- l py-4">
-        <div className="flex justify-between items-center">
+      <nav className="container mx-auto px-4 sm:px-[35px] lg:px-0 py-4">
+        <div className="flex justify-between gap-4 items-center">
           {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="w-12 h-12 bg-linear-to-r from-green-600 to-green-700 rounded-2xl flex items-center justify-center shadow-lg">
               <LogoLightIcon className="w-7 h-7 text-white" />
             </div>
-            <h3 className="sm:block hidden text-3xl font-bold text-gray-900">Agrimeet</h3>
+            <h3 className="lg:block hidden lg:text-3xl font-bold text-gray-900">Agrimeet</h3>
           </div>
 
           {/* Search Bar (Desktop) */}
           <form
             onSubmit={handleSearchSubmit}
-            className="flex"
+            className="flex w-full md:w-[50%]"
           >
             <div className="relative w-full">
               <input
@@ -283,7 +283,7 @@ const Navbar = () => {
               </div>
 
               {/* Download App Button */}
-              <button
+              {/* <button
                 onClick={() => {
                   // Add your download app logic here
                   setIsMenuOpen(false);
@@ -292,37 +292,39 @@ const Navbar = () => {
               >
                 <Download className="w-5 h-5" />
                 <span>Download App</span>
-              </button>
+              </button> */}
 
-              {/* Social Links */}
-              <div className="border-t border-gray-200 pt-6">
-                <p className="text-gray-600 text-sm font-medium mb-4 text-center">
-                  Connect with us
-                </p>
-                <div className="flex justify-center gap-4">
-                  {socialLinks.map((social) => {
-                    const Icon = social.icon;
-                    return (
-                      <a
-                        key={social.label}
-                        href={social.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-green-600 hover:text-white transition-all"
-                        aria-label={social.label}
-                      >
-                        <Icon className="w-5 h-5" />
-                      </a>
-                    );
-                  })}
+              <div className='w-full'>
+                {/* Social Links */}
+                <div className="border-t border-gray-200 pt-6">
+                  <p className="text-gray-600 text-sm font-medium mb-4 text-center">
+                    Connect with us
+                  </p>
+                  <div className="flex justify-center gap-4">
+                    {socialLinks.map((social) => {
+                      const Icon = social.icon;
+                      return (
+                        <a
+                          key={social.label}
+                          href={social.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-green-600 hover:text-white transition-all"
+                          aria-label={social.label}
+                        >
+                          <Icon className="w-5 h-5" />
+                        </a>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
 
-              {/* Footer Info */}
-              <div className="mt-6 text-center">
-                <p className="text-gray-500 text-xs">
-                  © 2025 AgriMeet. All rights reserved.
-                </p>
+                {/* Footer Info */}
+                <div className="mt-6 text-center">
+                  <p className="text-gray-500 text-xs">
+                    © 2025 AgriMeet. All rights reserved.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

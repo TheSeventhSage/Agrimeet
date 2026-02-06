@@ -1,0 +1,183 @@
+meta {
+  name: Like a review
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/buyer/reviews/:review/like
+  body: none
+  auth: bearer
+}
+
+params:path {
+  review: 3463
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Allows authenticated users to like a review. A user can only like a review once.
+}
+
+example {
+  name: Review liked successfully
+  
+  request: {
+    url: {{baseUrl}}/buyer/reviews/:review/like
+    method: POST
+    mode: none
+    params:path: {
+      review: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Review liked successfully"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: User already liked this review
+  
+  request: {
+    url: {{baseUrl}}/buyer/reviews/:review/like
+    method: POST
+    mode: none
+    params:path: {
+      review: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Bad Request
+      text: 400
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "You already liked this review"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/buyer/reviews/:review/like
+    method: POST
+    mode: none
+    params:path: {
+      review: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Review not found
+  
+  request: {
+    url: {{baseUrl}}/buyer/reviews/:review/like
+    method: POST
+    mode: none
+    params:path: {
+      review: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Review not found"
+        }
+      '''
+    }
+  }
+}

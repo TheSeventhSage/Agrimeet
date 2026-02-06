@@ -1,0 +1,54 @@
+meta {
+  name: Send a message in a conversation
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/conversations/:conversation/messages
+  body: none
+  auth: bearer
+}
+
+params:path {
+  conversation: 1
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: Message sent successfully
+  
+  request: {
+    url: {{baseUrl}}/conversations/:conversation/messages
+    method: POST
+    mode: none
+    params:path: {
+      conversation: 1
+    }
+  
+    headers: {
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    status: {
+      code: Created
+      text: 201
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

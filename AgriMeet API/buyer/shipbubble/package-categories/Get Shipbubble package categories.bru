@@ -1,0 +1,99 @@
+meta {
+  name: Get Shipbubble package categories
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/buyer/shipbubble/package-categories
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Returns all available package categories supported by Shipbubble. 
+       *     The response is cached to reduce external API calls and token consumption.
+}
+
+example {
+  name: Successful response (cached)
+  
+  request: {
+    url: {{baseUrl}}/buyer/shipbubble/package-categories
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "id": 1,
+            "name": "Box",
+            "description": "Standard box package"
+          },
+          {
+            "id": 1,
+            "name": "Box",
+            "description": "Standard box package"
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: External Shipbubble API error
+  
+  request: {
+    url: {{baseUrl}}/buyer/shipbubble/package-categories
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Internal Server Error
+      text: 500
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Unable to fetch package categories"
+        }
+      '''
+    }
+  }
+}

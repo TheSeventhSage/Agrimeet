@@ -1,0 +1,125 @@
+meta {
+  name: Handle social login callback
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/auth/:provider/callback
+  body: none
+  auth: inherit
+}
+
+params:path {
+  provider: apple
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Handles the OAuth callback from Google, Facebook, or Apple and returns an access token with user details.
+}
+
+example {
+  name: Login successful
+  
+  request: {
+    url: {{baseUrl}}/auth/:provider/callback
+    method: GET
+    mode: none
+    params:path: {
+      provider: apple
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Created
+      text: 201
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "access_token": "1|eyJ0eXAiOiJKV1QiLCJh...",
+          "user": {
+            "user_id": 123,
+            "email": "user@example.com",
+            "name": "John",
+            "role": "buyer"
+          },
+          "message": "Login successful."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Social login failed
+  
+  request: {
+    url: {{baseUrl}}/auth/:provider/callback
+    method: GET
+    mode: none
+    params:path: {
+      provider: apple
+    }
+  }
+  
+  response: {
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid provider
+  
+  request: {
+    url: {{baseUrl}}/auth/:provider/callback
+    method: GET
+    mode: none
+    params:path: {
+      provider: apple
+    }
+  }
+  
+  response: {
+    status: {
+      code: Unprocessable Entity (WebDAV) (RFC 4918)
+      text: 422
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

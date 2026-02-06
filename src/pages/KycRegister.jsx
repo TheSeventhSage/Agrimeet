@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import {
-    ArrowRight, ArrowLeft, CheckCircle, Phone, FileText, Shield, Info
+    ArrowRight, ArrowLeft, CheckCircle, Phone, FileText, Shield, Info, Home
 } from 'lucide-react';
 import Input from '../shared/components/Input';
 import Select from '../shared/components/Select';
@@ -50,7 +51,7 @@ const KYCRegistrationForm = () => {
         cover_image: null
     });
 
-    // --- PERSISTENCE LOGIC ---
+    // Data persistence logic
     const isFirstRender = useRef(true);
 
     useEffect(() => {
@@ -363,9 +364,25 @@ const KYCRegistrationForm = () => {
 
     return (
         <div className="min-h-screen bg-gray-50/50 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+            <Link
+                to="/"
+                className="hidden md:block absolute top-4 left-4 z-50 p-3 bg-brand-300/80 backdrop-blur-md hover:bg-white rounded-full shadow-sm text-green-800 transition-all hover:scale-105 border border-white/50"
+                aria-label="Back to Home"
+            >
+                <Home className="w-5 h-5" />
+            </Link>
+
             <BackgroundArt />
 
             <div className="w-full max-w-2xl relative z-10">
+                <Link
+                    to="/"
+                    className="md:hidden absolute top-3 left-3 z-50 p-2.5 bg-brand-300/80 backdrop-blur-md hover:bg-white rounded-full shadow-sm text-green-800 transition-all hover:scale-105 border border-white/50"
+                    aria-label="Back to Home"
+                >
+                    <Home className="w-3.5 h-3.5" />
+                </Link>
+
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
                     <div className="p-8">
                         <div className="text-center mb-8">

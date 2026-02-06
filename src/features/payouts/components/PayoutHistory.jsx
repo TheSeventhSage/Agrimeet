@@ -1,6 +1,9 @@
 import { Hash, Calendar, Package, Percent } from 'lucide-react';
 
 const PayoutHistory = ({ history = [] }) => {
+    // Fail-safe to prevent inconsistent data from crashing app
+    const safeHistory = Array.isArray(history) ? history : [];
+
     const statusConfig = {
         paid: { color: 'text-green-800 bg-green-100', label: 'Paid' },
         pending: { color: 'text-yellow-800 bg-yellow-100', label: 'Pending' },
@@ -40,14 +43,14 @@ const PayoutHistory = ({ history = [] }) => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {history.length === 0 ? (
+                        {safeHistory.length === 0 ? (
                             <tr>
                                 <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
                                     No transaction history found
                                 </td>
                             </tr>
                         ) : (
-                            history.map((item) => (
+                            safeHistory.map((item) => (
                                 <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                                     {/* Date */}
                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -60,26 +63,26 @@ const PayoutHistory = ({ history = [] }) => {
                                     {/* Order Details */}
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-medium text-gray-900">{item.order_number}</span>
+                                            <span className="text-sm font-medium text-gray-900">{item.order_number || 'N/A'}</span>
                                             <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
                                                 <Package className="w-3 h-3" />
-                                                <span className="truncate max-w-[150px]">{item.product_name}</span>
+                                                <span className="truncate max-w-[150px]">{item.product_name || 'N/A'}</span>
                                             </div>
                                         </div>
                                     </td>
 
                                     {/* Product Total */}
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                        ₦{parseInt(item.product_total).toLocaleString()}
+                                        ₦{parseInt(item.product_total).toLocaleString() || 'N/A'}
                                     </td>
 
                                     {/* Commission */}
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex flex-col">
-                                            <span className="text-sm text-gray-600">₦{parseInt(item.commission_amount).toLocaleString()}</span>
+                                            <span className="text-sm text-gray-600">₦{parseInt(item.commission_amount).toLocaleString() || 'N/A'}</span>
                                             <div className="flex items-center gap-1 text-xs text-gray-400">
                                                 <Percent className="w-3 h-3" />
-                                                {item.commission_rate}% rate
+                                                {item.commission_rate || 'N/A'}% rate
                                             </div>
                                         </div>
                                     </td>
@@ -87,7 +90,7 @@ const PayoutHistory = ({ history = [] }) => {
                                     {/* Earnings */}
                                     <td className="px-6 py-4 whitespace-nowrap text-right">
                                         <span className="text-sm font-bold text-green-600">
-                                            +₦{parseInt(item.your_earnings).toLocaleString()}
+                                            +₦{parseInt(item.your_earnings).toLocaleString() || 'N/A'}
                                         </span>
                                     </td>
 

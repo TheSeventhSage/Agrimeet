@@ -1,0 +1,190 @@
+meta {
+  name: Get top 3 sold products with revenue and daily breakdown
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/seller/sold_products?day_of_week=1&month=10&year=2025&last_days=30
+  body: none
+  auth: bearer
+}
+
+params:query {
+  day_of_week: 1
+  month: 10
+  year: 2025
+  last_days: 30
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieves the top 3 best-selling products with total revenue, sales count, and daily revenue breakdown. Supports filtering by day of week, month, year, or last N days.
+}
+
+example {
+  name: Top sold products retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/seller/sold_products?day_of_week=1&month=10&year=2025&last_days=30
+    method: GET
+    mode: none
+    params:query: {
+      day_of_week: 1
+      month: 10
+      year: 2025
+      last_days: 30
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "product_id": 456,
+            "product_name": "Premium Wireless Headphones",
+            "product_photo": "https://example.com/images/product-456.jpg",
+            "total_amount": 245600.5,
+            "sales_count": 125,
+            "daily_data": [
+              {
+                "day_of_week": 2,
+                "total_amount": 35200.75
+              },
+              {
+                "day_of_week": 2,
+                "total_amount": 35200.75
+              }
+            ]
+          },
+          {
+            "product_id": 456,
+            "product_name": "Premium Wireless Headphones",
+            "product_photo": "https://example.com/images/product-456.jpg",
+            "total_amount": 245600.5,
+            "sales_count": 125,
+            "daily_data": [
+              {
+                "day_of_week": 2,
+                "total_amount": 35200.75
+              },
+              {
+                "day_of_week": 2,
+                "total_amount": 35200.75
+              }
+            ]
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/seller/sold_products?day_of_week=1&month=10&year=2025&last_days=30
+    method: GET
+    mode: none
+    params:query: {
+      day_of_week: 1
+      month: 10
+      year: 2025
+      last_days: 30
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Seller not found
+  
+  request: {
+    url: {{baseUrl}}/seller/sold_products?day_of_week=1&month=10&year=2025&last_days=30
+    method: GET
+    mode: none
+    params:query: {
+      day_of_week: 1
+      month: 10
+      year: 2025
+      last_days: 30
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Seller not found."
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,293 @@
+meta {
+  name: Get all customers with filters and pagination
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/allCustomers?page=1&per_page=20&search_global=string&status=banned&sortBy=created_at&sortOrder=asc
+  body: none
+  auth: bearer
+}
+
+params:query {
+  page: 1
+  per_page: 20
+  search_global: string
+  status: banned
+  sortBy: created_at
+  sortOrder: asc
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieve a paginated list of all customers (users without seller accounts) with optional filtering by search term, status, and sorting options. Requires admin authentication.
+}
+
+example {
+  name: Customers retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/allCustomers?page=1&per_page=20&search_global=string&status=banned&sortBy=created_at&sortOrder=asc
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+      per_page: 20
+      search_global: string
+      status: banned
+      sortBy: created_at
+      sortOrder: asc
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": 1,
+              "name": "John Doe",
+              "email": "john@example.com",
+              "email_verified_at": "2024-01-15T10:30:00.000000Z",
+              "phone_number": "+234803456789",
+              "roles": [
+                "buyer",
+                "buyer"
+              ],
+              "profile_photo": "profile_photos/photo_123.jpg",
+              "country_name": "Nigeria",
+              "company": "Green Farm Ltd",
+              "address": "123 Main Street",
+              "state": "Lagos State",
+              "city": "Lagos",
+              "created_at": "2024-01-15T10:30:00.000000Z",
+              "updated_at": "2024-01-15T10:30:00.000000Z",
+              "seller": {
+                "id": 1,
+                "user_id": 1,
+                "store_name": "John's Farm",
+                "business_bio": "We specialize in organic produce",
+                "bank_name": "First Bank",
+                "bank_account_number": "1234567890",
+                "business_phone_number": "+234803456789",
+                "name_on_account": "John Doe",
+                "kyc_verified_at": "1952-01-05T19:20:13.737Z",
+                "created_at": "1955-02-09T21:56:51.351Z",
+                "updated_at": "2017-06-04T10:14:40.423Z"
+              }
+            },
+            {
+              "id": 1,
+              "name": "John Doe",
+              "email": "john@example.com",
+              "email_verified_at": "2024-01-15T10:30:00.000000Z",
+              "phone_number": "+234803456789",
+              "roles": [
+                "buyer",
+                "buyer"
+              ],
+              "profile_photo": "profile_photos/photo_123.jpg",
+              "country_name": "Nigeria",
+              "company": "Green Farm Ltd",
+              "address": "123 Main Street",
+              "state": "Lagos State",
+              "city": "Lagos",
+              "created_at": "2024-01-15T10:30:00.000000Z",
+              "updated_at": "2024-01-15T10:30:00.000000Z",
+              "seller": {
+                "id": 1,
+                "user_id": 1,
+                "store_name": "John's Farm",
+                "business_bio": "We specialize in organic produce",
+                "bank_name": "First Bank",
+                "bank_account_number": "1234567890",
+                "business_phone_number": "+234803456789",
+                "name_on_account": "John Doe",
+                "kyc_verified_at": "1951-10-20T05:22:37.634Z",
+                "created_at": "1955-03-22T00:39:51.668Z",
+                "updated_at": "1992-03-29T17:53:06.689Z"
+              }
+            }
+          ],
+          "links": {
+            "first": "http://example.com/api/admin/customers?page=1",
+            "last": "http://example.com/api/admin/customers?page=10",
+            "prev": null,
+            "next": "http://example.com/api/admin/customers?page=2"
+          },
+          "meta": {
+            "current_page": 1,
+            "from": 1,
+            "last_page": 10,
+            "per_page": 20,
+            "to": 20,
+            "total": 200
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/admin/allCustomers?page=1&per_page=20&search_global=string&status=banned&sortBy=created_at&sortOrder=asc
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+      per_page: 20
+      search_global: string
+      status: banned
+      sortBy: created_at
+      sortOrder: asc
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden - Admin access required
+  
+  request: {
+    url: {{baseUrl}}/admin/allCustomers?page=1&per_page=20&search_global=string&status=banned&sortBy=created_at&sortOrder=asc
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+      per_page: 20
+      search_global: string
+      status: banned
+      sortBy: created_at
+      sortOrder: asc
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Forbidden
+      text: 403
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthorized access."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Validation error
+  
+  request: {
+    url: {{baseUrl}}/admin/allCustomers?page=1&per_page=20&search_global=string&status=banned&sortBy=created_at&sortOrder=asc
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+      per_page: 20
+      search_global: string
+      status: banned
+      sortBy: created_at
+      sortOrder: asc
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unprocessable Entity (WebDAV) (RFC 4918)
+      text: 422
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "The given data was invalid.",
+          "errors": {
+            "status": [
+              "The selected status is invalid.",
+              "The selected status is invalid."
+            ]
+          }
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,120 @@
+meta {
+  name: Get top 5 transactions this week
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/seller/top_weekly_transactions
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieves the top 5 highest-value orders containing seller's products from the current week, ordered by total amount.
+}
+
+example {
+  name: Top transactions retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/seller/top_weekly_transactions
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "id": 1523,
+            "user_id": 89,
+            "total_amount": 25499.99,
+            "order_number": "ORD-2025-001523",
+            "created_at": "2025-10-08T14:30:00Z",
+            "user": {
+              "id": 89,
+              "first_name": "John",
+              "last_name": "Doe",
+              "email": "john.doe@example.com"
+            }
+          },
+          {
+            "id": 1523,
+            "user_id": 89,
+            "total_amount": 25499.99,
+            "order_number": "ORD-2025-001523",
+            "created_at": "2025-10-08T14:30:00Z",
+            "user": {
+              "id": 89,
+              "first_name": "John",
+              "last_name": "Doe",
+              "email": "john.doe@example.com"
+            }
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/seller/top_weekly_transactions
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}

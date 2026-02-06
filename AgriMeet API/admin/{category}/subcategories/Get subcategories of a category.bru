@@ -1,0 +1,234 @@
+meta {
+  name: Get subcategories of a category
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/:category/subcategories
+  body: none
+  auth: inherit
+}
+
+params:path {
+  category: 3463
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieve all subcategories (children) of a specific category. Results are cached for 24 hours.
+}
+
+example {
+  name: Subcategories retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/:category/subcategories
+    method: GET
+    mode: none
+    params:path: {
+      category: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": 1,
+              "name": "Electronics",
+              "slug": "electronics",
+              "description": "All electronic items and gadgets",
+              "image": "categories/category_123.jpg",
+              "parent_id": null,
+              "user_id": 1,
+              "created_at": "2013-08-24T18:25:08.734Z",
+              "updated_at": "1993-02-11T09:32:05.253Z",
+              "parent": {
+                "id": 1,
+                "name": "Main Category",
+                "slug": "main-category"
+              },
+              "children": [
+                {
+                  "id": 2,
+                  "name": "Mobile Phones",
+                  "slug": "mobile-phones",
+                  "description": "Smartphones and feature phones",
+                  "image": "categories/phones_456.jpg",
+                  "parent_id": 1,
+                  "created_at": "2014-08-04T19:36:35.661Z",
+                  "updated_at": "1987-06-04T17:35:38.637Z",
+                  "children": [
+                    {
+                      "id": 3,
+                      "name": "Android Phones",
+                      "slug": "android-phones",
+                      "parent_id": 2
+                    },
+                    {
+                      "id": 3,
+                      "name": "Android Phones",
+                      "slug": "android-phones",
+                      "parent_id": 2
+                    }
+                  ]
+                },
+                {
+                  "id": 2,
+                  "name": "Mobile Phones",
+                  "slug": "mobile-phones",
+                  "description": "Smartphones and feature phones",
+                  "image": "categories/phones_456.jpg",
+                  "parent_id": 1,
+                  "created_at": "2016-09-29T22:27:00.100Z",
+                  "updated_at": "1994-09-20T08:38:20.637Z",
+                  "children": [
+                    {
+                      "id": 3,
+                      "name": "Android Phones",
+                      "slug": "android-phones",
+                      "parent_id": 2
+                    },
+                    {
+                      "id": 3,
+                      "name": "Android Phones",
+                      "slug": "android-phones",
+                      "parent_id": 2
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": 1,
+              "name": "Electronics",
+              "slug": "electronics",
+              "description": "All electronic items and gadgets",
+              "image": "categories/category_123.jpg",
+              "parent_id": null,
+              "user_id": 1,
+              "created_at": "2015-03-09T00:21:42.781Z",
+              "updated_at": "1982-10-28T10:47:06.599Z",
+              "parent": {
+                "id": 1,
+                "name": "Main Category",
+                "slug": "main-category"
+              },
+              "children": [
+                {
+                  "id": 2,
+                  "name": "Mobile Phones",
+                  "slug": "mobile-phones",
+                  "description": "Smartphones and feature phones",
+                  "image": "categories/phones_456.jpg",
+                  "parent_id": 1,
+                  "created_at": "2022-08-08T12:05:23.332Z",
+                  "updated_at": "1994-07-15T12:25:40.139Z",
+                  "children": [
+                    {
+                      "id": 3,
+                      "name": "Android Phones",
+                      "slug": "android-phones",
+                      "parent_id": 2
+                    },
+                    {
+                      "id": 3,
+                      "name": "Android Phones",
+                      "slug": "android-phones",
+                      "parent_id": 2
+                    }
+                  ]
+                },
+                {
+                  "id": 2,
+                  "name": "Mobile Phones",
+                  "slug": "mobile-phones",
+                  "description": "Smartphones and feature phones",
+                  "image": "categories/phones_456.jpg",
+                  "parent_id": 1,
+                  "created_at": "2017-09-01T18:12:48.734Z",
+                  "updated_at": "2012-08-23T14:15:18.668Z",
+                  "children": [
+                    {
+                      "id": 3,
+                      "name": "Android Phones",
+                      "slug": "android-phones",
+                      "parent_id": 2
+                    },
+                    {
+                      "id": 3,
+                      "name": "Android Phones",
+                      "slug": "android-phones",
+                      "parent_id": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Category not found
+  
+  request: {
+    url: {{baseUrl}}/admin/:category/subcategories
+    method: GET
+    mode: none
+    params:path: {
+      category: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Category not found."
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,92 @@
+meta {
+  name: Get social login redirect URL
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/auth/:provider/redirect
+  body: none
+  auth: inherit
+}
+
+params:path {
+  provider: apple
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Generates a redirect URL for social login (Google, Facebook, Apple).
+}
+
+example {
+  name: Redirect URL generated successfully
+  
+  request: {
+    url: {{baseUrl}}/auth/:provider/redirect
+    method: GET
+    mode: none
+    params:path: {
+      provider: apple
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Successfully generated google redirect URL.",
+          "url": "https://accounts.google.com/o/oauth2/auth?client_id=..."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid provider
+  
+  request: {
+    url: {{baseUrl}}/auth/:provider/redirect
+    method: GET
+    mode: none
+    params:path: {
+      provider: apple
+    }
+  }
+  
+  response: {
+    status: {
+      code: Unprocessable Entity (WebDAV) (RFC 4918)
+      text: 422
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

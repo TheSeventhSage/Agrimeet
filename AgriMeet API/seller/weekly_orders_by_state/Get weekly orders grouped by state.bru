@@ -1,0 +1,106 @@
+meta {
+  name: Get weekly orders grouped by state
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/seller/weekly_orders_by_state
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieves the count of orders from the current week grouped by delivery address state/region. Useful for geographic sales analysis.
+}
+
+example {
+  name: Orders by state retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/seller/weekly_orders_by_state
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "address_state": "Lagos",
+            "total_orders": 45
+          },
+          {
+            "address_state": "Abuja",
+            "total_orders": 32
+          },
+          {
+            "address_state": "Kano",
+            "total_orders": 18
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/seller/weekly_orders_by_state
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}

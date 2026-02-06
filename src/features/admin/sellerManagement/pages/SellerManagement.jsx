@@ -147,8 +147,7 @@ const SellerManagement = () => {
             setShowKYCModal(false);
 
             // Refresh the seller data - Rule 4
-            loadSellers();
-            loadStats();
+            location.reload();
         } catch (error) {
             showError(error.message || 'Failed to process KYC review');
         } finally {

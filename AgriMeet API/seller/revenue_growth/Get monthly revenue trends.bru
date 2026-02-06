@@ -1,0 +1,162 @@
+meta {
+  name: Get monthly revenue trends
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/seller/revenue_growth?filter=month&months=12&days=30
+  body: none
+  auth: bearer
+}
+
+params:query {
+  filter: month
+  months: 12
+  days: 30
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieves revenue trends grouped by month. Supports various time filters including last 24 hours, last N days, last 7 days, current year, or custom month range.
+}
+
+example {
+  name: Monthly revenue retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/seller/revenue_growth?filter=month&months=12&days=30
+    method: GET
+    mode: none
+    params:query: {
+      filter: month
+      months: 12
+      days: 30
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "year": 2025,
+            "month": 10,
+            "total_amount": 342500.75
+          },
+          {
+            "year": 2025,
+            "month": 10,
+            "total_amount": 342500.75
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/seller/revenue_growth?filter=month&months=12&days=30
+    method: GET
+    mode: none
+    params:query: {
+      filter: month
+      months: 12
+      days: 30
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Seller not found
+  
+  request: {
+    url: {{baseUrl}}/seller/revenue_growth?filter=month&months=12&days=30
+    method: GET
+    mode: none
+    params:query: {
+      filter: month
+      months: 12
+      days: 30
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Seller not found."
+        }
+      '''
+    }
+  }
+}

@@ -1,7 +1,7 @@
 import { Wallet, Clock, CreditCard, TrendingUp, Calendar, ArrowDownLeft } from 'lucide-react';
 
 const WalletOverview = ({
-    overviewData,
+    overviewData = {},
     trend,
     history,
     timeFilter,

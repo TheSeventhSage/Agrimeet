@@ -65,17 +65,17 @@ const UserDropdown = () => {
                         <div>
                             {/* User Info Header */}
                             <div className="p-4 border-b border-gray-200">
-                                <div className="flex items-center gap-3">
+                                <div className="flex min-w-0 items-center gap-3 w-full">
                                     <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
                                         {user?.data?.profile_photo ? (
                                             <img src={user?.data?.profile_photo} alt="User" className="w-12 h-12 rounded-full object-cover" />
                                         ) : (
-                                            <User className="w-5 h-5 text-white" />
+                                            <User className="w-12 h-12 text-white" />
                                         )}
                                     </div>
-                                    <div>
-                                        <h3 className="font-semibold text-gray-900">{user?.data?.first_name || user.user || 'User'}</h3>
-                                        <p className="text-sm text-gray-500">{user?.data?.roles?.includes('seller') ? user?.data?.email : 'Platform Admin'}</p>
+                                    <div className='w-full min-w-0'>
+                                        <h3 className="w-fit font-semibold text-gray-900">{user?.data?.first_name || user.user || 'User'}</h3>
+                                        <p className="text-sm text-gray-500 w-full truncate">{user?.data?.roles?.includes('seller') ? user?.data?.email : 'Platform Admin'}</p>
                                         <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full mt-1">
                                             {user?.data?.roles?.includes('seller') ? 'Seller' : user?.data?.roles?.includes('admin') || user?.roles.includes('admin') ? 'Admin' : 'Inactive'}
                                         </span>

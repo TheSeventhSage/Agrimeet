@@ -19,15 +19,15 @@ import {
     Phone,
     MapPin,
 } from 'lucide-react';
-
 // API and Auth
 import { api } from './api/home.api.js';
 import { storageManager } from '../shared/utils/storageManager.js';
-// Utils
 import { LogoLightIcon } from "../shared/components/Logo";
+// import { productImagePlaceholder2 } from '../assets/index.js';
 import { showSuccess, showError } from '../shared/utils/alert';
 import Button from '../shared/components/Button';
 import Navbar from './components/Navbar';
+import { NairaIcon } from '../shared/components/Currency';
 
 /**
  * A reusable loading spinner
@@ -178,9 +178,9 @@ const ProductInfo = ({ product, averageRating, totalReviews }) => {
                 </span>
             </div>
 
-            <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-bold text-green-600">
-                    ${Number(product.discount_price || product.base_price).toFixed(2)}
+            <div className="flex items-baseline gap-3 h-fit">
+                <span className="text-3xl flex items-baseline font-bold text-[#15803d]">
+                    <NairaIcon color='#15803d' size={24} className='inline font-[800]' />  <b>{Number(product.discount_price || product.base_price).toFixed(2)}</b>
                 </span>
                 {product.discount_price && (
                     <span className="text-xl text-gray-400 line-through">
@@ -204,7 +204,7 @@ const ProductInfo = ({ product, averageRating, totalReviews }) => {
                 )}
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 pt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 pt-2">
                 <div className="flex items-center gap-2">
                     <Tag className="w-4 h-4 text-green-600" />
                     Category: <span className="font-medium text-gray-800">{product.category}</span>
@@ -220,12 +220,12 @@ const ProductInfo = ({ product, averageRating, totalReviews }) => {
                     Seller: <span className="font-medium text-gray-800">{product.seller?.store_name || 'AgriMeet Seller'}</span>
                 </div>
             </div>
-
+            {/* 
             <div className="pt-4">
                 <Button size="lg" className="w-full md:w-auto" disabled={!isAvailable}>
                     {!isAvailable ? 'Out of Stock' : 'Add to Cart'}
                 </Button>
-            </div>
+            </div> */}
         </div>
     );
 }

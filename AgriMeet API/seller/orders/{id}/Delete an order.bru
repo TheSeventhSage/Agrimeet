@@ -1,0 +1,69 @@
+meta {
+  name: Delete an order
+  type: http
+  seq: 1
+}
+
+delete {
+  url: {{baseUrl}}/seller/orders/:id
+  body: none
+  auth: bearer
+}
+
+params:path {
+  id: 123
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Remove an order (Currently not implemented)
+}
+
+example {
+  name: Not implemented
+  
+  request: {
+    url: {{baseUrl}}/seller/orders/:id
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 123
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Implemented
+      text: 501
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Method not implemented"
+        }
+      '''
+    }
+  }
+}

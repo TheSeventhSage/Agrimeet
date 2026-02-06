@@ -1,0 +1,101 @@
+meta {
+  name: Get all Shipbubble couriers
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/buyer/shipbubble/all-couriers
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Returns all couriers available on the Shipbubble platform.
+           *     The response is cached to minimize external API calls and improve performance.
+}
+
+example {
+  name: Successful response (cached)
+  
+  request: {
+    url: {{baseUrl}}/buyer/shipbubble/all-couriers
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "id": 12,
+            "name": "DHL",
+            "code": "DHL_EXPRESS",
+            "supports_cod": true
+          },
+          {
+            "id": 12,
+            "name": "DHL",
+            "code": "DHL_EXPRESS",
+            "supports_cod": true
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: External Shipbubble API error
+  
+  request: {
+    url: {{baseUrl}}/buyer/shipbubble/all-couriers
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Internal Server Error
+      text: 500
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Unable to fetch couriers"
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,272 @@
+meta {
+  name: Get all sellers with filters and pagination
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/allsellers?page=1&per_page=20&search_global=string&status=approved&business_type=string&sortBy=created_at&sortOrder=asc
+  body: none
+  auth: bearer
+}
+
+params:query {
+  page: 1
+  per_page: 20
+  search_global: string
+  status: approved
+  business_type: string
+  sortBy: created_at
+  sortOrder: asc
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieve a paginated list of all sellers with optional filtering by search term, status, business type, and sorting options. Requires admin authentication.
+}
+
+example {
+  name: Sellers retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/allsellers?page=1&per_page=20&search_global=string&status=approved&business_type=string&sortBy=created_at&sortOrder=asc
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+      per_page: 20
+      search_global: string
+      status: approved
+      business_type: string
+      sortBy: created_at
+      sortOrder: asc
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": 1,
+              "user_id": 123,
+              "business_type_id": 1,
+              "store_name": "John's Electronics",
+              "address": "123 Main Street",
+              "city": "Lagos",
+              "state": "Lagos State",
+              "business_phone_number": "+234803456789",
+              "bank_name": "First Bank",
+              "bank_account_number": "1234567890",
+              "name_on_account": "John Doe",
+              "business_bio": "string",
+              "gender": "male",
+              "kyc_verified_at": "1952-07-06T02:38:23.737Z",
+              "approved_kyc_submission_id": 9184,
+              "created_at": "2019-07-21T05:37:07.444Z",
+              "updated_at": "2008-05-18T14:05:47.373Z"
+            },
+            {
+              "id": 1,
+              "user_id": 123,
+              "business_type_id": 1,
+              "store_name": "John's Electronics",
+              "address": "123 Main Street",
+              "city": "Lagos",
+              "state": "Lagos State",
+              "business_phone_number": "+234803456789",
+              "bank_name": "First Bank",
+              "bank_account_number": "1234567890",
+              "name_on_account": "John Doe",
+              "business_bio": "string",
+              "gender": "male",
+              "kyc_verified_at": "1953-02-04T16:01:41.646Z",
+              "approved_kyc_submission_id": 1801,
+              "created_at": "1964-08-09T03:33:57.973Z",
+              "updated_at": "1970-12-20T08:47:14.279Z"
+            }
+          ],
+          "links": {
+            "first": "http://example.com/api/admin/sellers?page=1",
+            "last": "http://example.com/api/admin/sellers?page=10",
+            "prev": null,
+            "next": "http://example.com/api/admin/sellers?page=2"
+          },
+          "meta": {
+            "current_page": 1,
+            "from": 1,
+            "last_page": 10,
+            "per_page": 20,
+            "to": 20,
+            "total": 200
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/admin/allsellers?page=1&per_page=20&search_global=string&status=approved&business_type=string&sortBy=created_at&sortOrder=asc
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+      per_page: 20
+      search_global: string
+      status: approved
+      business_type: string
+      sortBy: created_at
+      sortOrder: asc
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden - Admin access required
+  
+  request: {
+    url: {{baseUrl}}/admin/allsellers?page=1&per_page=20&search_global=string&status=approved&business_type=string&sortBy=created_at&sortOrder=asc
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+      per_page: 20
+      search_global: string
+      status: approved
+      business_type: string
+      sortBy: created_at
+      sortOrder: asc
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Forbidden
+      text: 403
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthorized access."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Validation error
+  
+  request: {
+    url: {{baseUrl}}/admin/allsellers?page=1&per_page=20&search_global=string&status=approved&business_type=string&sortBy=created_at&sortOrder=asc
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+      per_page: 20
+      search_global: string
+      status: approved
+      business_type: string
+      sortBy: created_at
+      sortOrder: asc
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unprocessable Entity (WebDAV) (RFC 4918)
+      text: 422
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "The given data was invalid.",
+          "errors": {
+            "status": [
+              "The selected status is invalid.",
+              "The selected status is invalid."
+            ]
+          }
+        }
+      '''
+    }
+  }
+}

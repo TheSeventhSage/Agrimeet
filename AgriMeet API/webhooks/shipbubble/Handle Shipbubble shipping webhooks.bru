@@ -1,0 +1,84 @@
+meta {
+  name: Handle Shipbubble shipping webhooks
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/webhooks/shipbubble
+  body: json
+  auth: inherit
+}
+
+headers {
+  x-ship-signature: a1b2c3d4e5f6...
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "event": "shipment.status.changed",
+    "order_id": "SHP_ABC123XYZ",
+    "status": "in_transit",
+    "tracking_url": "https://tracking.shipbubble.com/track/ABC123",
+    "courier": {
+      "tracking_code": "TRK123456789"
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Receives and processes webhook events from Shipbubble courier service. Verifies HMAC SHA-512 signature using x-ship-signature header. Always returns HTTP 200 to prevent webhook retries.
+}
+
+example {
+  name: Webhook processed or ignored successfully
+  
+  request: {
+    url: {{baseUrl}}/webhooks/shipbubble
+    method: POST
+    mode: json
+    headers: {
+      x-ship-signature: a1b2c3d4e5f6...
+      Content-Type: application/json
+      Accept: application/json
+    }
+  
+    body:json: {
+      {
+        "event": "shipment.status.changed",
+        "order_id": "SHP_ABC123XYZ",
+        "status": "in_transit",
+        "tracking_url": "https://tracking.shipbubble.com/track/ABC123",
+        "courier": {
+          "tracking_code": "TRK123456789"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "status": "ok"
+        }
+      '''
+    }
+  }
+}

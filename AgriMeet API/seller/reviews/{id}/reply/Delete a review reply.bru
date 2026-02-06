@@ -1,0 +1,183 @@
+meta {
+  name: Delete a review reply
+  type: http
+  seq: 2
+}
+
+delete {
+  url: {{baseUrl}}/seller/reviews/:id/reply
+  body: none
+  auth: bearer
+}
+
+params:path {
+  id: 3463
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Allows the seller to remove their reply from a review. Sets review_reply to null.
+}
+
+example {
+  name: Review reply deleted successfully
+  
+  request: {
+    url: {{baseUrl}}/seller/reviews/:id/reply
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Review reply deleted successfully"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/seller/reviews/:id/reply
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthorized to delete this reply
+  
+  request: {
+    url: {{baseUrl}}/seller/reviews/:id/reply
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Forbidden
+      text: 403
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Review not found
+  
+  request: {
+    url: {{baseUrl}}/seller/reviews/:id/reply
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Review not found"
+        }
+      '''
+    }
+  }
+}

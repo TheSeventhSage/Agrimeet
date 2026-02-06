@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import adminWithdrawalService from '../../commissionsManagement/api/adminWithdrawalService';
 import { showSuccess, showError } from '../../../../shared/utils/alert';
+import { ConfirmationModal } from '../../../../shared/components';
 
 const TransactionOversight = () => {
     const [transactions, setTransactions] = useState([]);
@@ -25,6 +26,13 @@ const TransactionOversight = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [showTransactionModal, setShowTransactionModal] = useState(false);
+    const [confirmation, setConfirmation] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'info',
+        onConfirm: () => { }
+    });
 
     // Filters state
     const [filters, setFilters] = useState({
@@ -52,12 +60,15 @@ const TransactionOversight = () => {
             const responseData = response.data?.data ? response.data : response;
 
             setTransactions(responseData.data || []);
-            setPagination({
-                current_page: responseData.meta?.current_page || 1,
-                last_page: responseData.meta?.last_page || 1,
-                total: responseData.meta?.total || 0,
-                per_page: responseData.meta?.per_page || 20
-            });
+
+            if (responseData.meta) {
+                setPagination({
+                    current_page: responseData.meta.current_page,
+                    last_page: responseData.meta.last_page,
+                    total: responseData.meta.total,
+                    per_page: responseData.meta.per_page
+                });
+            }
         } catch (error) {
             console.error('Error loading withdrawals:', error);
             showError('Failed to load withdrawal requests');
@@ -66,35 +77,54 @@ const TransactionOversight = () => {
         }
     };
 
-    const handleApprove = async (id) => {
-        if (!window.confirm('Are you sure you want to approve this withdrawal? This will initiate the transfer.')) return;
+    // Action Handlers
+    const handleApprove = (id) => {
+        setConfirmation({
+            isOpen: true,
+            title: 'Approve Request',
+            message: 'Are you sure you want to approve this withdrawal? Funds will be released to the seller immediately.',
+            type: 'success',
+            onConfirm: () => executeApprove(id)
+        });
+    };
 
+    const handleReject = (id) => {
+        setConfirmation({
+            isOpen: true,
+            title: 'Reject Request',
+            message: 'Are you sure you want to reject this withdrawal? The funds will be reversed to the seller wallet.',
+            type: 'danger',
+            onConfirm: () => executeReject(id)
+        });
+    };
+
+    const executeApprove = async (id) => {
         try {
             setIsProcessing(true);
             await adminWithdrawalService.approveWithdrawal(id);
-            showSuccess('Withdrawal approved and sent for processing');
+            showSuccess('Withdrawal request approved successfully');
             setShowTransactionModal(false);
-            loadTransactions(); // Refresh list
+            loadTransactions();
         } catch (error) {
             showError(error.response?.data?.message || 'Failed to approve withdrawal');
         } finally {
             setIsProcessing(false);
+            setConfirmation(prev => ({ ...prev, isOpen: false }));
         }
     };
 
-    const handleReject = async (id) => {
-        if (!window.confirm('Are you sure you want to reject this withdrawal? Funds will be returned to the seller wallet.')) return;
-
+    const executeReject = async (id) => {
         try {
             setIsProcessing(true);
             await adminWithdrawalService.rejectWithdrawal(id);
-            showSuccess('Withdrawal rejected successfully');
+            showSuccess('Withdrawal request rejected');
             setShowTransactionModal(false);
-            loadTransactions(); // Refresh list
+            loadTransactions();
         } catch (error) {
             showError(error.response?.data?.message || 'Failed to reject withdrawal');
         } finally {
             setIsProcessing(false);
+            setConfirmation(prev => ({ ...prev, isOpen: false }));
         }
     };
 
@@ -189,10 +219,10 @@ const TransactionOversight = () => {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-medium text-sm">
-                                                    {transaction.user?.name?.charAt(0) || 'U'}
+                                                    {transaction.user?.first_name?.charAt(0) || 'U'}
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-medium text-gray-900">{transaction.user?.name || 'Unknown'}</p>
+                                                    <p className="text-sm font-medium text-gray-900">{transaction.user?.first_name || 'Unknown'}</p>
                                                     <p className="text-xs text-gray-500">{transaction.user?.seller?.store_name || 'N/A'}</p>
                                                 </div>
                                             </div>
@@ -370,6 +400,16 @@ const TransactionOversight = () => {
                     </div>
                 </div>
             )}
+
+            {/* Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={confirmation.isOpen}
+                onClose={() => setConfirmation(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmation.onConfirm}
+                title={confirmation.title}
+                message={confirmation.message}
+                type={confirmation.type}
+            />
         </DashboardLayout>
     );
 };

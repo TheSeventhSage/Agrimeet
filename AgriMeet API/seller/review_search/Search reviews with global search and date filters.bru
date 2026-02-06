@@ -1,0 +1,443 @@
+meta {
+  name: Search reviews with global search and date filters
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/seller/review_search?search_global=excellent&start_date=2025-01-01&end_date=2025-12-31
+  body: none
+  auth: bearer
+}
+
+params:query {
+  search_global: excellent
+  start_date: 2025-01-01
+  end_date: 2025-12-31
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Search through seller's reviews using global search term and/or date range. Searches across rating, status, comment, reply, product name, category, and user names. Returns paginated results with aggregate statistics.
+}
+
+example {
+  name: Search results retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/seller/review_search?search_global=excellent&start_date=2025-01-01&end_date=2025-12-31
+    method: GET
+    mode: none
+    params:query: {
+      search_global: excellent
+      start_date: 2025-01-01
+      end_date: 2025-12-31
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": 1,
+              "product_id": 101,
+              "user_id": 50,
+              "seller_id": 10,
+              "rating": 5,
+              "review_status": "approved",
+              "review_comment": "Excellent product, highly recommended!",
+              "review_reply": "Thank you for your positive feedback!",
+              "published_at": "2025-10-01T10:30:00Z",
+              "created_at": "2025-10-01T10:00:00Z",
+              "updated_at": "2025-10-01T11:00:00Z",
+              "product": {
+                "id": 1,
+                "name": "Fresh Tomatoes",
+                "slug": "fresh-tomatoes",
+                "description": "Fresh organic tomatoes from our farm",
+                "base_price": 25.99,
+                "discount_price": 20.99,
+                "stock_quantity": 100,
+                "status": "active",
+                "thumbnail": "products/thumbnails/thumb_123.jpg",
+                "seller_id": 1,
+                "category_id": 5,
+                "unit_id": 1,
+                "created_at": "1996-09-09T01:55:56.579Z",
+                "updated_at": "1954-11-18T13:18:15.852Z",
+                "category": {
+                  "id": 5,
+                  "name": "Vegetables",
+                  "slug": "vegetables"
+                },
+                "seller": {
+                  "id": 1,
+                  "store_name": "John's Farm",
+                  "business_phone_number": "+234803456789"
+                },
+                "unit": {
+                  "id": 1,
+                  "name": "Kilogram",
+                  "symbol": "kg"
+                },
+                "images": [
+                  {
+                    "id": 1,
+                    "product_id": 1,
+                    "url": "products/images/image_123.jpg",
+                    "created_at": "1979-01-22T20:58:36.547Z",
+                    "updated_at": "1974-01-25T18:00:23.557Z"
+                  },
+                  {
+                    "id": 1,
+                    "product_id": 1,
+                    "url": "products/images/image_123.jpg",
+                    "created_at": "2007-12-16T16:42:31.573Z",
+                    "updated_at": "1957-01-04T17:53:13.647Z"
+                  }
+                ],
+                "variants": [
+                  {
+                    "id": 1,
+                    "product_id": 1,
+                    "name": "Small Pack",
+                    "price": 15.99,
+                    "stock_quantity": 50,
+                    "unit": {
+                      "id": 2,
+                      "name": "Gram",
+                      "symbol": "g"
+                    }
+                  },
+                  {
+                    "id": 1,
+                    "product_id": 1,
+                    "name": "Small Pack",
+                    "price": 15.99,
+                    "stock_quantity": 50,
+                    "unit": {
+                      "id": 2,
+                      "name": "Gram",
+                      "symbol": "g"
+                    }
+                  }
+                ]
+              },
+              "user": {
+                "id": 1,
+                "name": "John Doe",
+                "email": "john@example.com",
+                "email_verified_at": "2024-01-15T10:30:00.000000Z",
+                "phone_number": "+234803456789",
+                "roles": [
+                  "buyer",
+                  "buyer"
+                ],
+                "profile_photo": "profile_photos/photo_123.jpg",
+                "country_name": "Nigeria",
+                "company": "Green Farm Ltd",
+                "address": "123 Main Street",
+                "state": "Lagos State",
+                "city": "Lagos",
+                "created_at": "2024-01-15T10:30:00.000000Z",
+                "updated_at": "2024-01-15T10:30:00.000000Z",
+                "seller": {
+                  "id": 1,
+                  "user_id": 1,
+                  "store_name": "John's Farm",
+                  "business_bio": "We specialize in organic produce",
+                  "bank_name": "First Bank",
+                  "bank_account_number": "1234567890",
+                  "business_phone_number": "+234803456789",
+                  "name_on_account": "John Doe",
+                  "kyc_verified_at": "1956-03-25T01:05:48.614Z",
+                  "created_at": "1962-05-12T16:28:51.705Z",
+                  "updated_at": "1977-12-06T00:06:10.467Z"
+                }
+              },
+              "seller": {
+                "id": 1,
+                "user_id": 123,
+                "business_type_id": 1,
+                "store_name": "John's Electronics",
+                "address": "123 Main Street",
+                "city": "Lagos",
+                "state": "Lagos State",
+                "business_phone_number": "+234803456789",
+                "bank_name": "First Bank",
+                "bank_account_number": "1234567890",
+                "name_on_account": "John Doe",
+                "business_bio": "string",
+                "gender": "male",
+                "kyc_verified_at": "1954-01-22T11:28:57.006Z",
+                "approved_kyc_submission_id": 5735,
+                "created_at": "2014-05-04T09:38:24.038Z",
+                "updated_at": "1960-08-28T13:31:01.071Z"
+              }
+            },
+            {
+              "id": 1,
+              "product_id": 101,
+              "user_id": 50,
+              "seller_id": 10,
+              "rating": 5,
+              "review_status": "approved",
+              "review_comment": "Excellent product, highly recommended!",
+              "review_reply": "Thank you for your positive feedback!",
+              "published_at": "2025-10-01T10:30:00Z",
+              "created_at": "2025-10-01T10:00:00Z",
+              "updated_at": "2025-10-01T11:00:00Z",
+              "product": {
+                "id": 1,
+                "name": "Fresh Tomatoes",
+                "slug": "fresh-tomatoes",
+                "description": "Fresh organic tomatoes from our farm",
+                "base_price": 25.99,
+                "discount_price": 20.99,
+                "stock_quantity": 100,
+                "status": "active",
+                "thumbnail": "products/thumbnails/thumb_123.jpg",
+                "seller_id": 1,
+                "category_id": 5,
+                "unit_id": 1,
+                "created_at": "2024-08-03T09:56:18.855Z",
+                "updated_at": "1985-10-10T05:14:05.481Z",
+                "category": {
+                  "id": 5,
+                  "name": "Vegetables",
+                  "slug": "vegetables"
+                },
+                "seller": {
+                  "id": 1,
+                  "store_name": "John's Farm",
+                  "business_phone_number": "+234803456789"
+                },
+                "unit": {
+                  "id": 1,
+                  "name": "Kilogram",
+                  "symbol": "kg"
+                },
+                "images": [
+                  {
+                    "id": 1,
+                    "product_id": 1,
+                    "url": "products/images/image_123.jpg",
+                    "created_at": "2011-03-29T00:13:42.587Z",
+                    "updated_at": "1968-12-15T00:50:03.266Z"
+                  },
+                  {
+                    "id": 1,
+                    "product_id": 1,
+                    "url": "products/images/image_123.jpg",
+                    "created_at": "1987-07-17T17:25:41.221Z",
+                    "updated_at": "1988-05-01T00:32:40.609Z"
+                  }
+                ],
+                "variants": [
+                  {
+                    "id": 1,
+                    "product_id": 1,
+                    "name": "Small Pack",
+                    "price": 15.99,
+                    "stock_quantity": 50,
+                    "unit": {
+                      "id": 2,
+                      "name": "Gram",
+                      "symbol": "g"
+                    }
+                  },
+                  {
+                    "id": 1,
+                    "product_id": 1,
+                    "name": "Small Pack",
+                    "price": 15.99,
+                    "stock_quantity": 50,
+                    "unit": {
+                      "id": 2,
+                      "name": "Gram",
+                      "symbol": "g"
+                    }
+                  }
+                ]
+              },
+              "user": {
+                "id": 1,
+                "name": "John Doe",
+                "email": "john@example.com",
+                "email_verified_at": "2024-01-15T10:30:00.000000Z",
+                "phone_number": "+234803456789",
+                "roles": [
+                  "buyer",
+                  "buyer"
+                ],
+                "profile_photo": "profile_photos/photo_123.jpg",
+                "country_name": "Nigeria",
+                "company": "Green Farm Ltd",
+                "address": "123 Main Street",
+                "state": "Lagos State",
+                "city": "Lagos",
+                "created_at": "2024-01-15T10:30:00.000000Z",
+                "updated_at": "2024-01-15T10:30:00.000000Z",
+                "seller": {
+                  "id": 1,
+                  "user_id": 1,
+                  "store_name": "John's Farm",
+                  "business_bio": "We specialize in organic produce",
+                  "bank_name": "First Bank",
+                  "bank_account_number": "1234567890",
+                  "business_phone_number": "+234803456789",
+                  "name_on_account": "John Doe",
+                  "kyc_verified_at": "1972-11-28T15:24:22.665Z",
+                  "created_at": "1978-03-05T03:47:30.976Z",
+                  "updated_at": "1956-08-28T19:14:47.309Z"
+                }
+              },
+              "seller": {
+                "id": 1,
+                "user_id": 123,
+                "business_type_id": 1,
+                "store_name": "John's Electronics",
+                "address": "123 Main Street",
+                "city": "Lagos",
+                "state": "Lagos State",
+                "business_phone_number": "+234803456789",
+                "bank_name": "First Bank",
+                "bank_account_number": "1234567890",
+                "name_on_account": "John Doe",
+                "business_bio": "string",
+                "gender": "male",
+                "kyc_verified_at": "1956-08-05T07:08:19.841Z",
+                "approved_kyc_submission_id": 3800,
+                "created_at": "2018-04-01T06:47:44.914Z",
+                "updated_at": "2019-09-14T17:45:41.776Z"
+              }
+            }
+          ],
+          "average_rating": 4.3,
+          "total_reviews": 75,
+          "ratings_count": {
+            "1": 2,
+            "2": 5,
+            "3": 10,
+            "4": 23,
+            "5": 35
+          },
+          "pagination": {
+            "current_page": 1,
+            "last_page": 8,
+            "per_page": 10,
+            "total": 75
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/seller/review_search?search_global=excellent&start_date=2025-01-01&end_date=2025-12-31
+    method: GET
+    mode: none
+    params:query: {
+      search_global: excellent
+      start_date: 2025-01-01
+      end_date: 2025-12-31
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: No seller or reviews found
+  
+  request: {
+    url: {{baseUrl}}/seller/review_search?search_global=excellent&start_date=2025-01-01&end_date=2025-12-31
+    method: GET
+    mode: none
+    params:query: {
+      search_global: excellent
+      start_date: 2025-01-01
+      end_date: 2025-12-31
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "No reviews found for this seller"
+        }
+      '''
+    }
+  }
+}

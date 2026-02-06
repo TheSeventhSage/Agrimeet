@@ -1,0 +1,111 @@
+meta {
+  name: Create a new dispute
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/buyer/disputes
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "order_id": 1,
+    "reason": "Item not delivered"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: Dispute created
+  
+  request: {
+    url: {{baseUrl}}/buyer/disputes
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+    }
+  
+    body:json: {
+      {
+        "order_id": 1,
+        "reason": "Item not delivered"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Created
+      text: 201
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": 1,
+          "order_id": 10,
+          "user_id": 5,
+          "reason": "Item not delivered",
+          "status": "open",
+          "resolution": "Refund issued to buyer",
+          "created_at": "2025-12-11T12:00:00Z",
+          "updated_at": "2025-12-11T12:00:00Z",
+          "order": {},
+          "user": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Validation error
+  
+  request: {
+    url: {{baseUrl}}/buyer/disputes
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+    }
+  
+    body:json: {
+      {
+        "order_id": 1,
+        "reason": "Item not delivered"
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: Unprocessable Entity (WebDAV) (RFC 4918)
+      text: 422
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

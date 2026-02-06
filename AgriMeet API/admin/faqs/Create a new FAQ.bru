@@ -1,0 +1,201 @@
+meta {
+  name: Create a new FAQ
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/admin/faqs
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "question": "string",
+    "answer": "string",
+    "order": 0,
+    "is_published": false,
+    "published_at": "1951-04-16T19:32:19.196Z"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: FAQ created successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/faqs
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+    }
+  
+    body:json: {
+      {
+        "question": "string",
+        "answer": "string",
+        "order": 0,
+        "is_published": false,
+        "published_at": "1951-04-16T19:32:19.196Z"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Created
+      text: 201
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "string",
+          "data": {
+            "id": 1,
+            "question": "How do I reset my password?",
+            "answer": "You can reset your password by clicking on the 'Forgot Password' link on the login page.",
+            "order": 1,
+            "is_published": true,
+            "published_at": "2024-01-15T10:30:00.000000Z",
+            "created_by": 1,
+            "creator": {
+              "id": 1,
+              "name": "John Doe",
+              "email": "admin@example.com"
+            },
+            "created_at": "2024-01-15T10:30:00.000000Z",
+            "updated_at": "2024-01-15T10:30:00.000000Z"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthorized
+  
+  request: {
+    url: {{baseUrl}}/admin/faqs
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+    }
+  
+    body:json: {
+      {
+        "question": "string",
+        "answer": "string",
+        "order": 0,
+        "is_published": false,
+        "published_at": "1951-04-16T19:32:19.196Z"
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden
+  
+  request: {
+    url: {{baseUrl}}/admin/faqs
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+    }
+  
+    body:json: {
+      {
+        "question": "string",
+        "answer": "string",
+        "order": 0,
+        "is_published": false,
+        "published_at": "1951-04-16T19:32:19.196Z"
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: Forbidden
+      text: 403
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: Validation error
+  
+  request: {
+    url: {{baseUrl}}/admin/faqs
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+    }
+  
+    body:json: {
+      {
+        "question": "string",
+        "answer": "string",
+        "order": 0,
+        "is_published": false,
+        "published_at": "1951-04-16T19:32:19.196Z"
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: Unprocessable Entity (WebDAV) (RFC 4918)
+      text: 422
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

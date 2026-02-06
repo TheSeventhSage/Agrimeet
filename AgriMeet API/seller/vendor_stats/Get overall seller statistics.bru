@@ -1,0 +1,98 @@
+meta {
+  name: Get overall seller statistics
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/seller/vendor_stats
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieves key performance indicators (KPIs) for the seller including total revenue, total products, total orders, and total reviews. This provides an all-time overview of the seller's business.
+}
+
+example {
+  name: Vendor statistics retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/seller/vendor_stats
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "total_revenue": 1256780.5,
+          "total_products": 342,
+          "total_orders": 1523,
+          "total_reviews": 856
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/seller/vendor_stats
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}

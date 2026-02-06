@@ -84,15 +84,14 @@ const Payouts = () => {
             // Consume the withdrawal endpoint
             await earningsApi.requestWithdrawal({ amount });
 
-            // Refresh data to show updated balance
-            await fetchDashboardData();
-
             // Reset tab to overview or show success message if needed
             // setActiveTab('overview'); 
         } catch (err) {
             console.error('Withdrawal failed:', err);
             alert(err.message || 'Failed to process withdrawal');
         } finally {
+            // Refresh data to show updated balance
+            await fetchDashboardData();
             setIsLoading(false);
         }
     };

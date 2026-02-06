@@ -1,0 +1,186 @@
+meta {
+  name: Get top selling categories with filters
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/admin-top-categories?day_of_week=1&month=1&year=2025&last_days=30
+  body: none
+  auth: bearer
+}
+
+params:query {
+  day_of_week: 1
+  month: 1
+  year: 2025
+  last_days: 30
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieve top 5 categories by revenue with optional filters for day, month, year, or last N days. Includes monthly revenue breakdown. Requires admin authentication.
+}
+
+example {
+  name: Top categories retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/admin-top-categories?day_of_week=1&month=1&year=2025&last_days=30
+    method: GET
+    mode: none
+    params:query: {
+      day_of_week: 1
+      month: 1
+      year: 2025
+      last_days: 30
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "category_id": 5,
+            "category_name": "Electronics",
+            "total_amount": 75000,
+            "monthly_data": [
+              {
+                "month": 10,
+                "total_amount": 15000
+              },
+              {
+                "month": 10,
+                "total_amount": 15000
+              }
+            ]
+          },
+          {
+            "category_id": 5,
+            "category_name": "Electronics",
+            "total_amount": 75000,
+            "monthly_data": [
+              {
+                "month": 10,
+                "total_amount": 15000
+              },
+              {
+                "month": 10,
+                "total_amount": 15000
+              }
+            ]
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/admin/admin-top-categories?day_of_week=1&month=1&year=2025&last_days=30
+    method: GET
+    mode: none
+    params:query: {
+      day_of_week: 1
+      month: 1
+      year: 2025
+      last_days: 30
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden - Admin access required
+  
+  request: {
+    url: {{baseUrl}}/admin/admin-top-categories?day_of_week=1&month=1&year=2025&last_days=30
+    method: GET
+    mode: none
+    params:query: {
+      day_of_week: 1
+      month: 1
+      year: 2025
+      last_days: 30
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Forbidden
+      text: 403
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthorized access."
+        }
+      '''
+    }
+  }
+}

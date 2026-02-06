@@ -1,0 +1,143 @@
+meta {
+  name: Get all notifications
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/notifications?per_page=15&page=1
+  body: none
+  auth: bearer
+}
+
+params:query {
+  per_page: 15
+  page: 1
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieve a paginated list of notifications for the authenticated user or seller
+}
+
+example {
+  name: Notifications retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/notifications?per_page=15&page=1
+    method: GET
+    mode: none
+    params:query: {
+      per_page: 15
+      page: 1
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "success": true,
+          "data": {
+            "notifications": [
+              {
+                "id": "9a7e1234-5678-90ab-cdef-1234567890ab",
+                "type": "App\\\\Notifications\\\\OrderPlaced",
+                "data": {
+                  "type": "new_order",
+                  "message": "You have a new order",
+                  "order_id": 123
+                },
+                "read_at": null,
+                "created_at": "2025-10-26T10:30:00.000000Z"
+              },
+              {
+                "id": "9a7e1234-5678-90ab-cdef-1234567890ab",
+                "type": "App\\\\Notifications\\\\OrderPlaced",
+                "data": {
+                  "type": "new_order",
+                  "message": "You have a new order",
+                  "order_id": 123
+                },
+                "read_at": null,
+                "created_at": "2025-10-26T10:30:00.000000Z"
+              }
+            ],
+            "unread_count": 5,
+            "pagination": {
+              "current_page": 1,
+              "last_page": 3,
+              "per_page": 15,
+              "total": 45
+            }
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/notifications?per_page=15&page=1
+    method: GET
+    mode: none
+    params:query: {
+      per_page: 15
+      page: 1
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}

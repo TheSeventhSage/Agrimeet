@@ -1,0 +1,96 @@
+meta {
+  name: Get a single dispute
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/admin/disputes/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 3463
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: Dispute details
+  
+  request: {
+    url: {{baseUrl}}/admin/disputes/:id
+    method: GET
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": 1,
+          "order_id": 10,
+          "user_id": 5,
+          "reason": "Item not delivered",
+          "status": "open",
+          "resolution": "Refund issued to buyer",
+          "created_at": "2025-12-11T12:00:00Z",
+          "updated_at": "2025-12-11T12:00:00Z",
+          "order": {},
+          "user": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Dispute not found
+  
+  request: {
+    url: {{baseUrl}}/admin/disputes/:id
+    method: GET
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  }
+  
+  response: {
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

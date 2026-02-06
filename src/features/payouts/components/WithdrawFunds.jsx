@@ -1,23 +1,93 @@
-import { useState, useEffect } from 'react';
-import { ArrowUpRight, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowUpRight } from 'lucide-react';
 import Button from '../../../shared/components/Button';
-import { useNavigate } from 'react-router-dom';
+import Modal from '../../../shared/components/Modal'; // Reuse existing Modal
+import { LoadingSpinner } from '../../../shared/components/Loader';
 
-const WithdrawFunds = ({ balance, bankAccounts, onWithdraw, isLoading }) => {
-    const navigate = useNavigate();
-    const [amount, setAmount] = useState('');
+// Fail-safe: Default props to prevent crashes
+const WithdrawFunds = ({ balance = 0, bankAccounts = [], onWithdraw, isLoading }) => {
+    // Restore original state structure
+    const [formData, setFormData] = useState({
+        amount: '',
+        bankAccountId: ''
+    });
 
-    // Get the profile bank account
-    const accounts = bankAccounts;
-    const profileBankAccount = accounts && accounts.length > 0 ? accounts[0] : null;
+    // NEW: Modal state for feedback (Replaces alerts)
+    const [modalConfig, setModalConfig] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'info'
+    });
 
-    const handleSubmit = (e) => {
+    // Fail-safe: Ensure bankAccounts is an array
+    const accounts = Array.isArray(bankAccounts) ? bankAccounts : [];
+    const safeBalance = Number(balance) || 0;
+
+    const handleInputChange = (field, value) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (amount && profileBankAccount) {
-            onWithdraw(parseFloat(amount));
-            setAmount('');
+
+        if (formData.amount && formData.bankAccountId) {
+            const withdrawalAmount = parseFloat(formData.amount);
+
+            // ---------------------------------------------------------
+            // OBJECTIVE 3: Duplicate Wallet Balance Check
+            // ---------------------------------------------------------
+            // Defensive validation to prevent submission if funds are insufficient.
+            // This happens before the API request to save resources and avoid race conditions.
+            if (withdrawalAmount > safeBalance) {
+                setModalConfig({
+                    isOpen: true,
+                    title: 'Insufficient Funds',
+                    message: `You cannot withdraw ₦${withdrawalAmount.toLocaleString()} because it exceeds your available balance of ₦${safeBalance.toLocaleString()}.`,
+                    color: { text: 'text-red-600', bg: 'bg-red-100', }
+                });
+
+                console.log(modalConfig);
+
+                return; // Gracefully block submission
+            }
+
+            try {
+                // Submit withdrawal using original signature (amount, accountId)
+                await onWithdraw(withdrawalAmount, parseInt(formData.bankAccountId));
+
+                // ---------------------------------------------------------
+                // OBJECTIVE 1: Success Feedback
+                // ---------------------------------------------------------
+
+                setModalConfig({
+                    isOpen: true,
+                    title: 'Withdrawal Successful',
+                    message: `Your withdrawal of ₦${withdrawalAmount.toLocaleString()} has been processed. Your updated balance will be reflected after admin approval.`,
+                    color: { text: 'text-sidebar-600', bg: 'bg-sidebar-100', }
+                });
+
+                // Clear form on success
+                setFormData({ amount: '', bankAccountId: '' });
+
+            } catch (error) {
+                // ---------------------------------------------------------
+                // OBJECTIVE 2: Replace Alerts (Error Case)
+                // ---------------------------------------------------------
+                setModalConfig({
+                    isOpen: true,
+                    title: 'Withdrawal Failed',
+                    message: 'There was an issue processing your withdrawal. Please try again.',
+                    color: { text: 'text-amber-600', bg: 'bg-amber-100', }
+                });
+            }
         }
     };
+
+    const closeModal = () => setModalConfig(prev => ({ ...prev, isOpen: false }));
 
     return (
         <div className="space-y-6">
@@ -35,70 +105,51 @@ const WithdrawFunds = ({ balance, bankAccounts, onWithdraw, isLoading }) => {
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₦</span>
                                 <input
                                     type="number"
-                                    value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
-                                    className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                                    min="0"
+                                    step="0.01"
+                                    value={formData.amount}
+                                    onChange={(e) => handleInputChange('amount', e.target.value)}
+                                    className="pl-8 block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm h-10 border"
                                     placeholder="0.00"
-                                    min="100"
-                                    max={balance}
-                                    required
-                                    disabled={!profileBankAccount}
                                 />
                             </div>
-                            <div className="flex justify-between mt-1 text-xs">
-                                <span className="text-gray-500">Min: ₦100</span>
-                                <span className={balance < parseFloat(amount || 0) ? "text-red-500 font-medium" : "text-gray-500"}>
-                                    Available: ₦{parseFloat(balance).toLocaleString()}
-                                </span>
-                            </div>
+                            <p className="mt-1 text-xs text-gray-500">
+                                Available Balance: <span className="font-medium text-gray-900">₦{safeBalance.toLocaleString()}</span>
+                            </p>
                         </div>
 
+                        {/* Restored Select Element */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Destination Bank
+                                Select Bank Account
                             </label>
-                            {profileBankAccount ? (
-                                <div className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 cursor-not-allowed">
-                                    <div className="font-medium">{profileBankAccount.bankName}</div>
-                                    <div className="text-sm text-gray-500">
-                                        {profileBankAccount.accountNumber} • {profileBankAccount.accountName}
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                    <div className="flex gap-3">
-                                        <AlertCircle className="w-5 h-5 text-yellow-600 shrink-0" />
-                                        <div>
-                                            <h4 className="text-sm font-medium text-yellow-800">No Bank Account Linked</h4>
-                                            <p className="text-xs text-yellow-700 mt-1">
-                                                You need to update your profile with bank details before you can withdraw.
-                                            </p>
-                                            <button
-                                                type="button"
-                                                onClick={() => navigate('/settings/profile')}
-                                                className="text-xs font-semibold text-yellow-800 underline mt-2 hover:text-yellow-900"
-                                            >
-                                                Go to Profile Settings
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                            <select
+                                value={formData.bankAccountId}
+                                onChange={(e) => handleInputChange('bankAccountId', e.target.value)}
+                                className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm h-10 border px-3"
+                            >
+                                <option value="">Select a bank account</option>
+                                {accounts.map((account) => (
+                                    <option key={account.id} value={account.id}>
+                                        {account.bankName} - {account.accountNumber}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <Button
                             type="submit"
+                            variant="primary"
+                            className="w-full justify-center"
                             loading={isLoading}
-                            disabled={!amount || !profileBankAccount || parseFloat(amount) > balance}
-                            className="w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 text-white py-2.5 rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                            disabled={!formData.amount || !formData.bankAccountId || isLoading}
                         >
-                            <ArrowUpRight className="w-4 h-4" />
-                            {isLoading ? 'Processing...' : 'Withdraw Funds'}
+                            Withdraw Funds
                         </Button>
                     </form>
                 </div>
 
-                {/* Withdrawal Information */}
+                {/* Restored Withdrawal Information */}
                 <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                     <h4 className="font-medium text-gray-900 mb-4">Withdrawal Information</h4>
                     <div className="space-y-3 text-sm">
@@ -108,21 +159,38 @@ const WithdrawFunds = ({ balance, bankAccounts, onWithdraw, isLoading }) => {
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-600">Minimum Withdrawal:</span>
-                            <span className="font-medium">₦100</span>
+                            <span className="font-medium">₦1,000</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-600">Transaction Fee:</span>
-                            <span className="font-medium">₦0</span>
+                            <span className="font-medium">₦25</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-gray-600">Daily Limit:</span>
+                            <span className="font-medium">₦500,000</span>
                         </div>
                     </div>
 
                     <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                         <p className="text-sm text-yellow-800">
-                            💡 Withdrawals are processed on business days using the bank details in your profile.
+                            💡 Withdrawals are processed on business days. Weekend requests will be processed on the next business day.
                         </p>
                     </div>
                 </div>
             </div>
+
+            {/* Modal Component for Feedback */}
+            <Modal
+                isOpen={modalConfig.isOpen}
+                onClose={closeModal}
+                title={modalConfig.title}
+                titleColor={modalConfig.color}
+                size='sm'
+            >
+                <div className="text-gray-600">
+                    {modalConfig.message}
+                </div>
+            </Modal>
         </div>
     );
 };

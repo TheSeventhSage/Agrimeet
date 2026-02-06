@@ -1,0 +1,104 @@
+meta {
+  name: Get all measurement units
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/admin/units
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieve a list of all measurement units. Results are cached for 24 hours.
+}
+
+example {
+  name: Units retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/units
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": 1,
+              "name": "Kilogram",
+              "symbol": "kg",
+              "created_at": "2024-01-15T10:30:00.000000Z",
+              "updated_at": "2024-01-15T10:30:00.000000Z"
+            },
+            {
+              "id": 1,
+              "name": "Kilogram",
+              "symbol": "kg",
+              "created_at": "2024-01-15T10:30:00.000000Z",
+              "updated_at": "2024-01-15T10:30:00.000000Z"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Server error
+  
+  request: {
+    url: {{baseUrl}}/admin/units
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Internal Server Error
+      text: 500
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Internal server error"
+        }
+      '''
+    }
+  }
+}

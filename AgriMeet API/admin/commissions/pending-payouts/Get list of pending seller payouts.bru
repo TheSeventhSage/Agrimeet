@@ -1,0 +1,46 @@
+meta {
+  name: Get list of pending seller payouts
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/commissions/pending-payouts
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: Pending payouts retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/commissions/pending-payouts
+    method: GET
+    mode: none
+    headers: {
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

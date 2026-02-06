@@ -15,10 +15,10 @@ const AuthLayout = ({ className, title, subtitle, footer, mode = 'art', children
         <div className={`min-h-screen relative overflow-hidden bg-linear-to-br from-brand-50 to-brand-100 ${className}`}>
             <Link
                 to="/"
-                className="absolute top-4 left-4 z-50 p-3 bg-brand-300/80 backdrop-blur-md hover:bg-white rounded-full shadow-sm text-green-800 transition-all hover:scale-105 border border-white/50"
+                className="absolute top-3 left-3 md:top-4 md:left-4 z-50 p-2.5 sm:p-3 bg-brand-300/80 backdrop-blur-md hover:bg-white rounded-full shadow-sm text-green-800 transition-all hover:scale-105 border border-white/50"
                 aria-label="Back to Home"
             >
-                <Home className="w-5 h-5" />
+                <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </Link>
 
             {/* Background based on mode */}

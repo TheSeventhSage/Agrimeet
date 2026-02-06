@@ -1,0 +1,147 @@
+meta {
+  name: List all privacy policies
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/admin/privacy-policies?page=1
+  body: none
+  auth: inherit
+}
+
+params:query {
+  page: 1
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: List of privacy policies
+  
+  request: {
+    url: {{baseUrl}}/admin/privacy-policies?page=1
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+    }
+  
+    headers: {
+      Accept: application/json
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": [
+            {
+              "id": 1,
+              "content": "string",
+              "is_published": true,
+              "published_at": "2024-01-15T10:30:00.000000Z",
+              "created_by": 1,
+              "creator": {
+                "id": 1,
+                "name": "John Doe",
+                "email": "admin@example.com"
+              },
+              "created_at": "2024-01-15T10:30:00.000000Z",
+              "updated_at": "2024-01-15T10:30:00.000000Z"
+            },
+            {
+              "id": 1,
+              "content": "string",
+              "is_published": true,
+              "published_at": "2024-01-15T10:30:00.000000Z",
+              "created_by": 1,
+              "creator": {
+                "id": 1,
+                "name": "John Doe",
+                "email": "admin@example.com"
+              },
+              "created_at": "2024-01-15T10:30:00.000000Z",
+              "updated_at": "2024-01-15T10:30:00.000000Z"
+            }
+          ],
+          "current_page": 8119,
+          "last_page": 9547,
+          "per_page": 9560,
+          "total": 9318
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthorized
+  
+  request: {
+    url: {{baseUrl}}/admin/privacy-policies?page=1
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+    }
+  }
+  
+  response: {
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden
+  
+  request: {
+    url: {{baseUrl}}/admin/privacy-policies?page=1
+    method: GET
+    mode: none
+    params:query: {
+      page: 1
+    }
+  }
+  
+  response: {
+    status: {
+      code: Forbidden
+      text: 403
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

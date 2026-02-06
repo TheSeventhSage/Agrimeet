@@ -1,0 +1,146 @@
+meta {
+  name: Delete coupon
+  type: http
+  seq: 2
+}
+
+delete {
+  url: {{baseUrl}}/admin/coupons/:coupon
+  body: none
+  auth: bearer
+}
+
+params:path {
+  coupon: 
+  id: 3463
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Soft delete a coupon. Requires admin authentication.
+}
+
+example {
+  name: Coupon deleted successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/coupons/:coupon
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Coupon deleted successfully"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/admin/coupons/:coupon
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Coupon not found
+  
+  request: {
+    url: {{baseUrl}}/admin/coupons/:coupon
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Coupon not found"
+        }
+      '''
+    }
+  }
+}

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 const BankAccounts = ({ accounts }) => {
     const navigate = useNavigate();
-    const bankAccounts = [accounts];
+    const bankAccounts = accounts ? [accounts] : [];
     console.log(bankAccounts)
 
     return (

@@ -26,7 +26,7 @@ const SellerDetailsModal = ({ seller, onClose, onSuspendSeller, onUnsuspendSelle
     const suspensionCount = user?.suspension_count || 0;
 
     return (
-        <div className="ml-0 lg:ml-64 fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-12 py-4">
+        <div className="ml-0 lg:ml-64 fixed inset-0 bg-[rgba(0,0,0,.8)] flex items-center justify-center z-50 px-3 md:px-12 py-4">
             <div className="bg-white rounded-xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
@@ -52,7 +52,7 @@ const SellerDetailsModal = ({ seller, onClose, onSuspendSeller, onUnsuspendSelle
                         ? 'bg-red-50 border border-red-200'
                         : 'bg-green-50 border border-green-200'
                         }`}>
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-3 md:flex-row md:items-center justify-between">
                             <div className="flex items-center gap-3">
                                 {isSuspended ? (
                                     <>
@@ -107,7 +107,7 @@ const SellerDetailsModal = ({ seller, onClose, onSuspendSeller, onUnsuspendSelle
                             <User className="w-5 h-5 text-brand-600" />
                             User Information
                         </h4>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="text-sm font-medium text-gray-600">Full Name</label>
                                 <p className="text-gray-900">
@@ -152,7 +152,7 @@ const SellerDetailsModal = ({ seller, onClose, onSuspendSeller, onUnsuspendSelle
                             <Store className="w-5 h-5 text-brand-600" />
                             Store Information
                         </h4>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="text-sm font-medium text-gray-600">Store Name</label>
                                 <p className="text-gray-900">{seller.store_name || 'N/A'}</p>
@@ -182,7 +182,7 @@ const SellerDetailsModal = ({ seller, onClose, onSuspendSeller, onUnsuspendSelle
                             <MapPin className="w-5 h-5 text-brand-600" />
                             Location
                         </h4>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="col-span-2">
                                 <label className="text-sm font-medium text-gray-600">Address</label>
                                 <p className="text-gray-900">{seller.address || 'N/A'}</p>
@@ -204,7 +204,7 @@ const SellerDetailsModal = ({ seller, onClose, onSuspendSeller, onUnsuspendSelle
                             <CreditCard className="w-5 h-5 text-brand-600" />
                             Bank Details
                         </h4>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="text-sm font-medium text-gray-600">Bank Name</label>
                                 <p className="text-gray-900">{seller.bank_name || 'N/A'}</p>

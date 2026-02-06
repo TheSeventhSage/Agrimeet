@@ -1,0 +1,58 @@
+meta {
+  name: Get all messages in a conversation
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/conversations/:conversation/messages
+  body: none
+  auth: bearer
+}
+
+params:path {
+  conversation: 1
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieves all messages in a conversation thread. Automatically marks messages as read when viewed by the recipient.
+}
+
+example {
+  name: Messages retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/conversations/:conversation/messages
+    method: GET
+    mode: none
+    params:path: {
+      conversation: 1
+    }
+  
+    headers: {
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

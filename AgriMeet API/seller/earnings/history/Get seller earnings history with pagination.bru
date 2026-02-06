@@ -1,0 +1,46 @@
+meta {
+  name: Get seller earnings history with pagination
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/seller/earnings/history
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: Earnings history retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/seller/earnings/history
+    method: GET
+    mode: none
+    headers: {
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

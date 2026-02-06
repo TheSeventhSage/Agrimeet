@@ -1,0 +1,359 @@
+meta {
+  name: Update user profile
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{baseUrl}}/buyer/users/11
+  body: json
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{authLogin}}
+}
+
+body:json {
+  {
+  "first_name": "Ebub"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Update user profile information including seller details if applicable. Requires authentication.
+}
+
+example {
+  name: User updated successfully
+  
+  request: {
+    url: {{baseUrl}}/buyer/users/:user
+    method: PUT
+    mode: multipartForm
+    params:path: {
+      user: 3463
+    }
+  
+    headers: {
+      Content-Type: multipart/form-data
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:multipart-form: {
+      name: John Doe
+      email: john@example.com
+      phone_number: +234803456789
+      profile_photo: @file()
+      country_name: Nigeria
+      company: Green Farm Ltd
+      address: 123 Main Street
+      state: Lagos State
+      city: Lagos
+      business_bio: We specialize in organic produce
+      bank_name: First Bank
+      bank_account_number: 1234567890
+      business_phone_number: +234803456789
+      name_on_account: John Doe
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "User updated successfully",
+          "user": {
+            "id": 1,
+            "name": "John Doe",
+            "email": "john@example.com",
+            "email_verified_at": "2024-01-15T10:30:00.000000Z",
+            "phone_number": "+234803456789",
+            "roles": [
+              "buyer",
+              "buyer"
+            ],
+            "profile_photo": "profile_photos/photo_123.jpg",
+            "country_name": "Nigeria",
+            "company": "Green Farm Ltd",
+            "address": "123 Main Street",
+            "state": "Lagos State",
+            "city": "Lagos",
+            "created_at": "2024-01-15T10:30:00.000000Z",
+            "updated_at": "2024-01-15T10:30:00.000000Z",
+            "seller": {
+              "id": 1,
+              "user_id": 1,
+              "store_name": "John's Farm",
+              "business_bio": "We specialize in organic produce",
+              "bank_name": "First Bank",
+              "bank_account_number": "1234567890",
+              "business_phone_number": "+234803456789",
+              "name_on_account": "John Doe",
+              "kyc_verified_at": "2008-02-21T04:45:44.936Z",
+              "created_at": "1952-04-14T17:00:24.156Z",
+              "updated_at": "1976-05-20T19:33:07.592Z"
+            }
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/buyer/users/:user
+    method: PUT
+    mode: multipartForm
+    params:path: {
+      user: 3463
+    }
+  
+    headers: {
+      Content-Type: multipart/form-data
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:multipart-form: {
+      name: John Doe
+      email: john@example.com
+      phone_number: +234803456789
+      profile_photo: @file()
+      country_name: Nigeria
+      company: Green Farm Ltd
+      address: 123 Main Street
+      state: Lagos State
+      city: Lagos
+      business_bio: We specialize in organic produce
+      bank_name: First Bank
+      bank_account_number: 1234567890
+      business_phone_number: +234803456789
+      name_on_account: John Doe
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden - Can only update own profile
+  
+  request: {
+    url: {{baseUrl}}/buyer/users/:user
+    method: PUT
+    mode: multipartForm
+    params:path: {
+      user: 3463
+    }
+  
+    headers: {
+      Content-Type: multipart/form-data
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:multipart-form: {
+      name: John Doe
+      email: john@example.com
+      phone_number: +234803456789
+      profile_photo: @file()
+      country_name: Nigeria
+      company: Green Farm Ltd
+      address: 123 Main Street
+      state: Lagos State
+      city: Lagos
+      business_bio: We specialize in organic produce
+      bank_name: First Bank
+      bank_account_number: 1234567890
+      business_phone_number: +234803456789
+      name_on_account: John Doe
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Forbidden
+      text: 403
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthorized."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: User not found
+  
+  request: {
+    url: {{baseUrl}}/buyer/users/:user
+    method: PUT
+    mode: multipartForm
+    params:path: {
+      user: 3463
+    }
+  
+    headers: {
+      Content-Type: multipart/form-data
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:multipart-form: {
+      name: John Doe
+      email: john@example.com
+      phone_number: +234803456789
+      profile_photo: @file()
+      country_name: Nigeria
+      company: Green Farm Ltd
+      address: 123 Main Street
+      state: Lagos State
+      city: Lagos
+      business_bio: We specialize in organic produce
+      bank_name: First Bank
+      bank_account_number: 1234567890
+      business_phone_number: +234803456789
+      name_on_account: John Doe
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "User not found"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Validation error
+  
+  request: {
+    url: {{baseUrl}}/buyer/users/:user
+    method: PUT
+    mode: multipartForm
+    params:path: {
+      user: 3463
+    }
+  
+    headers: {
+      Content-Type: multipart/form-data
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:multipart-form: {
+      name: John Doe
+      email: john@example.com
+      phone_number: +234803456789
+      profile_photo: @file()
+      country_name: Nigeria
+      company: Green Farm Ltd
+      address: 123 Main Street
+      state: Lagos State
+      city: Lagos
+      business_bio: We specialize in organic produce
+      bank_name: First Bank
+      bank_account_number: 1234567890
+      business_phone_number: +234803456789
+      name_on_account: John Doe
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unprocessable Entity (WebDAV) (RFC 4918)
+      text: 422
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "The given data was invalid.",
+          "errors": {
+            "name": [
+              "The name field is required.",
+              "The name field is required."
+            ],
+            "email": [
+              "The email has already been taken.",
+              "The email has already been taken."
+            ],
+            "profile_photo": [
+              "The profile photo must be an image.",
+              "The profile photo must be an image."
+            ]
+          }
+        }
+      '''
+    }
+  }
+}

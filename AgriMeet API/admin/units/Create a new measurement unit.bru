@@ -1,0 +1,177 @@
+meta {
+  name: Create a new measurement unit
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/admin/units
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+body:json {
+  {
+    "name": "Kilogram",
+    "symbol": "kg"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Create a new measurement unit. Requires authentication.
+}
+
+example {
+  name: Unit created successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/units
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "name": "Kilogram",
+        "symbol": "kg"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Created
+      text: 201
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "id": 1,
+            "name": "Kilogram",
+            "symbol": "kg",
+            "created_at": "2024-01-15T10:30:00.000000Z",
+            "updated_at": "2024-01-15T10:30:00.000000Z"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/admin/units
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "name": "Kilogram",
+        "symbol": "kg"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Validation error
+  
+  request: {
+    url: {{baseUrl}}/admin/units
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "name": "Kilogram",
+        "symbol": "kg"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unprocessable Entity (WebDAV) (RFC 4918)
+      text: 422
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "The given data was invalid.",
+          "errors": {
+            "name": [
+              "The name field is required.",
+              "The name field is required."
+            ],
+            "symbol": [
+              "The symbol may not be greater than 500 characters.",
+              "The symbol may not be greater than 500 characters."
+            ]
+          }
+        }
+      '''
+    }
+  }
+}

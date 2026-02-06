@@ -1,0 +1,176 @@
+meta {
+  name: Delete a business type
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{baseUrl}}/admin/business_types/:id
+  body: none
+  auth: bearer
+}
+
+params:path {
+  id: 3463
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Permanently delete a business type. Requires authentication.
+}
+
+example {
+  name: Business type deleted successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/business_types/:id
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    status: {
+      code: No Content
+      text: 204
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/admin/business_types/:id
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Business type not found
+  
+  request: {
+    url: {{baseUrl}}/admin/business_types/:id
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Business type not found."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Cannot delete business type with associated records
+  
+  request: {
+    url: {{baseUrl}}/admin/business_types/:id
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 3463
+    }
+  
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Conflict
+      text: 409
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Cannot delete business type that is being used by sellers."
+        }
+      '''
+    }
+  }
+}

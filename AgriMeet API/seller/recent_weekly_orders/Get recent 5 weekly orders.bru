@@ -1,0 +1,146 @@
+meta {
+  name: Get recent 5 weekly orders
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/seller/recent_weekly_orders
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Retrieves the 5 most recent orders containing seller's products from the current week, ordered by creation date.
+}
+
+example {
+  name: Recent orders retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/seller/recent_weekly_orders
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "id": 1523,
+            "order_number": "ORD-2025-001523",
+            "total_amount": 12499.99,
+            "payment_status": "paid",
+            "fulfillment_status": "unfulfilled",
+            "created_at": "2025-10-11T09:15:00Z",
+            "user": {
+              "id": 89,
+              "first_name": "John",
+              "last_name": "Doe",
+              "email": "john.doe@example.com"
+            },
+            "products": [
+              {
+                "id": 456,
+                "name": "Premium Wireless Headphones",
+                "thumbnail": "https://example.com/images/product-456.jpg"
+              },
+              {
+                "id": 456,
+                "name": "Premium Wireless Headphones",
+                "thumbnail": "https://example.com/images/product-456.jpg"
+              }
+            ]
+          },
+          {
+            "id": 1523,
+            "order_number": "ORD-2025-001523",
+            "total_amount": 12499.99,
+            "payment_status": "paid",
+            "fulfillment_status": "unfulfilled",
+            "created_at": "2025-10-11T09:15:00Z",
+            "user": {
+              "id": 89,
+              "first_name": "John",
+              "last_name": "Doe",
+              "email": "john.doe@example.com"
+            },
+            "products": [
+              {
+                "id": 456,
+                "name": "Premium Wireless Headphones",
+                "thumbnail": "https://example.com/images/product-456.jpg"
+              },
+              {
+                "id": 456,
+                "name": "Premium Wireless Headphones",
+                "thumbnail": "https://example.com/images/product-456.jpg"
+              }
+            ]
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/seller/recent_weekly_orders
+    method: GET
+    mode: none
+    headers: {
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}

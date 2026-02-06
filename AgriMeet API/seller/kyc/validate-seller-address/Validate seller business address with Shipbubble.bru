@@ -1,0 +1,200 @@
+meta {
+  name: Validate seller business address with Shipbubble
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/seller/kyc/validate-seller-address
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+body:json {
+  {
+    "seller_id": 5
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Validates a seller's business address with the Shipbubble shipping service. If the address is already validated, returns the existing address code. Otherwise, sends address details to Shipbubble for validation, stores the returned address code and coordinates, and marks the address as validated.
+}
+
+example {
+  name: Address validated successfully (or already validated)
+  
+  request: {
+    url: {{baseUrl}}/seller/kyc/validate-seller-address
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "seller_id": 5
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Seller address validated successfully",
+          "address_code": "ADDR_ABC123XYZ"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Unauthenticated
+  
+  request: {
+    url: {{baseUrl}}/seller/kyc/validate-seller-address
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "seller_id": 5
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unauthorized
+      text: 401
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Unauthenticated."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Seller not found
+  
+  request: {
+    url: {{baseUrl}}/seller/kyc/validate-seller-address
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "seller_id": 5
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Not Found
+      text: 404
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Seller profile not found"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Address validation failed by Shipbubble
+  
+  request: {
+    url: {{baseUrl}}/seller/kyc/validate-seller-address
+    method: POST
+    mode: json
+    headers: {
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: Bearer <token>
+    }
+  
+    body:json: {
+      {
+        "seller_id": 5
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: Unprocessable Entity (WebDAV) (RFC 4918)
+      text: 422
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Address validation failed",
+          "error": "Address does not exist in Shipbubble service area"
+        }
+      '''
+    }
+  }
+}

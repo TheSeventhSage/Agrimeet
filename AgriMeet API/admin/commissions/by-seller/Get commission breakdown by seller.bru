@@ -1,0 +1,56 @@
+meta {
+  name: Get commission breakdown by seller
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/admin/commissions/by-seller?period=year&payout_status=processing
+  body: none
+  auth: bearer
+}
+
+params:query {
+  period: year
+  payout_status: processing
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+settings {
+  encodeUrl: true
+}
+
+example {
+  name: Seller commission breakdown retrieved successfully
+  
+  request: {
+    url: {{baseUrl}}/admin/commissions/by-seller?period=year&payout_status=processing
+    method: GET
+    mode: none
+    params:query: {
+      period: year
+      payout_status: processing
+    }
+  
+    headers: {
+      Authorization: Bearer <token>
+    }
+  }
+  
+  response: {
+    status: {
+      code: OK
+      text: 200
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
