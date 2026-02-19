@@ -140,7 +140,7 @@ const ProductTable = ({ product, onEdit, onDelete, onView, onManageVariants, isD
                                 ${product.originalPrice}
                             </span>
                             <span className="text-xs font-medium text-green-600">
-                                ({product.discount}% off)
+                                ({Math.round((product.originalPrice - (product?.discountedPrice ?? product?.price)) / product.originalPrice * 100)}% off)
                             </span>
                         </div>
                     )}

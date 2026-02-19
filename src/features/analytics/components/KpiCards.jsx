@@ -1,15 +1,18 @@
 // components/KpiCards.jsx
 
 import { useQuery } from '@tanstack/react-query';
-import { getVendorStats } from '../api/analyticsApi';
 import { DollarSign, Users, Package, Star } from 'lucide-react';
-import { LoadingSpinner } from '../../../shared/components/Loader';
 import { DataErrorState } from './ChartComponents';
+import { getVendorStats } from '../api/analyticsApi';
+import { LoadingSpinner } from '../../../shared/components/Loader';
+import { NairaIcon } from '../../../shared/components/Currency';
+
+const NGN = NairaIcon
 
 const formatCurrency = (amount) =>
-    new Intl.NumberFormat('en-US', {
+    new Intl.NumberFormat('en-NG', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'NGN',
         minimumFractionDigits: 1,
     }).format(amount);
 
@@ -37,7 +40,7 @@ const KpiCards = ({ filters }) => {
         {
             title: 'Total Revenue',
             value: +stats?.total_revenue || 0, // Keep as Number
-            icon: DollarSign,
+            icon: NGN,
             color: 'text-green-600',
             isCurrency: true, // Add this flag
         },
@@ -100,7 +103,7 @@ const KpiCards = ({ filters }) => {
                                     }`}
                             >
                                 {card.value >= 1000000
-                                    ? (card.isCurrency ? '$' : '') + formatCompact(card.value)
+                                    ? (card.isCurrency ? '₦' : '') + formatCompact(card.value)
                                     : (card.isCurrency ? formatCurrency(card.value) : card.value)
                                 }
                             </p>

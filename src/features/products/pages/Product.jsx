@@ -5,7 +5,7 @@ import ProductGridHeader from '../components/ProductGridHeader';
 import ProductTable from '../components/ProductTable';
 import { LoadingSpinner } from '../../../shared/components/Loader';
 import ConfirmationModal from '../../../shared/components/ConfirmationModal'; // Added Import
-import Pagination from '../components/Pagination';
+import Pagination from '../../../shared/components/Paginate';
 import {
     getProducts,
     deleteProduct,

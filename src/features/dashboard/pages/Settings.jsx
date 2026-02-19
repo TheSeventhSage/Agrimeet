@@ -14,30 +14,29 @@ import DashboardLayout from '../../../layouts/DashboardLayout';
 import Input from '../../../shared/components/Input';
 import DocumentUpload from '../../../shared/components/DocumentUpload';
 import Button from '../../../shared/components/Button';
+import BankDetailsForm from '../components/BankDetailsForm';
 import { showSuccess, showError } from '../../../shared/utils/alert';
 import { storageManager } from '../../../shared/utils/storageManager';
-import { updateUserProfile } from '../../../pages/api/profile.api';
+import { updateUserProfile, updateSellerProfile } from '../../../pages/api/profile.api';
 
 const Settings = () => {
-    const [activeTab, setActiveTab] = useState('profile');// State for the Confirmation Modal
+    const [activeTab, setActiveTab] = useState('profile');
     const [showResetConfirm, setShowResetConfirm] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState();
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
-    // Stores the raw File object
+
+    // Stores the raw File object for profile photo
     const [avatarFile, setAvatarFile] = useState(null);
 
     // Stores the full complex user object
     const [currentUserData, setCurrentUserData] = useState(null);
 
-    // Form data for the 4 editable fields
+    // Form data for the User Profile fields only
     const [profile, setProfile] = useState({
         first_name: '',
         last_name: '',
         email: '',
         phone_number: '',
-        bank_name: '',
-        bank_account_number: 0,
-        name_on_account: '',
     });
 
     useEffect(() => {
@@ -46,14 +45,12 @@ const Settings = () => {
             const actualUserData = userStored.data || userStored;
             setCurrentUserData(actualUserData);
 
+            // Only populate User fields here. Bank fields are handled in the child component.
             setProfile({
                 first_name: actualUserData.first_name || '',
                 last_name: actualUserData.last_name || '',
                 email: actualUserData.email || '',
                 phone_number: actualUserData.phone_number || '',
-                bank_account_number: actualUserData.seller.bank_account_number || '',
-                bank_name: actualUserData.seller.bank_name || '',
-                name_on_account: actualUserData.seller.name_on_account || '',
             });
         }
     }, []);
@@ -76,31 +73,23 @@ const Settings = () => {
 
     /**
      * Recursive helper to append nested objects/arrays to FormData.
-     * This ensures 'seller', 'roles', etc. are sent correctly.
      */
     const buildFormData = (formData, data, parentKey) => {
         if (data && typeof data === 'object' && !(data instanceof Date) && !(data instanceof File)) {
             Object.keys(data).forEach(key => {
                 const value = data[key];
-                // Determine the key string for formData (e.g., "seller[store_name]")
                 const formKey = parentKey ? `${parentKey}[${key}]` : key;
-
                 buildFormData(formData, value, formKey);
             });
         } else {
-            // Append primitive values or Files
-            // Skip null or undefined to avoid sending "null" string
             if (data !== null && data !== undefined) {
                 const value = typeof data === 'boolean' ? (data ? '1' : '0') : data;
                 formData.append(parentKey, value);
             }
         }
-
-        console.log(formData);
     };
 
-    console.log(currentUserData);
-
+    // --- 1. User Profile Submission (Photo, Name, Phone) ---
     const handleProfileSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -112,51 +101,32 @@ const Settings = () => {
 
             const userId = currentUserData.id;
 
-
-
-            const updatedSellerData = {
-                ...(currentUserData.seller || {}), // Keep existing seller data (id, business type, etc.)
-                bank_name: profile.bank_name,
-                bank_account_number: profile.bank_account_number,
-                name_on_account: profile.name_on_account,
-            };
-
-            console.log(updatedSellerData);
-
-            // 1. Merge Data
+            // Merge current data with new profile inputs
+            // Note: We leave 'seller' data strictly as it is in currentUserData
             const mergedData = {
                 ...currentUserData,
                 first_name: profile.first_name,
                 last_name: profile.last_name,
                 email: profile.email,
                 phone_number: profile.phone_number,
-                seller: updatedSellerData
             };
 
-            // 2. Create FormData
             const formDataPayload = new FormData();
-
-            // *** CRITICAL FIX: Method Spoofing ***
-            // We add this so Laravel knows to treat this POST as a PUT
-            formDataPayload.append('_method', 'PUT');
+            formDataPayload.append('_method', 'PUT'); // Method spoofing for Laravel
 
             // Separate photo from the rest
             const { profile_photo, ...dataWithoutPhoto } = mergedData;
 
-            // Build the rest of the data
+            // Build payload
             buildFormData(formDataPayload, dataWithoutPhoto, '');
 
-            // 3. Handle Photo
             if (avatarFile) {
                 formDataPayload.append('profile_photo', avatarFile);
             }
 
-            // 4. Send as POST (Important!)
-            // We are passing a flag 'true' or using a different function to ensure 
-            // the API layer uses axios.post, NOT axios.put
             await updateUserProfile(userId, formDataPayload);
 
-            // 5. Update Storage
+            // Update Storage
             const newStorageData = { data: mergedData };
             storageManager.setUserData(newStorageData);
             setCurrentUserData(mergedData);
@@ -177,19 +147,53 @@ const Settings = () => {
         }
     };
 
+    // --- 2. Bank Details Submission (New Logic) ---
+    const handleBankSubmit = async (bankFormData) => {
+        setIsSubmitting(true);
+        try {
+            const currentSeller = currentUserData.seller || {};
+
+            // Construct payload: Must include existing seller fields (store_name, address, etc.)
+            // + the new bank details from the form
+            const payload = {
+                ...currentSeller,
+                ...bankFormData
+            };
+
+            // Call the specific endpoint for seller profile updates
+            await updateSellerProfile(payload);
+
+            // Update local state and storage to reflect changes
+            const updatedUserData = {
+                ...currentUserData,
+                seller: payload
+            };
+
+            storageManager.setUserData({ data: updatedUserData });
+            setCurrentUserData(updatedUserData);
+
+            showSuccess('Bank details updated successfully');
+        } catch (error) {
+            console.error(error);
+            if (error.response?.data?.errors) {
+                const errorMsg = Object.values(error.response.data.errors).flat().join('\n');
+                showError(errorMsg);
+            } else {
+                showError(error.message || 'Failed to update bank details');
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     // --- Security / Password Flow ---
     const handlePasswordResetInitiation = () => {
         setShowResetConfirm(true);
     };
 
     const confirmPasswordResetFlow = () => {
-        // 1. Close Modal
         setShowResetConfirm(false);
-
-        // 2. Clear Session (Logout)
         storageManager.clearAll();
-
-        // 3. Redirect to Forgot Password
         navigate('/forgot-password');
     };
 
@@ -198,8 +202,6 @@ const Settings = () => {
             <div className="flex flex-col md:flex-row gap-8">
                 {/* Photo Section */}
                 <div className="w-full md:w-1/3 flex flex-col space-y-4">
-
-                    {/* Visual check: Show Current Profile Photo if no NEW file selected */}
                     {!avatarFile && currentUserData?.profile_photo && typeof currentUserData.profile_photo === 'string' && (
                         <div className="flex flex-col items-center mb-2">
                             <span className="text-sm font-medium text-gray-700 mb-2">Current Photo</span>
@@ -229,7 +231,7 @@ const Settings = () => {
                     />
                 </div>
 
-                {/* Form Fields */}
+                {/* Form Fields - User Info Only */}
                 <div className="w-full md:w-2/3 space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input
@@ -274,43 +276,13 @@ const Settings = () => {
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                            label="Bank Name"
-                            name="bank_name"
-                            value={profile.bank_name}
-                            onChange={handleInputChange}
-                            icon={Banknote}
-                            placeholder="Enter your bank name"
-                        />
-                        <Input
-                            label="Bank Account Number"
-                            name="bank_account_number"
-                            type="number"
-                            value={profile.bank_account_number}
-                            onChange={handleInputChange}
-                            icon={Banknote}
-                            placeholder="Enter your bank account number"
-                        />
-                    </div>
-
-                    <Input
-                        label="Name on Account"
-                        name="name_on_account"
-                        type="text"
-                        value={profile.name_on_account}
-                        onChange={handleInputChange}
-                        icon={Banknote}
-                        placeholder="Enter your name on account"
-                    />
-
                     <div className="pt-4 flex justify-end">
                         <Button
                             type="submit"
                             loading={isSubmitting}
                             icon={Save}
                         >
-                            Save Changes
+                            Save Profile
                         </Button>
                     </div>
                 </div>
@@ -355,7 +327,6 @@ const Settings = () => {
                 </div>
             </div>
 
-            {/* Two-Factor Placeholder (Optional Visual Filler) */}
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 opacity-75">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -375,6 +346,7 @@ const Settings = () => {
 
     const tabs = [
         { id: 'profile', label: 'Profile Settings', icon: User },
+        { id: 'bank', label: 'Bank Details', icon: Banknote },
         { id: 'security', label: 'Security', icon: Lock },
         { id: 'notifications', label: 'Notifications', icon: Bell },
     ];
@@ -411,6 +383,15 @@ const Settings = () => {
                     <div className="flex-1">
                         <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6">
                             {activeTab === 'profile' && renderProfileTab()}
+
+                            {activeTab === 'bank' && (
+                                <BankDetailsForm
+                                    initialData={currentUserData?.seller || {}}
+                                    onSave={handleBankSubmit}
+                                    isSubmitting={isSubmitting}
+                                />
+                            )}
+
                             {activeTab === 'security' && renderSecurityTab()}
                             {activeTab === 'notifications' && <div className="text-center text-gray-500 py-12">Notification settings coming soon</div>}
                         </div>

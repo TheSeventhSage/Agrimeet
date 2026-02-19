@@ -371,7 +371,7 @@ const CategoriesTab = () => {
 
             {/* Create/Edit Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+                <div className="ml-0 lg:ml-64 fixed inset-0 bg-[rgba(0,0,0,.8)] flex justify-center items-center z-50 p-4">
                     <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
                         <h3 className="text-lg font-medium text-gray-900 mb-4">
                             {modalMode === 'create' ? 'Create New Category' : 'Edit Category'}

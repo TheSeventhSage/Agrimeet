@@ -3,6 +3,7 @@ import { Plus, Edit2, Trash2, Loader2, AlertCircle, Scale } from 'lucide-react';
 import { unitsApi, getErrorMessage } from '../api/settings.api';
 import ConfirmationModal from '../../../../shared/components/ConfirmationModal';
 import Pagination from '../../../../shared/components/Pagination';
+import { showSuccess } from '../../../../shared/utils/alert';
 
 const PAGE_SIZE = 12; // Data sets per page
 
@@ -108,17 +109,17 @@ const UnitsTab = () => {
         try {
             if (modalMode === 'create') {
                 await unitsApi.create(formData);
-                // toast.success('Unit created successfully!');
+                showSuccess('Unit created successfully!');
             } else {
                 await unitsApi.update(currentItem.id, formData);
-                // toast.success('Unit updated successfully!');
+                showSuccess('Unit updated successfully!');
             }
             loadUnits(); // Refresh list
             closeModal();
         } catch (err) {
             const errorMessage = getErrorMessage(err);
             setError(errorMessage);
-            // toast.error(errorMessage);
+            showError(errorMessage);
             if (err.data?.errors) {
                 setFormErrors(err.data.errors);
             }
@@ -141,7 +142,7 @@ const UnitsTab = () => {
 
         try {
             await unitsApi.delete(confirmModalState.itemId);
-            // toast.success('Unit deleted.');
+            showSuccess('Unit deleted successfully.');
             loadUnits(); // Refresh list
         } catch (err) {
             const errorMessage = getErrorMessage(err);
@@ -239,7 +240,7 @@ const UnitsTab = () => {
 
             {/* Modal (using simple conditional rendering) */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+                <div className="ml-0 lg:ml-64 fixed inset-0 bg-[rgba(0,0,0,.8)] flex justify-center items-center z-50 p-4">
                     <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
                         <h3 className="text-lg font-medium text-gray-900 mb-4">
                             {modalMode === 'create' ? 'Create New Unit' : 'Edit Unit'}

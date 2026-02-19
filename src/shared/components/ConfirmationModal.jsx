@@ -1,7 +1,9 @@
 import { AlertTriangle, X } from 'lucide-react';
+import Button from './Button';
 
 const ConfirmationModal = ({
     isOpen,
+    isLoading,
     onClose,
     onConfirm,
     title = "Confirm Action",
@@ -50,12 +52,13 @@ const ConfirmationModal = ({
                         <AlertTriangle className={`w-6 h-6 ${styles.icon}`} />
                         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
                     </div>
-                    <button
+                    <Button
                         onClick={onClose}
+                        variant='ghost'
                         className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                         <X className="w-5 h-5 text-gray-500" />
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Body */}
@@ -64,18 +67,20 @@ const ConfirmationModal = ({
 
                     {/* Actions */}
                     <div className="flex items-center justify-end gap-3">
-                        <button
+                        <Button
                             onClick={onClose}
+                            variant='ghost'
                             className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                         >
                             {cancelText}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={onConfirm}
+                            loading={isLoading}
                             className={`px-4 py-2 rounded-lg transition-colors ${styles.confirmButton} cursor-pointer`}
                         >
                             {confirmText}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>

@@ -316,10 +316,10 @@ const DisputeDetailsModal = ({ dispute, onClose, onResolve }) => {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="flex flex-1 overflow-hidden">
+                <div className="flex overflow-hidden">
 
                     {/* Sidebar Tabs (Desktop) / Top Tabs (Mobile) */}
-                    <div className="w-full md:w-64 bg-white border-r border-gray-200 flex flex-row md:flex-col overflow-x-auto md:overflow-visible">
+                    <div className="w-full sm:w-64 bg-white border-r border-gray-200 flex flex-row sm:flex-col overflow-x-auto md:overflow-visible">
                         {[
                             { id: 'overview', label: 'Overview', icon: FileText },
                             { id: 'order', label: 'Order & Logistics', icon: Package },

@@ -9,6 +9,7 @@ import {
     Package,
     ShoppingCart,
     MessageSquare,
+    MessageSquareLock,
     Wallet,
     Settings,
     ChevronRight,
@@ -45,7 +46,6 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
 
     const isAdmin = userRoles.role.includes('admin');
     const isSeller = userRoles.role.includes('seller');
-    // console.log(isSeller, isAdmin, userRoles, user);
 
     const sellerMenuItems = [
         {
@@ -105,9 +105,15 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                     path: '/messages'
                 },
                 {
+                    key: 'message-admin',
+                    label: 'Message Admin',
+                    icon: MessageSquareLock,
+                    path: '/message-admin'
+                },
+                {
                     key: 'reviews',
                     label: 'Reviews',
-                    icon: Star, // or ThumbsUp
+                    icon: Star,
                     path: '/reviews'
                 },
                 {
@@ -202,6 +208,12 @@ const MultilevelSidebar = ({ isMobileOpen, onMobileMenuToggle }) => {
                     label: 'Dispute Management',
                     icon: AlertTriangle,
                     path: '/admin/disputes'
+                },
+                {
+                    key: 'support',
+                    label: 'Suport Messaging',
+                    icon: AlertTriangle,
+                    path: '/admin/support'
                 },
             ]
         },

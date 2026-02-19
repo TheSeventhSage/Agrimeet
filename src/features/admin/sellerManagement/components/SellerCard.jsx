@@ -79,7 +79,7 @@ const SellerCard = ({ seller, onViewDetails, onSuspendSeller, onUnsuspendSeller,
     const isKycPending = seller.latest_kyc?.status === 'pending';
 
     return (
-        <div className="bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow">
+        <div className="relative bg-white rounded-xl shadow-xs border border-gray-100 p-6 hover:shadow-md transition-shadow flex flex-col">
             <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-brand-100 rounded-full flex items-center justify-center">
@@ -151,7 +151,7 @@ const SellerCard = ({ seller, onViewDetails, onSuspendSeller, onUnsuspendSeller,
                 </div>
             )}
 
-            <div className="flex items-center gap-2 pt-4 border-t border-gray-200 mt-auto">
+            <div className=" flex items-center gap-2 pt-4 border-t border-gray-200 mt-auto">
                 {/* <div className='w-full'> */}
                 <button
                     onClick={() => onViewDetails(seller)}

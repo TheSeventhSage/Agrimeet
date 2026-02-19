@@ -1,3 +1,4 @@
+import { useParams } from 'react-router-dom';
 import { api } from '../../../../shared/utils/apiClient';
 
 /**
@@ -6,8 +7,9 @@ import { api } from '../../../../shared/utils/apiClient';
  * @returns {Promise} - Paginated list of withdrawals
  */
 export const getWithdrawals = async (params = {}) => {
+    const query = params;
     try {
-        const response = await api.get('/admin/withdrawals', { params });
+        const response = await api.get('/admin/withdrawals', { query });
         return response;
     } catch (error) {
         console.error('Error fetching withdrawals:', error);

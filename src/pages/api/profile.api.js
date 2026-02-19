@@ -1,5 +1,34 @@
-// modules/auth/api/profile.api.js
+// profile.api.js
 import { api, getErrorMessage } from '../../shared/utils/apiClient';
+
+/**
+ * Get list of all Nigerian banks
+ * @returns {Promise} List of banks
+ */
+export const getBanks = async () => {
+    try {
+        const response = await api.get('/banks');
+        return response?.data?.data || [];
+    } catch (error) {
+        console.error('Error fetching banks:', error);
+        throw new Error(getErrorMessage(error));
+    }
+};
+
+/**
+ * Update seller profile information
+ * @param {Object} profileData - Profile data to update
+ * @returns {Promise} Updated profile data
+ */
+export const updateSellerProfile = async (profileData) => {
+    try {
+        const response = await api.put('/seller/profile', profileData);
+        return response;
+    } catch (error) {
+        console.error('Error updating seller profile:', error);
+        throw new Error(getErrorMessage(error));
+    }
+};
 
 /**
  * Get user profile details

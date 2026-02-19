@@ -66,7 +66,7 @@ const UserDropdown = () => {
                             {/* User Info Header */}
                             <div className="p-4 border-b border-gray-200">
                                 <div className="flex min-w-0 items-center gap-3 w-full">
-                                    <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+                                    <div className="w-12 h-12 bg-orange-500 rounded-full flex shrink-0 items-center justify-center">
                                         {user?.data?.profile_photo ? (
                                             <img src={user?.data?.profile_photo} alt="User" className="w-12 h-12 rounded-full object-cover" />
                                         ) : (

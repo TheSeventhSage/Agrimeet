@@ -3,6 +3,7 @@ import { Search, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import Button from '../../../shared/components/Button';
 import { LoadingSpinner } from '../../../shared/components/Loader';
 import { STATUS_CONFIG } from '../api/orderService';
+import Pagination from '../../../shared/components/Paginate';
 
 const OrdersList = ({
     orders,
@@ -21,35 +22,6 @@ const OrdersList = ({
                 {config.label}
             </span>
         );
-    };
-
-    // Pagination Logic for Page Numbers
-    const getPageNumbers = () => {
-        const pages = [];
-        const { current_page, last_page } = pagination;
-
-        // Always show first page
-        pages.push(1);
-
-        if (current_page > 3) {
-            pages.push('...');
-        }
-
-        // Show pages around current
-        for (let i = Math.max(2, current_page - 1); i <= Math.min(last_page - 1, current_page + 1); i++) {
-            pages.push(i);
-        }
-
-        if (current_page < last_page - 2) {
-            pages.push('...');
-        }
-
-        // Always show last page if > 1
-        if (last_page > 1) {
-            pages.push(last_page);
-        }
-
-        return pages;
     };
 
     if (isLoading) {
@@ -126,49 +98,11 @@ const OrdersList = ({
 
                 {/* Numbered Pagination Footer */}
                 {pagination.last_page > 1 && (
-                    <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
-                        <div className="text-sm text-gray-500 hidden sm:block">
-                            Showing page <span className="font-medium">{pagination.current_page}</span> of <span className="font-medium">{pagination.last_page}</span>
-                        </div>
-                        <div className="flex items-center space-x-1 mx-auto sm:mx-0">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => onPageChange(pagination.current_page - 1)}
-                                disabled={pagination.current_page <= 1}
-                                className="px-2"
-                            >
-                                <ChevronLeft className="w-4 h-4" />
-                            </Button>
-
-                            {getPageNumbers().map((page, index) => (
-                                page === '...' ? (
-                                    <span key={`dots-${index}`} className="px-2 text-gray-400">...</span>
-                                ) : (
-                                    <button
-                                        key={page}
-                                        onClick={() => onPageChange(page)}
-                                        className={`min-w-[32px] h-8 rounded-md text-sm font-medium transition-colors ${pagination.current_page === page
-                                            ? 'bg-brand-600 text-white'
-                                            : 'text-gray-600 hover:bg-gray-100'
-                                            }`}
-                                    >
-                                        {page}
-                                    </button>
-                                )
-                            ))}
-
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => onPageChange(pagination.current_page + 1)}
-                                disabled={pagination.current_page >= pagination.last_page}
-                                className="px-2"
-                            >
-                                <ChevronRight className="w-4 h-4" />
-                            </Button>
-                        </div>
-                    </div>
+                    <Pagination
+                        currentPage={pagination.current_page}
+                        lastPage={pagination.last_page}
+                        onPageChange={onPageChange}
+                    />
                 )}
             </div>
         </div>

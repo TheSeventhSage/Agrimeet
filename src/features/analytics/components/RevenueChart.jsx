@@ -15,9 +15,9 @@ import {
 import { ChartContainer, DataErrorState, ChartInsights } from './ChartComponents';
 
 const formatCurrency = (amount) =>
-    new Intl.NumberFormat('en-US', {
+    new Intl.NumberFormat('en-NG', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'NGN',
         minimumFractionDigits: 0,
     }).format(amount);
 
@@ -180,7 +180,7 @@ const RevenueChart = ({ filters }) => {
                             <YAxis
                                 stroke="#888888"
                                 fontSize={12}
-                                tickFormatter={(value) => `$${value / 1000}k`}
+                                tickFormatter={(value) => `₦${value / 1000}k`}
                             />
                             <Tooltip
                                 content={

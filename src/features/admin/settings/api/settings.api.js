@@ -130,11 +130,12 @@ export const businessTypesApi = {
         return handleResponse(res);
     },
 
+    // AFTER
     async update(id, data) {
         const res = await fetch(`${BASE_URL}/admin/business_types/${id}`, {
-            method: 'PUT',
+            method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify(data),
+            body: JSON.stringify({ ...data, _method: 'PUT' }),
         });
         return handleResponse(res);
     },
@@ -266,9 +267,9 @@ export const couponsApi = {
      */
     async update(id, data) {
         const res = await fetch(`${BASE_URL}/admin/coupons/${id}`, {
-            method: 'PUT',
+            method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify(data),
+            body: JSON.stringify({ ...data, _method: 'PUT' }),
         });
         return handleResponse(res);
     },
@@ -310,11 +311,12 @@ export const productAttributeApi = {
         });
         return handleResponse(res);
     },
+
     async update(id, data) {
         const res = await fetch(`${BASE_URL}/admin/product-attributes/${id}`, {
-            method: 'PUT',
+            method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify(data),
+            body: JSON.stringify({ ...data, _method: 'PUT' }),
         });
         return handleResponse(res);
     },

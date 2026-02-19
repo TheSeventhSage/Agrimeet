@@ -77,8 +77,11 @@ export const reviewsApi = {
         return handleResponse(response);
     },
 
-    // Reply to a review
-    replyToReview: async (reviewId, { review_reply }) => {
+    // Reply to a review (and optionally set status)
+    replyToReview: async (reviewId, replyText, status = null) => {
+        const payload = { review_reply: replyText };
+        if (status) payload.review_status = status;
+
         const response = await fetch(`${API_BASE_URL}/seller/reviews/${reviewId}/reply`, {
             method: 'POST',
             headers: {
@@ -86,22 +89,28 @@ export const reviewsApi = {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({ review_reply })
+            body: JSON.stringify(payload)
         });
 
         return handleResponse(response);
     },
 
     // Edit a review reply
-    editReply: async (reviewId, { review_reply }) => {
+    editReply: async (reviewId, replyText, status = null) => {
+        const payload = {
+            review_reply: replyText,
+            _method: 'PUT',
+        };
+        if (status) payload.review_status = status;
+
         const response = await fetch(`${API_BASE_URL}/seller/reviews/${reviewId}/reply`, {
-            method: 'PUT',
+            method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({ review_reply })
+            body: JSON.stringify(payload)
         });
 
         return handleResponse(response);
@@ -123,7 +132,7 @@ export const reviewsApi = {
 
     // Mark review as pending
     markAsPending: async (reviewId) => {
-        const response = await fetch(`${API_BASE_URL}/seller/reviews/${reviewId}/mark-pending`, {
+        const response = await fetch(`${API_BASE_URL}/seller/reviews/${reviewId}/pending`, {
             method: 'PATCH',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -135,10 +144,10 @@ export const reviewsApi = {
         return handleResponse(response);
     },
 
-    // Mark review as approved
-    markAsApproved: async (reviewId) => {
-        const response = await fetch(`${API_BASE_URL}/seller/reviews/${reviewId}/approve`, {
-            method: 'PATCH',
+    // Delete a review completely
+    deleteReview: async (reviewId) => {
+        const response = await fetch(`${API_BASE_URL}/seller/reviews/${reviewId}`, {
+            method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -146,20 +155,7 @@ export const reviewsApi = {
             }
         });
 
-        return handleResponse(response);
-    },
-
-    // Mark review as rejected
-    markAsRejected: async (reviewId) => {
-        const response = await fetch(`${API_BASE_URL}/seller/reviews/${reviewId}/reject`, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        });
-
+        if (response.status === 204) return true; // 204 No Content
         return handleResponse(response);
     },
 

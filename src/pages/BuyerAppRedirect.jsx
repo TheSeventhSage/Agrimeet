@@ -126,7 +126,7 @@ const Footer = () => {
                     <div>
                         <h5 className="font-semibold mb-3">Contact</h5>
                         <div className="text-sm text-gray-600 space-y-3">
-                            <div className="flex items-center gap-2"><Mail className="w-4 h-4" /> <span>hello@agrimeet.com</span></div>
+                            <div className="flex items-center gap-2"><Mail className="w-4 h-4" /> <span>support@agrimeetconnect.com</span></div>
                             <div className="flex items-center gap-2"><Phone className="w-4 h-4" /> <span>+234 803 456 789</span></div>
                             <div className="flex items-center gap-2"><MapPin className="w-4 h-4" /> <span>123 Farm Lane, AgriTown</span></div>
                         </div>
@@ -340,7 +340,7 @@ export default function DownloadLanding({
                         </div>
                         <div>
                             <div className="font-medium">Need support?</div>
-                            <div className="mt-1">Email us at hello@agrimeet.com or call +234 803 456 789.</div>
+                            <div className="mt-1">Email us at support@agrimeetconnect.com or call +234 803 456 789.</div>
                         </div>
                     </div>
                 </div>

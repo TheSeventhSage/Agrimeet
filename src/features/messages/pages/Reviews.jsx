@@ -7,10 +7,13 @@ import {
     Filter,
     Award,
     Search,
-    Package
+    Package,
+    Edit2,
 } from 'lucide-react';
 import { reviewsApi } from '../api/reviews.api';
+
 import { showError, showSuccess } from '../../../shared/utils/alert';
+import ConfirmationModal from '../../../shared/components/ConfirmationModal';
 
 const Reviews = () => {
     // --- State Management ---
@@ -26,7 +29,6 @@ const Reviews = () => {
         per_page: 10,
         total: 0
     });
-    const [loading, setLoading] = useState(true);
 
     // Filters & Search
     const [searchQuery, setSearchQuery] = useState('');
@@ -35,10 +37,24 @@ const Reviews = () => {
     const [productFilter, setProductFilter] = useState('');
 
     // UI State
+    const [loading, setLoading] = useState(true);
     const [replyingTo, setReplyingTo] = useState(null);
     const [replyText, setReplyText] = useState('');
     const [submittingReply, setSubmittingReply] = useState(false);
     const [showFilterMenu, setShowFilterMenu] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [replyToDelete, setReplyToDelete] = useState(null);
+    const [isDeletingReply, setIsDeletingReply] = useState(false);
+    const [replyStatus, setReplyStatus] = useState('');
+    const [statusLoading, setStatusLoading] = useState(null);
+    const [isDeleteReviewModalOpen, setIsDeleteReviewModalOpen] = useState(false);
+    const [reviewToDelete, setReviewToDelete] = useState(null);
+    const [isDeletingReview, setIsDeletingReview] = useState(false);
+    const [editingReplyId, setEditingReplyId] = useState(null);
+    const [editReplyText, setEditReplyText] = useState('');
+    const [editReplyStatus, setEditReplyStatus] = useState('');
+    const [submittingEdit, setSubmittingEdit] = useState(false);
+
 
     // --- Data Fetching ---
     useEffect(() => {
@@ -101,8 +117,13 @@ const Reviews = () => {
             }
 
         } catch (error) {
-            console.error('Failed to fetch reviews:', error);
-            showError('Failed to load reviews');
+            if (error.message === "No reviews found for this seller") {
+                setReviews([]);
+                setPagination(prev => ({ ...prev, total: 0, last_page: 1 }));
+            } else {
+                console.error('Fetch reviews error:', error);
+                showError(error.message || 'Failed to fetch reviews');
+            }
         } finally {
             setLoading(false);
         }
@@ -113,26 +134,91 @@ const Reviews = () => {
         if (!replyText.trim()) return;
         setSubmittingReply(true);
         try {
-            await reviewsApi.replyToReview(reviewId, { review_reply: replyText });
+            await reviewsApi.replyToReview(reviewId, replyText, replyStatus || undefined);
             showSuccess('Reply posted successfully');
             setReplyingTo(null);
             setReplyText('');
-            fetchReviews();
+            setReplyStatus('');
+            fetchReviews(pagination.current_page);
         } catch (error) {
-            showError('Failed to post reply');
+            showError(error.message || 'Failed to post reply');
         } finally {
             setSubmittingReply(false);
         }
     };
 
-    const handleDeleteReply = async (reviewId) => {
-        if (!window.confirm('Are you sure you want to delete this reply?')) return;
+    const handleEditReplySubmit = async (reviewId) => {
+        if (!editReplyText.trim()) return;
+        setSubmittingEdit(true);
         try {
-            await reviewsApi.deleteReply(reviewId);
+            await reviewsApi.editReply(reviewId, editReplyText, editReplyStatus || undefined);
+            showSuccess('Reply updated successfully');
+            setEditingReplyId(null);
+            setEditReplyText('');
+            setEditReplyStatus('');
+            fetchReviews(pagination.current_page);
+        } catch (error) {
+            showError(error.message || 'Failed to update reply');
+        } finally {
+            setSubmittingEdit(false);
+        }
+    };
+
+    const confirmDeleteReview = (reviewId) => {
+        setReviewToDelete(reviewId);
+        setIsDeleteReviewModalOpen(true);
+    };
+
+    const handleDeleteReview = async () => {
+        if (!reviewToDelete) return;
+        setIsDeletingReview(true);
+        try {
+            await reviewsApi.deleteReview(reviewToDelete);
+            showSuccess('Review deleted successfully');
+            fetchReviews(pagination.current_page);
+        } catch (error) {
+            showError(error.message || 'Failed to delete review');
+        } finally {
+            setIsDeletingReview(false);
+            setIsDeleteReviewModalOpen(false);
+            setReviewToDelete(null);
+        }
+    };
+
+    const handleStatusUpdate = async (reviewId, status) => {
+        if (status !== 'pending') return;
+
+        setStatusLoading(reviewId);
+        try {
+            await reviewsApi.markAsPending(reviewId);
+            showSuccess(`Review marked as pending`);
+            fetchReviews(pagination.current_page);
+        } catch (error) {
+            showError(error.message || `Failed to update status`);
+        } finally {
+            setStatusLoading(null);
+        }
+    };
+
+    const confirmDeleteReply = (reviewId) => {
+        setReplyToDelete(reviewId);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteReply = async () => {
+        if (!replyToDelete) return;
+
+        setIsDeletingReply(true);
+        try {
+            await reviewsApi.deleteReply(replyToDelete);
             showSuccess('Reply deleted');
             fetchReviews();
         } catch (error) {
             showError('Failed to delete reply');
+        } finally {
+            setIsDeletingReply(false);
+            setIsDeleteModalOpen(false);
+            setReplyToDelete(null);
         }
     };
 
@@ -325,12 +411,32 @@ const Reviews = () => {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${review.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                            review.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${review.review_status === 'approved' ? 'bg-green-100 text-green-700' :
+                                            review.review_status === 'rejected' ? 'bg-red-100 text-red-700' :
                                                 'bg-yellow-100 text-yellow-700'
                                             }`}>
-                                            {review.status}
+                                            {review.review_status}
                                         </span>
+
+                                        {/* Status Quick Actions & Delete */}
+                                        <div className="flex items-center gap-2 ml-2 border-l pl-2 border-gray-200">
+                                            {review.review_status !== 'pending' && (
+                                                <button
+                                                    onClick={() => handleStatusUpdate(review.id, 'pending')}
+                                                    disabled={statusLoading === review.id}
+                                                    className="text-xs font-medium text-yellow-600 hover:text-yellow-800 disabled:opacity-50"
+                                                >
+                                                    Mark Pending
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => confirmDeleteReview(review.id)}
+                                                className="text-gray-400 hover:text-red-600 ml-1 transition-colors"
+                                                title="Delete Review"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -344,7 +450,8 @@ const Reviews = () => {
                                             />
                                         ))}
                                     </div>
-                                    <p className="text-gray-600 mb-2">{review.comment}</p>
+                                    {/* UPDATED: Changed from review.comment to review.review_comment */}
+                                    <p className="text-gray-600 mb-2">{review.review_comment}</p>
                                     <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 p-2 rounded">
                                         <Package className="w-4 h-4" />
                                         <span>Product: <strong>{review.product?.name}</strong></span>
@@ -352,35 +459,103 @@ const Reviews = () => {
                                 </div>
 
                                 {/* Reply Section */}
-                                {review.reply ? (
-                                    <div className="bg-brand-50 p-4 rounded-lg ml-8 relative group">
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <p className="text-xs font-bold text-brand-800 mb-1">Your Reply</p>
-                                                <p className="text-sm text-brand-700">{review.reply}</p>
+                                {/* UPDATED: Changed from review.reply to review.review_reply */}
+                                {review.review_reply ? (
+                                    editingReplyId === review.id ? (
+                                        <div className="bg-white p-4 rounded-lg ml-8 relative border border-gray-200 shadow-sm">
+                                            <div className="mb-3">
+                                                <label className="text-xs font-medium text-gray-700 block mb-1">Update Status (Optional)</label>
+                                                <select
+                                                    value={editReplyStatus}
+                                                    onChange={(e) => setEditReplyStatus(e.target.value)}
+                                                    className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-brand-500 w-full sm:w-auto outline-none bg-white"
+                                                >
+                                                    <option value="">Leave status unchanged</option>
+                                                    <option value="approved">Approve Review</option>
+                                                    <option value="rejected">Reject Review</option>
+                                                </select>
                                             </div>
-                                            <button
-                                                onClick={() => handleDeleteReply(review.id)}
-                                                className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            <textarea
+                                                value={editReplyText}
+                                                onChange={(e) => setEditReplyText(e.target.value)}
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 mb-3 text-sm bg-gray-50 outline-none"
+                                                rows="3"
+                                            />
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleEditReplySubmit(review.id)}
+                                                    disabled={submittingEdit}
+                                                    className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-50 transition-colors"
+                                                >
+                                                    {submittingEdit ? 'Updating...' : 'Update'}
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setEditingReplyId(null);
+                                                        setEditReplyText('');
+                                                        setEditReplyStatus('');
+                                                    }}
+                                                    className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className="bg-brand-50 p-4 rounded-lg ml-8 relative group">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-xs font-bold text-brand-800 mb-1">Your Reply</p>
+                                                    <p className="text-sm text-brand-700 whitespace-pre-wrap">{review.review_reply}</p>
+                                                </div>
+                                                <div className="flex items-center gap-2 opacity-.8 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingReplyId(review.id);
+                                                            setEditReplyText(review.review_reply);
+                                                        }}
+                                                        className="text-blue-400 hover:text-blue-600 transition-colors"
+                                                        title="Edit Reply"
+                                                    >
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => confirmDeleteReply(review.id)}
+                                                        className="text-red-400 hover:text-red-600 transition-colors"
+                                                        title="Delete Reply"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
                                 ) : replyingTo === review.id ? (
-                                    <div className="mt-4 ml-8 animate-in fade-in slide-in-from-top-2">
+                                    <div className="mt-4 ml-8 animate-in fade-in slide-in-from-top-2 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <div className="mb-3">
+                                            <label className="text-xs font-medium text-gray-700 block mb-1">Update Status (Optional)</label>
+                                            <select
+                                                value={replyStatus}
+                                                onChange={(e) => setReplyStatus(e.target.value)}
+                                                className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-brand-500 w-full sm:w-auto outline-none bg-white"
+                                            >
+                                                <option value="">Leave status unchanged</option>
+                                                <option value="approved">Approve Review</option>
+                                                <option value="rejected">Reject Review</option>
+                                            </select>
+                                        </div>
                                         <textarea
                                             value={replyText}
                                             onChange={(e) => setReplyText(e.target.value)}
                                             placeholder="Write your reply..."
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 mb-2 text-sm"
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 mb-3 text-sm bg-white"
                                             rows="3"
                                         />
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => handleReplySubmit(review.id)}
                                                 disabled={submittingReply}
-                                                className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-50"
+                                                className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-50 transition-colors"
                                             >
                                                 {submittingReply ? 'Posting...' : 'Post Reply'}
                                             </button>
@@ -388,8 +563,9 @@ const Reviews = () => {
                                                 onClick={() => {
                                                     setReplyingTo(null);
                                                     setReplyText('');
+                                                    setReplyStatus('');
                                                 }}
-                                                className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-200"
+                                                className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
                                             >
                                                 Cancel
                                             </button>
@@ -433,6 +609,38 @@ const Reviews = () => {
                     </div>
                 )}
             </div>
+
+            {/* Delete reply to a review confirmation modal */}
+            <ConfirmationModal
+                isOpen={isDeleteModalOpen}
+                isLoading={isDeletingReply}
+                onClose={() => {
+                    setIsDeleteModalOpen(false);
+                    setReplyToDelete(null);
+                }}
+                onConfirm={handleDeleteReply}
+                title="Delete Reply"
+                message="Are you sure you want to delete this reply? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                type="danger"
+            />
+
+            {/* Delete review confirmation modal */}
+            <ConfirmationModal
+                isOpen={isDeleteReviewModalOpen}
+                isLoading={isDeletingReview}
+                onClose={() => {
+                    setIsDeleteReviewModalOpen(false);
+                    setReviewToDelete(null);
+                }}
+                onConfirm={handleDeleteReview}
+                title="Delete Review"
+                message="Are you sure you want to permanently delete this entire review? This action cannot be undone."
+                confirmText="Delete Review"
+                cancelText="Cancel"
+                type="danger"
+            />
         </DashboardLayout>
     );
 };

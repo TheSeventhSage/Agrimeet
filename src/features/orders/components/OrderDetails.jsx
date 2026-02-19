@@ -121,17 +121,17 @@ const OrderDetails = ({ order, onBack, onPrintInvoice }) => {
         <div className="lg:col-span-2 space-y-6">
 
           {/* Order Items Table */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-auto">
             <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
               <h3 className="font-semibold text-gray-900 flex items-center gap-2">
                 <Box className="w-4 h-4 text-gray-500" />
-                Order Items ({order.items.length})
+                Order Items ({Object.values(order.items).length})
               </h3>
             </div>
             <div className="divide-y divide-gray-100">
-              {order.items.map((item) => (
+              {Object.values(order.items).map((item) => (
                 <div key={item.id} className="p-4">
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-5 sm:gap-10">
                     {/* Thumbnail */}
                     <div className="h-20 w-20 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-200">
                       <img
@@ -143,8 +143,8 @@ const OrderDetails = ({ order, onBack, onPrintInvoice }) => {
                     </div>
 
                     {/* Item Details */}
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
+                    <div className="flex-1 w-[80%] sm:w-full">
+                      <div className="flex justify-between items-center">
                         <div>
                           <h4 className="font-bold text-gray-900">{item.name}</h4>
                           {/* Variants */}
@@ -171,13 +171,16 @@ const OrderDetails = ({ order, onBack, onPrintInvoice }) => {
                       </div>
 
                       {/* Item Financial Breakdown (Micro view) */}
-                      <div className="mt-3 pt-3 border-t border-gray-50 flex gap-4 text-xs text-gray-500">
-                        <div className="flex gap-1">
+                      <div className="mt-3 pt-3 border-t border-gray-50 flex justify-between gap-4 text-xs text-gray-500">
+                        <div className="flex flex-col md:flex-row">
                           <span>Platform Fee:</span>
-                          <span className="text-red-600 font-medium">-{formatCurrency(item.platform_commission_amount)}</span>
-                          <span className="text-gray-400">({Number(item.platform_commission_rate)}%)</span>
+                          <span className="text-red-600 font-medium">-
+                            {formatCurrency(item.platform_commission_amount)}
+                            <span className="text-gray-400 ml-1">({Number(item.platform_commission_rate)}%)</span>
+                          </span>
+
                         </div>
-                        <div className="flex gap-1">
+                        <div className="flex flex-col md:flex-row gap-1">
                           <span>Your Earnings:</span>
                           <span className="text-green-600 font-bold">{formatCurrency(item.seller_earnings)}</span>
                         </div>
@@ -229,22 +232,22 @@ const OrderDetails = ({ order, onBack, onPrintInvoice }) => {
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Seller Net (You)</p>
 
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>Total Commission Deducted</span>
+                  <span className="text-[14px]">Commission <br /> Deducted</span>
                   <span className="text-red-500">-{formatCurrency(order.total_commission)}</span>
                 </div>
 
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>Shipping Revenue</span>
+                  <span className="text-[14px]">Shipping <br /> Revenue</span>
                   {/* Assuming seller gets shipping fee, if not, logic changes based on platform rules */}
                   <span>{formatCurrency(Number(order.shipping_amount) - Number(order.shipping_discount))}</span>
                 </div>
 
                 <div className="pt-3 border-t border-gray-100 flex justify-between items-center bg-green-50 -mx-4 px-4 py-2 rounded-lg mt-2">
                   <div className="flex flex-col">
-                    <span className="font-bold text-green-900">Total Earnings</span>
+                    <span className="font-bold text-base text-green-900">Total Earnings</span>
                     <span className="text-xs text-green-700">Sent to Wallet</span>
                   </div>
-                  <span className="text-xl font-bold text-green-700">{formatCurrency(order.total_seller_earnings)}</span>
+                  <span className="text-sm font-bold text-green-700">{formatCurrency(order.total_seller_earnings)}</span>
                 </div>
               </div>
             </div>

@@ -13,9 +13,9 @@ import {
 import { ChartContainer, DataErrorState, ChartInsights } from './ChartComponents';
 
 const formatCurrency = (amount) =>
-    new Intl.NumberFormat('en-US', {
+    new Intl.NumberFormat('en-NG', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'NGN',
         minimumFractionDigits: 0,
     }).format(amount);
 
@@ -52,7 +52,7 @@ const CategoryChart = ({ filters }) => {
                             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                         >
                             <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                            <XAxis type="number" tickFormatter={(value) => `$${value / 1000}k`} />
+                            <XAxis type="number" tickFormatter={(value) => `₦${value / 1000}k`} />
                             <YAxis
                                 dataKey="name"
                                 type="category"

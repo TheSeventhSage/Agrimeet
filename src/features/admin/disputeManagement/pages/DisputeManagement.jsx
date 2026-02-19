@@ -157,7 +157,7 @@ const DisputeManagement = () => {
                         <select
                             value={filters.status}
                             onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value, page: 1 }))}
-                            className="w-full border-gray-300 rounded-lg focus:ring-brand-500 focus:border-brand-500"
+                            className="w-[60%] sm:w-[40%] border-gray-300 rounded-lg focus:ring-brand-500 focus:border-brand-500"
                         >
                             <option value="all">All Statuses</option>
                             <option value="open">Open</option>

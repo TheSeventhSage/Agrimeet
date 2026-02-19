@@ -1,10 +1,10 @@
 
 // components/shared/LoadingSpinner.jsx
-export const LoadingSpinner = ({ 
-    size = 'md', 
-    fullScreen = false, 
+export const LoadingSpinner = ({
+    size = 'md',
+    fullScreen = false,
     message = 'Loading...',
-    showMessage = true 
+    showMessage = true
 }) => {
     const sizeClasses = {
         sm: 'h-4 w-4 border-2',
@@ -14,7 +14,7 @@ export const LoadingSpinner = ({
     };
 
     const spinner = (
-        <div className="flex flex-col items-center justify-center gap-3">
+        <div className="flex flex-col h-screen items-center justify-center gap-3">
             <div
                 className={`
                     ${sizeClasses[size]} 
@@ -66,7 +66,7 @@ export const InlineLoader = () => (
 
 export const Loading = (
     { size = 'lg', className = '', message }
-    ) => {
+) => {
     const sizeClasses = {
         sm: 'w-4 h-4',
         md: 'w-8 h-8',
@@ -75,8 +75,8 @@ export const Loading = (
 
     return (
         <div className="flex items-center justify-center py-12">
-                <div className={`animate-spin rounded-full border-b-2 border-brand-600 ${className, sizeClasses[size]}`}>{message}</div>
-            </div>
+            <div className={`animate-spin rounded-full border-b-2 border-brand-600 ${className, sizeClasses[size]}`}>{message}</div>
+        </div>
     );
 };
 

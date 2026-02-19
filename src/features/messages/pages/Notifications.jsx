@@ -15,9 +15,11 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import { LoadingSpinner, PageLoader } from '../../../shared/components/Loader';
-import { showError, showSuccess } from '../../../shared/utils/alert';
 import { getSellerNotifications, markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from '../api/notifications.api';
+import { LoadingSpinner, PageLoader } from '../../../shared/components/Loader';
+import ConfirmationModal from '../../../shared/components/ConfirmationModal';
+import { showError, showSuccess } from '../../../shared/utils/alert';
+import Pagination from '../../../shared/components/Paginate';
 
 // --- Helper Functions ---
 const formatTimeAgo = (dateString) => {
@@ -118,6 +120,8 @@ const Notifications = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [notificationToDelete, setNotificationToDelete] = useState(null);
 
     // --- Data Fetching ---
     const fetchNotifications = async (page = 1) => {
@@ -191,12 +195,17 @@ const Notifications = () => {
         }
     };
 
-    const handleDelete = async (notificationId) => {
-        if (!confirm('Are you sure you want to delete this notification?')) return;
+    const confirmDelete = (notificationId) => {
+        setNotificationToDelete(notificationId);
+        setIsDeleteModalOpen(true);
+    };
 
-        setActionLoading(notificationId);
+    const handleDelete = async () => {
+        if (!notificationToDelete) return;
+
+        setActionLoading(notificationToDelete);
         try {
-            const response = await deleteNotification(notificationId);
+            const response = await deleteNotification(notificationToDelete);
             console.log('Delete notification response:', response);
 
             // Refetch to get the updated data from server
@@ -209,6 +218,8 @@ const Notifications = () => {
             await fetchNotifications(pagination.current_page);
         } finally {
             setActionLoading(null);
+            setIsDeleteModalOpen(false);
+            setNotificationToDelete(null);
         }
     };
 
@@ -373,7 +384,7 @@ const Notifications = () => {
                                                             </button>
                                                         )}
                                                         <button
-                                                            onClick={() => handleDelete(notification.id)}
+                                                            onClick={() => confirmDelete(notification.id)}
                                                             disabled={actionLoading === notification.id}
                                                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                             title="Delete notification"
@@ -405,35 +416,29 @@ const Notifications = () => {
 
                     {/* Pagination */}
                     {notifications.length > 0 && pagination.last_page > 1 && (
-                        <div className="flex flex-col gap-2 items-center justify-between px-6 py-4 border-t border-gray-100 md:flex-row md:gap-0">
-                            <div className="text-sm text-gray-600">
-                                Page {pagination.current_page} of {pagination.last_page}
-                                <span className="ml-2 text-gray-500">
-                                    ({pagination.total} total notifications)
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => handlePageChange(pagination.current_page - 1)}
-                                    disabled={pagination.current_page === 1 || isLoading}
-                                    className="flex items-center gap-1 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <ChevronLeft className="w-4 h-4" />
-                                    <span className="text-sm font-medium">Previous</span>
-                                </button>
-                                <button
-                                    onClick={() => handlePageChange(pagination.current_page + 1)}
-                                    disabled={pagination.current_page === pagination.last_page || isLoading}
-                                    className="flex items-center gap-1 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <span className="text-sm font-medium">Next</span>
-                                    <ChevronRight className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
+                        <Pagination
+                            currentPage={pagination.current_page}
+                            lastPage={pagination.last_page}
+                            onPageChange={handlePageChange}
+                        />
                     )}
                 </div>
             </div>
+
+            <ConfirmationModal
+                isOpen={isDeleteModalOpen}
+                isLoading={actionLoading === notificationToDelete}
+                onClose={() => {
+                    setIsDeleteModalOpen(false);
+                    setNotificationToDelete(null);
+                }}
+                onConfirm={handleDelete}
+                title="Delete Notification"
+                message="Are you sure you want to delete this notification? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                type="danger"
+            />
         </DashboardLayout>
     );
 };

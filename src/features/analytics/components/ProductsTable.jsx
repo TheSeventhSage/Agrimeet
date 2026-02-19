@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { getPopularProducts } from '../api/analyticsApi';
 import { LoadingSpinner } from '../../../shared/components/Loader';
+import Pagination from '../../../shared/components/Paginate';
 import { DataErrorState } from './ChartComponents';
 
 const useDebounce = (value, delay) => {
@@ -34,9 +35,9 @@ const useDebounce = (value, delay) => {
 };
 
 const formatCurrency = (amount) =>
-    new Intl.NumberFormat('en-US', {
+    new Intl.NumberFormat('en-NG', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'NGN',
         minimumFractionDigits: 0,
     }).format(amount);
 
@@ -135,19 +136,17 @@ const ProductsTable = () => {
         manualPagination: false,
     });
 
-    // ... (rest of the table component is unchanged) ...
-
     return (
         <div className="bg-white rounded-xl shadow-xs border border-gray-100 overflow-hidden">
-            <div className="p-6 flex justify-between items-center">
+            <div className="space-y-3 p-4 md:p-6 md:flex justify-between items-center">
                 <h2 className="text-lg font-semibold text-gray-900">
                     Top Products by Revenue
                 </h2>
-               <div className="flex">
+                <div className="md:flex md:gap-2.5 space-y-2">
                     <select
                         value={ratingFilter}
                         onChange={(e) => setRatingFilter(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     >
                         <option value="">All Ratings</option>
                         <option value="4">4 Stars & Up</option>
@@ -155,17 +154,17 @@ const ProductsTable = () => {
                         <option value="2">2 Stars & Up</option>
                         <option value="1">1 Star & Up</option>
                     </select>
-                    <div className="relative">
+                    <div className="w-full relative">
                         <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                         <input
                             type="text"
                             placeholder="Search products..."
                             value={productName}
                             onChange={(e) => setProductName(e.target.value)}
-                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
                         />
                     </div>
-               </div>
+                </div>
             </div>
 
             {isLoading && (
@@ -230,26 +229,11 @@ const ProductsTable = () => {
             )}
 
             {/* Pagination Controls */}
-            <div className="p-4 flex items-center justify-between border-t border-gray-200">
-                <button
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                    className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                >
-                    <ChevronLeft className="w-4 h-4" /> Previous
-                </button>
-                <span className="text-sm text-gray-600">
-                    Page {table.getState().pagination.pageIndex + 1} of{' '}
-                    {table.getPageCount()}
-                </span>
-                <button
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                    className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                >
-                    Next <ChevronRight className="w-4 h-4" />
-                </button>
-            </div>
+            <Pagination
+                currentPage={table.getState().pagination.pageIndex + 1}
+                lastPage={table.getPageCount()}
+                onPageChange={(page) => table.setPageIndex(page - 1)}
+            />
         </div>
     );
 };

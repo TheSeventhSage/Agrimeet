@@ -57,7 +57,7 @@ const DocumentViewerModal = ({ isOpen, onClose, documentUrl, title = 'View Docum
     return (
         // Modal Overlay
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,.8)] transition-opacity"
+            className="ml-0 md:ml-64 fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,.8)] transition-opacity"
             onClick={onClose}
         >
             {/* Modal Content */}

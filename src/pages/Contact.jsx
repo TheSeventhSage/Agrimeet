@@ -14,6 +14,7 @@ import {
     Linkedin
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { contactDetails } from '../shared/utils/contact';
 
 const Contact = () => {
     const [formData, setFormData] = useState({
@@ -54,302 +55,226 @@ const Contact = () => {
         }, 1500);
     };
 
-    const contactInfo = [
-        {
-            icon: Mail,
-            title: 'Email Us',
-            detail: 'hello@agrimeet.com',
-            description: 'Send us an email anytime',
-            link: 'mailto:hello@agrimeet.com'
-        },
-        {
-            icon: Phone,
-            title: 'Call Us',
-            detail: '+1 (555) 123-4567',
-            description: 'Mon-Fri from 9am to 6pm',
-            link: 'tel:+15551234567'
-        },
-        {
-            icon: MapPin,
-            title: 'Visit Us',
-            detail: '123 Farm Lane, AgriTown',
-            description: 'Come say hello at our office',
-            link: '#'
-        }
-    ];
-
-    const workingHours = [
-        { day: 'Monday - Friday', hours: '9:00 AM - 6:00 PM' },
-        { day: 'Saturday', hours: '10:00 AM - 4:00 PM' },
-        { day: 'Sunday', hours: 'Closed' }
-    ];
-
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        <button
-                            onClick={() => window.history.back()}
-                            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                            <span className="font-medium">Back</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Hero Section */}
-            <div className="bg-gradient-to-br from-green-600 to-green-700 text-white py-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gray-50 selection:bg-green-100 selection:text-green-900">
+            {/* Header / Hero Section */}
+            <div className="bg-gradient-to-br from-green-900 via-green-800 to-green-900 text-white py-16 lg:py-24 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <Link to="/" className="inline-flex items-center text-green-100 hover:text-white transition-colors mb-8 group bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm text-sm font-medium">
+                        <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                        Back to Home
+                    </Link>
                     <div className="max-w-3xl">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                                <MessageCircle className="w-6 h-6" />
-                            </div>
-                            <span className="text-green-100 font-medium">Get In Touch</span>
-                        </div>
-                        <h1 className="text-5xl lg:text-6xl font-bold mb-6">Contact Us</h1>
-                        <p className="text-xl text-green-100 leading-relaxed">
-                            Have questions about our marketplace? We're here to help. Reach out to our team and we'll get back to you as soon as possible.
+                        <h1 className="text-4xl lg:text-6xl font-extrabold mb-6 tracking-tight">
+                            Get in Touch
+                        </h1>
+                        <p className="text-lg lg:text-xl text-green-100 font-light leading-relaxed max-w-2xl">
+                            Have questions about our platform or need assistance? Our team is here to help you grow.
                         </p>
                     </div>
                 </div>
             </div>
 
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                {/* Contact Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-                    {contactInfo.map((info, index) => {
-                        const Icon = info.icon;
-                        return (
-                            <a
-                                key={index}
-                                href={info.link}
-                                className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all group"
-                            >
-                                <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-green-600 transition-colors">
-                                    <Icon className="w-7 h-7 text-green-600 group-hover:text-white transition-colors" />
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-2">{info.title}</h3>
-                                <p className="text-green-600 font-semibold mb-1">{info.detail}</p>
-                                <p className="text-sm text-gray-600">{info.description}</p>
-                            </a>
-                        );
-                    })}
-                </div>
-
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 lg:-mt-16 pb-24 relative z-20">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Contact Form */}
-                    <div className="lg:col-span-2">
-                        <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
-                            <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-gray-900 mb-3">Send us a Message</h2>
-                                <p className="text-gray-600">Fill out the form below and our team will get back to you within 24 hours.</p>
-                            </div>
+                    <div className="h-fit lg:col-span-2 bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-8 lg:p-12">
+                        <div className="mb-10">
+                            <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Send us a message</h2>
+                            <p className="text-gray-500 mt-2">Fill out the form below and we'll get back to you as soon as possible.</p>
+                        </div>
 
-                            {submitted && (
-                                <div className="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
-                                    <CheckCircle className="w-5 h-5 text-green-600" />
-                                    <p className="text-green-800 font-medium">Message sent successfully! We'll be in touch soon.</p>
+                        {submitted ? (
+                            <div className="bg-green-50 border border-green-200 rounded-2xl p-10 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-300">
+                                <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
+                                    <CheckCircle className="w-8 h-8" />
                                 </div>
-                            )}
-
-                            <div className="space-y-6">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Full Name *
-                                        </label>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-2">Message Sent!</h3>
+                                <p className="text-gray-600">Thank you for reaching out. We'll get back to you shortly.</p>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-gray-700">Full Name</label>
                                         <input
                                             type="text"
                                             name="name"
                                             value={formData.name}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            required
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:bg-white transition-all outline-none"
                                             placeholder="John Doe"
                                         />
                                     </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Email Address *
-                                        </label>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-gray-700">Email Address</label>
                                         <input
                                             type="email"
                                             name="email"
                                             value={formData.email}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            required
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:bg-white transition-all outline-none"
                                             placeholder="john@example.com"
                                         />
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Phone Number
-                                        </label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-gray-700">Phone Number (Optional)</label>
                                         <input
                                             type="tel"
                                             name="phone"
                                             value={formData.phone}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                            placeholder="+1 (555) 123-4567"
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:bg-white transition-all outline-none"
+                                            placeholder="+1 (555) 000-0000"
                                         />
                                     </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Subject *
-                                        </label>
-                                        <select
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-gray-700">Subject</label>
+                                        <input
+                                            type="text"
                                             name="subject"
                                             value={formData.subject}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                        >
-                                            <option value="">Select a subject</option>
-                                            <option value="general">General Inquiry</option>
-                                            <option value="support">Technical Support</option>
-                                            <option value="seller">Become a Seller</option>
-                                            <option value="partnership">Partnership</option>
-                                            <option value="other">Other</option>
-                                        </select>
+                                            required
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:bg-white transition-all outline-none"
+                                            placeholder="How can we help?"
+                                        />
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Message *
-                                    </label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-gray-700">Message</label>
                                     <textarea
                                         name="message"
                                         value={formData.message}
                                         onChange={handleChange}
-                                        rows={6}
-                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
-                                        placeholder="Tell us how we can help you..."
-                                    />
+                                        required
+                                        rows="5"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:bg-white transition-all outline-none resize-none"
+                                        placeholder="Write your message here..."
+                                    ></textarea>
                                 </div>
 
                                 <button
-                                    onClick={handleSubmit}
+                                    type="submit"
                                     disabled={loading}
-                                    className="w-full bg-green-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                                    className="w-full sm:w-auto px-8 py-4 bg-green-600 text-white rounded-xl hover:bg-green-700 focus:ring-4 focus:ring-green-100 transition-all flex items-center justify-center font-semibold disabled:opacity-70 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                                 >
                                     {loading ? (
-                                        <>
-                                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                            Sending...
-                                        </>
+                                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                     ) : (
                                         <>
-                                            <Send className="w-5 h-5" />
+                                            <Send className="w-5 h-5 mr-2" />
                                             Send Message
                                         </>
                                     )}
                                 </button>
-                            </div>
-                        </div>
+                            </form>
+                        )}
                     </div>
 
-                    {/* Sidebar */}
+                    {/* Contact Information Sidebar */}
                     <div className="space-y-6">
-                        {/* Working Hours */}
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <Clock className="w-5 h-5 text-blue-600" />
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900">Working Hours</h3>
-                            </div>
-                            <div className="space-y-3">
-                                {workingHours.map((schedule, index) => (
-                                    <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
-                                        <span className="text-sm text-gray-600">{schedule.day}</span>
-                                        <span className="text-sm font-semibold text-gray-900">{schedule.hours}</span>
+                        {/* Support Info Card */}
+                        <div className="bg-white rounded-3xl p-8 shadow-lg shadow-gray-200/50 border border-gray-100 hover:-translate-y-1 transition-transform duration-300">
+                            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                                <MessageCircle className="w-5 h-5 mr-2 text-green-600" />
+                                Contact Information
+                            </h3>
+                            <div className="space-y-6">
+                                <div className="flex items-start">
+                                    <div className="flex-shrink-0">
+                                        <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center border border-green-100">
+                                            <Mail className="w-5 h-5 text-green-600" />
+                                        </div>
                                     </div>
+                                    <div className="ml-4">
+                                        <p className="text-sm font-medium text-gray-900">Email Us</p>
+                                        <a href={`mailto:${contactDetails.email}`} className="text-green-600 hover:text-green-700 transition-colors text-sm font-medium mt-1 inline-block">
+                                            {contactDetails.email}
+                                        </a>
+                                    </div>
+                                </div>
+                                <div className="flex items-start">
+                                    <div className="flex-shrink-0">
+                                        <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center border border-green-100">
+                                            <Phone className="w-5 h-5 text-green-600" />
+                                        </div>
+                                    </div>
+                                    <div className="ml-4">
+                                        <p className="text-sm font-medium text-gray-900">Call Us</p>
+                                        <a href={`tel:${contactDetails.phoneNumber}`} className="text-green-600 hover:text-green-700 transition-colors text-sm font-medium mt-1 inline-block">
+                                            {contactDetails.phoneNumber}
+                                        </a>
+                                    </div>
+                                </div>
+                                <div className="flex items-start">
+                                    <div className="flex-shrink-0">
+                                        <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center border border-green-100">
+                                            <MapPin className="w-5 h-5 text-green-600" />
+                                        </div>
+                                    </div>
+                                    <div className="ml-4">
+                                        <p className="text-sm font-medium text-gray-900">Visit Us</p>
+                                        <p className="text-gray-600 text-sm mt-1 leading-relaxed">
+                                            {contactDetails.address}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Business Hours Card */}
+                        <div className="bg-white rounded-3xl p-8 shadow-lg shadow-gray-200/50 border border-gray-100 hover:-translate-y-1 transition-transform duration-300">
+                            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                                <Clock className="w-5 h-5 mr-2 text-green-600" />
+                                Business Hours
+                            </h3>
+                            <div className="space-y-3 text-sm">
+                                <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                                    <span className="text-gray-600 font-medium">Monday - Friday</span>
+                                    <span className="text-gray-900 font-semibold">9:00 AM - 6:00 PM</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                                    <span className="text-gray-600 font-medium">Saturday</span>
+                                    <span className="text-gray-900 font-semibold">10:00 AM - 4:00 PM</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2">
+                                    <span className="text-gray-600 font-medium">Sunday</span>
+                                    <span className="text-red-600 font-semibold bg-red-50 px-2 py-1 rounded-md text-xs">Closed</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Social Links Card */}
+                        <div className="bg-white rounded-3xl p-8 shadow-lg shadow-gray-200/50 border border-gray-100 hover:-translate-y-1 transition-transform duration-300">
+                            <h3 className="text-xl font-bold text-gray-900 mb-6">Connect With Us</h3>
+                            <div className="flex gap-4">
+                                {[
+                                    { icon: Facebook, bg: 'hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200' },
+                                    { icon: Twitter, bg: 'hover:bg-sky-50 hover:text-sky-500 hover:border-sky-200' },
+                                    { icon: Instagram, bg: 'hover:bg-pink-50 hover:text-pink-600 hover:border-pink-200' },
+                                    { icon: Linkedin, bg: 'hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200' }
+                                ].map((social, index) => (
+                                    <a key={index} href="#" className={`w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 transition-all duration-300 ${social.bg}`}>
+                                        <social.icon className="w-5 h-5" />
+                                    </a>
                                 ))}
                             </div>
-                        </div>
 
-                        {/* Social Media */}
-                        <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl shadow-lg p-6 text-white">
-                            <h3 className="text-lg font-bold mb-3">Connect With Us</h3>
-                            <p className="text-green-100 mb-6 text-sm">
-                                Follow us on social media for updates, tips, and community stories.
-                            </p>
-                            <div className="grid grid-cols-2 gap-3">
-                                <a
-                                    href="#"
-                                    className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-3 hover:bg-white/30 transition-colors"
-                                >
-                                    <Facebook className="w-5 h-5" />
-                                    <span className="text-sm font-medium">Facebook</span>
-                                </a>
-                                <a
-                                    href="#"
-                                    className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-3 hover:bg-white/30 transition-colors"
-                                >
-                                    <Twitter className="w-5 h-5" />
-                                    <span className="text-sm font-medium">Twitter</span>
-                                </a>
-                                <a
-                                    href="#"
-                                    className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-3 hover:bg-white/30 transition-colors"
-                                >
-                                    <Instagram className="w-5 h-5" />
-                                    <span className="text-sm font-medium">Instagram</span>
-                                </a>
-                                <a
-                                    href="#"
-                                    className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg p-3 hover:bg-white/30 transition-colors"
-                                >
-                                    <Linkedin className="w-5 h-5" />
-                                    <span className="text-sm font-medium">LinkedIn</span>
-                                </a>
-                            </div>
-                        </div>
-
-                        {/* Quick Links */}
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-                            <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Links</h3>
-                            <div className="space-y-2">
-                                <Link to="/help" className="block text-sm text-gray-600 hover:text-green-600 transition-colors py-2">
-                                    Help Center
+                            <div className="mt-8 pt-6 border-t border-gray-100">
+                                <Link to="/faq" className="block text-sm font-medium text-gray-600 hover:text-green-600 transition-colors py-2 flex items-center">
+                                    <ArrowLeft className="w-4 h-4 mr-2 rotate-180" /> Visit Help Center
                                 </Link>
-                                <Link to="/faqs" className="block text-sm text-gray-600 hover:text-green-600 transition-colors py-2">
-                                    FAQs
+                                <Link to="/terms" className="block text-sm font-medium text-gray-600 hover:text-green-600 transition-colors py-2 flex items-center">
+                                    <ArrowLeft className="w-4 h-4 mr-2 rotate-180" /> Terms of Service
                                 </Link>
-                                <Link to="/privacy" className="block text-sm text-gray-600 hover:text-green-600 transition-colors py-2">
-                                    Privacy Policy
-                                </Link>
-                                <Link to="/terms" className="block text-sm text-gray-600 hover:text-green-600 transition-colors py-2">
-                                    Terms of Service
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Map Section */}
-                <div className="mt-16">
-                    <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
-                        <div className="p-6 border-b border-gray-100">
-                            <h2 className="text-2xl font-bold text-gray-900">Find Us Here</h2>
-                            <p className="text-gray-600 mt-1">Visit our office for a tour or a cup of coffee</p>
-                        </div>
-                        <div className="h-96 bg-gray-100 flex items-center justify-center">
-                            <div className="text-center">
-                                <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                                <p className="text-gray-600">Map integration placeholder</p>
-                                <p className="text-sm text-gray-500">123 Farm Lane, AgriTown</p>
                             </div>
                         </div>
                     </div>

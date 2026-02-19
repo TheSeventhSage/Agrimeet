@@ -5,13 +5,48 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // Helper function to handle API responses
 const handleResponse = async (response) => {
     if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: 'An error occurred' }));
-        throw new Error(error.message || error.error || 'Request failed');
+        // Capture the full error body to handle specific cases like 400
+        const errorData = await response.json().catch(() => ({ message: 'An error occurred' }));
+        const error = new Error(errorData.message || errorData.error || 'Request failed');
+        error.data = errorData;
+        error.status = response.status;
+        throw error;
     }
     return response.json();
 };
 
 export const messagesApi = {
+    // Initialize or Retrieve Admin Conversation
+    initiateAdminChat: async () => {
+        const token = storageManager.getAccessToken();
+        try {
+            const response = await fetch(`${API_BASE_URL}/seller/conversations/admin`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: "Start of support conversation"
+                })
+            });
+
+            return await handleResponse(response);
+        } catch (error) {
+            // FIX: specific handling for the "Conversation already exists" 400 case
+            if (error.status === 400 && error.data) {
+                // The backend returns { conversation: {...}, error: "..." }
+                // We must return ONLY the conversation object to the UI
+                if (error.data.conversation) {
+                    return error.data.conversation;
+                }
+                return error.data;
+            }
+            throw error;
+        }
+    },
+
     // Get all conversations for authenticated user
     getConversations: async ({ unread_only = false, context_type = null } = {}) => {
         // FIX: Get token inside the function call
@@ -110,5 +145,77 @@ export const messagesApi = {
         });
 
         return handleResponse(response);
+    }
+};
+
+export const adminMessagesApi = {
+    // Initialize or Retrieve Admin Conversation
+    initiateAdminChat: async () => {
+        const token = storageManager.getAccessToken();
+        try {
+            const response = await fetch(`${API_BASE_URL}/seller/conversations/admin`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: "Start of support conversation"
+                })
+            });
+
+            return await handleResponse(response);
+        } catch (error) {
+            // SPECIFIC HANDLER: "Conversation already exists" (400)
+            // Backend returns: { error: "...", conversation: { ... } }
+            if (error.status === 400 && error.data && error.data.conversation) {
+                return error.data.conversation;
+            }
+            throw error;
+        }
+    },
+
+    // Get messages (Reuses standard endpoint but isolated for Admin usage)
+    getMessages: async (conversationId) => {
+        const token = storageManager.getAccessToken();
+        const response = await fetch(`${API_BASE_URL}/conversations/${conversationId}/messages`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        return handleResponse(response);
+    },
+
+    // Send message
+    sendMessage: async (conversationId, message) => {
+        const token = storageManager.getAccessToken();
+        const response = await fetch(`${API_BASE_URL}/conversations/${conversationId}/messages`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ message })
+        });
+        return handleResponse(response);
+    },
+
+    // Send typing indicator
+    sendTyping: async (conversationId, is_typing) => {
+        const token = storageManager.getAccessToken();
+        await fetch(`${API_BASE_URL}/conversations/${conversationId}/typing`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ is_typing })
+        });
     }
 };

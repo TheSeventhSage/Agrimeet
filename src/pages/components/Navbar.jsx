@@ -17,8 +17,9 @@ import {
 } from 'lucide-react';
 import { LogoLightIcon } from '../../shared/components/Logo';
 import { storageManager } from '../../shared/utils/storageManager';
+import { contactDetails } from '../../shared/utils/contact';
 
-const Navbar = () => {
+const Navbar = ({ handleLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
@@ -51,12 +52,12 @@ const Navbar = () => {
 
         const isSeller = userRoles.includes('seller');
         console.log(isSeller);
-        const name = isSeller ? userData?.user || userData?.data.first_name + ' ' + userData?.data.last_name : userData.roles.includes('admin') ? 'Admin' : '';
+        const name = isSeller ? userData?.user || userData?.data.first_name + ' ' + userData?.data.last_name : userData.roles.includes('admin') ? 'Admin' : userData.roles.includes('buyer') ? userData.user : '';
         console.log(name)
 
         setAuthState({
           isAuthenticated: true,
-          userName: name || 'Dashboard',
+          userName: name || 'User',
           isSeller: isSeller,
           user: userData,
           roles: userRoles,
@@ -80,6 +81,10 @@ const Navbar = () => {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery(''); // Clear search query after navigation
     }
+  };
+
+  const logout = () => {
+    handleLogout();
   };
 
   console.log(authState);
@@ -108,11 +113,11 @@ const Navbar = () => {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4" />
-              <span>hello@agrimeet.com</span>
+              <span>{contactDetails.email}</span>
             </div>
             <div className="hidden sm:flex items-center gap-2">
               <Phone className="w-4 h-4" />
-              <span>+1 (555) 123-4567</span>
+              <a href={`tel:${contactDetails.phoneNumber}`}>{contactDetails.phoneNumber}</a>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -124,7 +129,7 @@ const Navbar = () => {
       </div>
 
       {/* Main Navigation */}
-      <nav className="container mx-auto px-4 sm:px-[35px] lg:px-0 py-4">
+      <nav className="container mx-auto px-4 sm:px-[35px] lg:px-5 py-4">
         <div className="flex justify-between gap-4 items-center">
           {/* Logo */}
           <div className="flex items-center gap-2">
@@ -168,13 +173,21 @@ const Navbar = () => {
                   <span>Dashboard</span>
                 </button>
               ) : (
-                <button
-                  onClick={() => authState.user.roles.includes('seller') ? navigate('/dashboard') : authState.user.roles.includes('admin') ? navigate('/admin/dashboard') : navigate('/')}
-                  className="text-gray-900 font-semibold hover:text-green-600 transition-colors flex items-center gap-2 cursor-pointer"
-                >
-                  <User className="w-4 h-4" />
-                  <span>Hi, {authState.userName}</span>
-                </button>
+                <div className='flex gap-3'>
+                  <button
+                    onClick={() => authState.user.roles.includes('seller') ? navigate('/dashboard') : authState.user.roles.includes('admin') ? navigate('/admin/dashboard') : navigate('/login')}
+                    className="text-gray-900 font-semibold hover:text-green-600 transition-colors flex items-center gap-2 cursor-pointer"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>Hi, {authState.userName}</span>
+                  </button>
+                  <button
+                    className="bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700 transition-all transform active:scale-95 cursor-pointer"
+                    onClick={logout}
+                  >
+                    Logout
+                  </button>
+                </div>
               )
             ) : (
               <>
@@ -246,7 +259,7 @@ const Navbar = () => {
 
               {/* Auth Buttons Section */}
               <div className="border-t border-gray-200 pt-6 mb-6">
-                {authState.isAuthenticated ? (
+                {authState.isAuthenticated && authState.isSeller ? (
                   <button
                     onClick={() => {
                       (authState.roles.includes('seller') || authState.roles.includes('seller')) ? navigate('/dashboard') : authState.roles.includes('admin') ? navigate('/admin/dashboard') : navigate('/');
@@ -264,20 +277,28 @@ const Navbar = () => {
                         navigate('/login');
                         setIsMenuOpen(false);
                       }}
-                      className="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-2xl hover:bg-green-700 transition-all flex items-center justify-center gap-2 shadow-md"
+                      className="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-2xl hover:bg-green-700 transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer"
                     >
                       <User className="w-5 h-5" />
                       <span>Login</span>
                     </button>
                     <button
-                      onClick={() => {
-                        navigate('/register');
-                        setIsMenuOpen(false);
-                      }}
-                      className="w-full text-green-600 font-semibold py-3 px-6 rounded-2xl border-2 border-green-600 hover:bg-green-50 transition-all flex items-center justify-center gap-2"
+                      className="w-full bg-transparent text-green-600 font-semibold py-3 px-6 rounded-2xl border border-green-600 hover:bg-green-700 hover:text-white transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer"
+                      onClick={logout}
                     >
-                      <span>Register</span>
+                      Logout
                     </button>
+                    {(!authState.isAuthenticated && (
+                      <button
+                        onClick={() => {
+                          navigate('/register');
+                          setIsMenuOpen(false);
+                        }}
+                        className="w-full text-green-600 font-semibold py-3 px-6 rounded-2xl border-2 border-green-600 hover:bg-green-50 transition-all flex items-center justify-center gap-2"
+                      >
+                        <span>Register</span>
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>

@@ -297,6 +297,22 @@ export const AuthProvider = ({ children }) => {
         showSuccess('Logged out successfully');
     };
 
+    const homeLogout = () => {
+        // Clear all sessions
+        storageManager.clearAll();
+
+        // Reset react states
+        setUser(null);
+        setVerificationStatus('unverified');
+        setIsAuthenticated(false);
+        setKycStatus(null);
+
+        // Navigate WITHOUT refreshing the page
+        navigate('/');
+        window.location.reload();
+        showSuccess('Logged out successfully');
+    };
+
     const value = {
         user,
         isAuthenticated,
@@ -309,6 +325,7 @@ export const AuthProvider = ({ children }) => {
         forgotPassword,
         resetPassword,
         logout,
+        homeLogout,
         isEmailVerified: () => verificationStatus === 'verified'
     };
 

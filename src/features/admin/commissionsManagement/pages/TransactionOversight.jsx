@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import adminWithdrawalService from '../../commissionsManagement/api/adminWithdrawalService';
 import { showSuccess, showError } from '../../../../shared/utils/alert';
-import { ConfirmationModal } from '../../../../shared/components';
+import { Button, ConfirmationModal } from '../../../../shared/components';
 
 const TransactionOversight = () => {
     const [transactions, setTransactions] = useState([]);
@@ -54,7 +54,14 @@ const TransactionOversight = () => {
     const loadTransactions = async () => {
         try {
             setIsLoading(true);
-            const response = await adminWithdrawalService.getWithdrawals(filters);
+
+            const filter = {
+                status: filters.status,
+                page: filters.page
+            }
+            filter.status === '' && delete filter.status;
+
+            const response = await adminWithdrawalService.getWithdrawals(filter);
 
             // Handle response structure based on the API definition provided
             const responseData = response.data?.data ? response.data : response;
@@ -296,7 +303,7 @@ const TransactionOversight = () => {
             {/* Transaction Details Modal */}
             {showTransactionModal && selectedTransaction && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-auto max-h-[90vh]">
                         <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50">
                             <h3 className="text-xl font-bold text-gray-900">Withdrawal Details</h3>
                             <button
@@ -364,25 +371,28 @@ const TransactionOversight = () => {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
-                            <button
+                        <div className="p-6 border-t border-gray-100 bg-gray-50 flex flex-col md:flex-row    justify-end gap-3">
+                            <Button
                                 onClick={() => setShowTransactionModal(false)}
-                                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+                                className=" px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
                             >
-                                Close
-                            </button>
+                                <span className='text-gray-700'>Close</span>
+
+                            </Button>
 
                             {selectedTransaction.status === 'pending' && (
                                 <>
-                                    <button
+                                    <Button
                                         onClick={() => handleReject(selectedTransaction.id)}
                                         disabled={isProcessing}
-                                        className="flex items-center gap-2 px-4 py-2 text-red-700 bg-white border border-red-200 rounded-lg hover:bg-red-50 font-medium disabled:opacity-50"
+                                        className="flex items-center gap-2 px-4 py-2  bg-white border border-red-200 rounded-lg hover:bg-red-50 font-medium disabled:opacity-50"
                                     >
-                                        <XCircle className="w-4 h-4" />
-                                        Reject Request
-                                    </button>
-                                    <button
+                                        <span className='text-red-700 flex items-center gap-2'>
+                                            <XCircle className="w-4 h-4" />
+                                            Reject Request
+                                        </span>
+                                    </Button>
+                                    <Button
                                         onClick={() => handleApprove(selectedTransaction.id)}
                                         disabled={isProcessing}
                                         className="flex items-center gap-2 px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 font-medium shadow-sm disabled:opacity-50"
@@ -393,7 +403,7 @@ const TransactionOversight = () => {
                                             <CheckCircle className="w-4 h-4" />
                                         )}
                                         Approve & Pay
-                                    </button>
+                                    </Button>
                                 </>
                             )}
                         </div>
@@ -409,6 +419,7 @@ const TransactionOversight = () => {
                 title={confirmation.title}
                 message={confirmation.message}
                 type={confirmation.type}
+                isLoading={isProcessing}
             />
         </DashboardLayout>
     );

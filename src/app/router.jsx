@@ -42,6 +42,7 @@ const EditProduct = lazy(() => import('../features/products/pages/EditProduct'))
 const EditVariant = lazy(() => import('../features/products/pages/EditVariant'));
 const Analytics = lazy(() => import('../features/analytics/page/Analytics'));
 const Messages = lazy(() => import('../features/messages/pages/Messages'));
+const MessageAdmin = lazy(() => import('../features/messages/pages/MessageAdmin'));
 const Reviews = lazy(() => import('../features/messages/pages/Reviews'));
 const Notifications = lazy(() => import('../features/messages/pages/Notifications'));
 const KYCPage = lazy(() => import('../features/kyc/pages/KycVerify'));
@@ -59,6 +60,7 @@ const OrderModeration = lazy(() => import('../features/admin/productOrderManagem
 const TransactionOversight = lazy(() => import('../features/admin/commissionsManagement/pages/TransactionOversight'));
 const CommissionManagement = lazy(() => import('../features/admin/commissionsManagement/pages/CommissionManagement'));
 const DisputeManagement = lazy(() => import('../features/admin/disputeManagement/pages/DisputeManagement'));
+const AdminSupport = lazy(() => import('../features/admin/adminMessageSupport/pages/AdminSupportMessages'));
 const AdminDebug = lazy(() => import('../features/admin/pages/AdmiDebug'));
 const AdminSettings = lazy(() => import('../features/admin/settings/pages/Settings'));
 const AdminNotifications = lazy(() => import('../features/admin/notifications/AdminNotifications'));
@@ -110,6 +112,7 @@ export default function Router() {
                 <Route path="/products/:productId/variants/:variantId/edit" element={<ProtectedRoutes allowedRoles={['seller']}><EditVariant /></ProtectedRoutes>} />
                 {/**** Messages ****/}
                 <Route path="/messages" element={<ProtectedRoutes allowedRoles={['seller']}><Messages /></ProtectedRoutes>} />
+                <Route path="/message-admin" element={<ProtectedRoutes allowedRoles={['seller']}><MessageAdmin /></ProtectedRoutes>} />
                 <Route path="/reviews" element={<ProtectedRoutes allowedRoles={['seller']}><Reviews /></ProtectedRoutes>} />
                 <Route path="/notifications" element={<ProtectedRoutes allowedRoles={['seller']}><Notifications /></ProtectedRoutes>} />
                 {/**** Analytics ****/}
@@ -132,6 +135,7 @@ export default function Router() {
                 <Route path="/admin/orders" element={<ProtectedRoutes allowedRoles={['admin']}><OrderModeration /></ProtectedRoutes>} />
                 <Route path="/admin/transactions" element={<ProtectedRoutes allowedRoles={['admin']}><TransactionOversight /></ProtectedRoutes>} />
                 <Route path="/admin/disputes" element={<ProtectedRoutes allowedRoles={['admin']}><DisputeManagement /></ProtectedRoutes>} />
+                <Route path="/admin/support" element={<ProtectedRoutes allowedRoles={['admin']}><AdminSupport /></ProtectedRoutes>} />
                 <Route path="/admin/commissions" element={<ProtectedRoutes allowedRoles={['admin']}><CommissionManagement /></ProtectedRoutes>} />
                 <Route path="/admin/settings" element={<ProtectedRoutes allowedRoles={['admin']}><AdminSettings /></ProtectedRoutes>} />
                 <Route path="/admin/notifications" element={<ProtectedRoutes allowedRoles={['admin']}><AdminNotifications /></ProtectedRoutes>} />

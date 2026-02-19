@@ -17,7 +17,8 @@ const WalletOverview = ({
             value: overviewData.wallet_balance || 0, // Updated to consume wallet_balance
             color: 'green',
             icon: Wallet,
-            description: 'Ready for withdrawal'
+            description: 'Ready for withdrawal',
+            approvalStatus: overviewData.approval_status || 'pending'
         },
         {
             title: 'Pending Balance',

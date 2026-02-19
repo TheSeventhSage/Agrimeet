@@ -11,7 +11,8 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { showError, showSuccess } from '../../../shared/utils/alert';
-import { privacyPolicyApi } from './api/privacyPolicy.api'; // Adjust import path
+import ConfirmationModal from '../../../shared/components/ConfirmationModal';
+import { privacyPolicyApi } from './api/privacyPolicy.api';
 
 const PrivacyPolicies = () => {
     // State
@@ -27,6 +28,20 @@ const PrivacyPolicies = () => {
         content: '',
         is_published: false
     });
+    // Confirmation Modal State
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        isLoading: false,
+        title: '',
+        message: '',
+        type: 'warning',
+        confirmText: 'Confirm',
+        action: null, // wrapped in object to avoid React treating it as an updater
+    });
+
+    // 
+    const closeConfirmModal = () =>
+        setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false, action: null }));
 
     // --- Data Fetching ---
     const fetchPolicies = async (page = 1) => {
@@ -99,33 +114,55 @@ const PrivacyPolicies = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this policy?')) return;
-
-        try {
-            await privacyPolicyApi.delete(id);
-            showSuccess('Policy deleted successfully.');
-            fetchPolicies(pagination.current_page);
-        } catch (error) {
-            showError('Failed to delete policy.');
-        }
+    const handleDelete = (id) => {
+        setConfirmModal({
+            isOpen: true,
+            isLoading: false,
+            title: 'Delete Policy',
+            message: 'Are you sure you want to delete this policy? This action cannot be undone.',
+            type: 'danger',
+            confirmText: 'Delete',
+            onConfirm: async () => {
+                setConfirmModal((prev) => ({ ...prev, isLoading: true }));
+                try {
+                    await privacyPolicyApi.delete(id);
+                    showSuccess('Policy deleted successfully.');
+                    fetchPolicies(pagination.current_page);
+                    closeConfirmModal();
+                } catch (error) {
+                    showError('Failed to delete policy.');
+                    setConfirmModal((prev) => ({ ...prev, isLoading: false }));
+                }
+            },
+        });
     };
 
-    const handleTogglePublish = async (policy) => {
+    const handleTogglePublish = (policy) => {
         const action = policy.is_published ? 'unpublish' : 'publish';
-        if (!window.confirm(`Are you sure you want to ${action} this policy?`)) return;
-
-        try {
-            if (policy.is_published) {
-                await privacyPolicyApi.unpublish(policy.id);
-            } else {
-                await privacyPolicyApi.publish(policy.id);
-            }
-            showSuccess(`Policy ${action}ed successfully.`);
-            fetchPolicies(pagination.current_page);
-        } catch (error) {
-            showError(`Failed to ${action} policy.`);
-        }
+        setConfirmModal({
+            isOpen: true,
+            isLoading: false,
+            title: `${action.charAt(0).toUpperCase() + action.slice(1)} Policy`,
+            message: `Are you sure you want to ${action} this policy?`,
+            type: 'warning',
+            confirmText: action.charAt(0).toUpperCase() + action.slice(1),
+            onConfirm: async () => {
+                setConfirmModal((prev) => ({ ...prev, isLoading: true }));
+                try {
+                    if (policy.is_published) {
+                        await privacyPolicyApi.unpublish(policy.id);
+                    } else {
+                        await privacyPolicyApi.publish(policy.id);
+                    }
+                    showSuccess(`Policy ${action}ed successfully.`);
+                    fetchPolicies(pagination.current_page);
+                    closeConfirmModal();
+                } catch (error) {
+                    showError(`Failed to ${action} policy.`);
+                    setConfirmModal((prev) => ({ ...prev, isLoading: false }));
+                }
+            },
+        });
     };
 
     // --- Helper for Date Formatting ---
@@ -266,7 +303,7 @@ const PrivacyPolicies = () => {
 
             {/* --- Create/Edit Modal --- */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                <div className="ml-0 lg:ml-64 fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden">
                         <div className="px-4 py-3 md:px-6 md:py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
                             <h3 className="text-lg font-bold text-gray-900">
@@ -329,6 +366,17 @@ const PrivacyPolicies = () => {
                     </div>
                 </div>
             )}
+
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                isLoading={confirmModal.isLoading}
+                onClose={closeConfirmModal}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type={confirmModal.type}
+                confirmText={confirmModal.confirmText}
+            />
         </DashboardLayout>
     );
 };

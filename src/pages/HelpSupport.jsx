@@ -20,6 +20,7 @@ import {
     ChevronUp
 } from 'lucide-react';
 import { legalApi } from './api/legal.api';
+import { contactDetails } from '../shared/utils/contact';
 
 const HelpSupport = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -50,7 +51,8 @@ const HelpSupport = () => {
             title: 'Live Chat',
             description: 'Get instant help from our support team',
             availability: 'Available 24/7',
-            action: 'Start Chat',
+            action: `https://wa.me/${contactDetails.whatsAppNumber.replace(/\D/g, '')}`,
+            content: `Chat on WhatsApp: ${contactDetails.whatsAppNumber}`,
             color: 'bg-green-500'
         },
         {
@@ -58,7 +60,8 @@ const HelpSupport = () => {
             title: 'Phone Support',
             description: 'Speak directly with our support team',
             availability: 'Mon-Fri, 9AM-6PM',
-            action: '+1 (555) 123-4567',
+            action: `tel:${contactDetails.phoneNumber}`,
+            content: `Call on: ${contactDetails.phoneNumber}`,
             color: 'bg-blue-500'
         },
         {
@@ -66,7 +69,8 @@ const HelpSupport = () => {
             title: 'Email Support',
             description: 'Send us a detailed message',
             availability: 'Response within 24 hours',
-            action: 'support@agrimeet.com',
+            action: `mailto:${contactDetails.email}`,
+            content: `Email us at: ${contactDetails.email}`,
             color: 'bg-purple-500'
         }
     ];
@@ -111,7 +115,7 @@ const HelpSupport = () => {
                         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                         <input
                             type="text"
-                            placeholder="Search for help articles, FAQs, or topics..."
+                            placeholder="Search for help FAQs"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
@@ -134,9 +138,9 @@ const HelpSupport = () => {
                                     <Clock className="w-4 h-4" />
                                     {method.availability}
                                 </div>
-                                <button className="text-green-600 hover:text-green-700 font-medium">
-                                    {method.action}
-                                </button>
+                                <a href={`${method.action}`} className="text-green-600 hover:text-green-700 font-medium">
+                                    {method.content}
+                                </a>
                             </div>
                         ))}
                     </div>
@@ -211,12 +215,12 @@ const HelpSupport = () => {
                         Can't find what you're looking for? Our support team is here to help you with any questions or issues you might have.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        <Link to="/contact" className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                             Contact Support
-                        </button>
-                        <button className="px-6 py-3 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition-colors">
+                        </Link>
+                        {/* <button className="px-6 py-3 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition-colors">
                             Submit Feedback
-                        </button>
+                        </button> */}
                     </div>
                 </div>
             </div>
