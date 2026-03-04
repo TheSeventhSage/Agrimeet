@@ -7,3 +7,7 @@ export const contactDetails = {
     instagramPage: "https://www.instagram.com/agrimeetconnect",
     twitterPage: "https://www.twitter.com/agrimeetconnect",
 }
+
+export const utilities = {
+    naira: '\u20A6',
+}

@@ -1,0 +1,1 @@
+const o={HOME:"/home",LOGIN:"/login",REGISTER:"/register",VERIFY_OTP:"/verify-otp",KYC_REGISTER:"/kyc-register"},t=()=>{setTimeout(()=>{window.location.href=o.VERIFY_OTP},1e3)},i=()=>{setTimeout(()=>{window.location.href=o.KYC_REGISTER},1e3)},s=e=>{setTimeout(()=>{window.location.href=e},500)};export{o as R,i as a,t as h,s as p};

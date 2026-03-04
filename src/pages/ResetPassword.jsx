@@ -145,7 +145,6 @@ export default function ResetPassword() {
                     error={errors.email}
                     placeholder="Confirm your email"
                     required
-                    readOnly={true}
                     className="bg-gray-100 cursor-not-allowed opacity-75"
                 />
 

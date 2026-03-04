@@ -10,6 +10,7 @@ import {
     ChevronLeft,
     ChevronRight,
 } from "lucide-react";
+import { utilities } from "../../shared/utils/contact";
 
 /**
  * A self-contained component to fetch, display, and paginate all products.
@@ -153,15 +154,15 @@ const ProductsList = () => {
                                                         <h3 className="font-bold text-gray-900 text-lg mb-1">
                                                             {product.name}
                                                         </h3>
-                                                        <div className="flex items-center gap-[5px]">
+                                                        <div className="flex md:flex-col md:items-start 2xl:items-center 2xl:flex-row items-center gap-[5px]">
                                                             <span className="text-2xl font-bold text-green-600">
-                                                                ${product.discount_price || product.base_price}
+                                                                {utilities.naira}{product.discount_price || product.base_price}
                                                             </span>
                                                             {product.discount_price &&
                                                                 Number(product.discount_price) <
                                                                 Number(product.base_price) && (
                                                                     <span className="text-xs text-gray-400 line-through">
-                                                                        ${product.base_price}
+                                                                        {utilities.naira}{product.base_price}
                                                                     </span>
                                                                 )}
                                                         </div>

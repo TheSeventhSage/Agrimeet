@@ -5,6 +5,7 @@ import {
     Shield, CreditCard, Package, ShoppingCart,
     Ban, User, Globe
 } from 'lucide-react';
+import { utilities } from '../../../../shared/utils/contact';
 
 const UserDetailsModal = ({ user, isOpen, onClose }) => {
     if (!isOpen || !user) return null;
@@ -131,19 +132,9 @@ const UserDetailsModal = ({ user, isOpen, onClose }) => {
                                 <p className="text-gray-900 font-mono">{user.id}</p>
                             </div>
                             <div>
-                                <label className="text-sm font-medium text-gray-600">Email Verified</label>
+                                <label className="text-sm font-medium text-gray-600">Wallet Balance</label>
                                 <p className="text-gray-900">
-                                    {user.email_verified_at ? (
-                                        <span className="text-green-600 flex items-center gap-1">
-                                            <CheckCircle className="w-4 h-4" />
-                                            Verified on {formatDate(user.email_verified_at)}
-                                        </span>
-                                    ) : (
-                                        <span className="text-red-600 flex items-center gap-1">
-                                            <XCircle className="w-4 h-4" />
-                                            Not Verified
-                                        </span>
-                                    )}
+                                    {utilities.naira}{user.wallet}
                                 </p>
                             </div>
                             <div>
@@ -154,7 +145,7 @@ const UserDetailsModal = ({ user, isOpen, onClose }) => {
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-600">Last Name</label>
-                                <p className="text-gray-900 flex items-center gap-1">   
+                                <p className="text-gray-900 flex items-center gap-1">
                                     {user.last_name}
                                 </p>
                             </div>
@@ -166,7 +157,7 @@ const UserDetailsModal = ({ user, isOpen, onClose }) => {
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-600">Bank Name</label>
-                                <p className="text-gray-900 flex items-center gap-1">   
+                                <p className="text-gray-900 flex items-center gap-1">
                                     {user.user_bank_name || 'N/A'}
                                 </p>
                             </div>
@@ -178,7 +169,7 @@ const UserDetailsModal = ({ user, isOpen, onClose }) => {
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-600">Bank Name</label>
-                                <p className="text-gray-900 flex items-center gap-1">   
+                                <p className="text-gray-900 flex items-center gap-1">
                                     {user.user_bank_name || 'N/A'}
                                 </p>
                             </div>
