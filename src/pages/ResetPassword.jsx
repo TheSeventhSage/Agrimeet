@@ -140,12 +140,12 @@ export default function ResetPassword() {
                     label="Email Address"
                     name="email"
                     type="email"
-                    value={formData.email}
+                    value={formData.email || ''}
                     onChange={handleChange}
                     error={errors.email}
                     placeholder="Confirm your email"
                     required
-                    className="bg-gray-100 cursor-not-allowed opacity-75"
+                    className="bg-gray-100 opacity-75"
                 />
 
                 {/* Using PasswordField Component */}

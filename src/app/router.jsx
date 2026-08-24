@@ -27,6 +27,7 @@ const ForgotPassword = lazy(() => import('../pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('../pages/ResetPassword'));
 const VerifyOtp = lazy(() => import('../pages/VerifyOtp'));
 const Unauthorized = lazy(() => import('../pages/Unauthorized'));
+const NotFound = lazy(() => import('../pages/NotFound'));
 
 
 /********* SELLER PAGES *********/
@@ -67,8 +68,6 @@ const AdminNotifications = lazy(() => import('../features/admin/notifications/Ad
 const PrivacyPolicies = lazy(() => import('../features/admin/legalContents/PrivacyPolicies'));
 const TermsOfService = lazy(() => import('../features/admin/legalContents/TermsOfService'));
 const FAQs = lazy(() => import('../features/admin/legalContents/Faqs'));
-
-const NotFound = () => <div className="p-8">404 — Not found</div>;
 
 export default function Router() {
     return (

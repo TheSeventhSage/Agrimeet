@@ -112,15 +112,15 @@ const ProductsList = () => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {products.map((product) => {
                                     // Calculate total stock from all variants
-                                    const variantStock = Array.isArray(product.variants)
-                                        ? product.variants.reduce(
-                                            (sum, v) => sum + (Number(v.stock_quantity) || 0),
-                                            0
-                                        )
-                                        : 0;
+                                    // const variantStock = Array.isArray(product.variants)
+                                    //     ? product.variants.reduce(
+                                    //         (sum, v) => sum + (Number(v.stock_quantity) || 0),
+                                    //         0
+                                    //     )
+                                    //     : 0;
 
                                     // Determine availability
-                                    const isAvailable = variantStock > 0;
+                                    // const isAvailable = variantStock > 0;
 
                                     return (
                                         <div
@@ -154,7 +154,7 @@ const ProductsList = () => {
                                                         <h3 className="font-bold text-gray-900 text-lg mb-1">
                                                             {product.name}
                                                         </h3>
-                                                        <div className="flex md:flex-col md:items-start 2xl:items-center 2xl:flex-row items-center gap-[5px]">
+                                                        <div className="flex flex-col items-start 2xl:items-center 2xl:flex-row gap-[5px]">
                                                             <span className="text-2xl font-bold text-green-600">
                                                                 {utilities.naira}{product.discount_price || product.base_price}
                                                             </span>
