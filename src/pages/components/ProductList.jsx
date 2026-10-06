@@ -125,7 +125,7 @@ const ProductsList = () => {
                                     return (
                                         <div
                                             key={product.id}
-                                            className="group relative bg-white border border-gray-100 rounded-3xl p-6 hover:shadow-xl hover:border-green-200 transition-all duration-300 transform hover:scale-[1.02]"
+                                            className="group relative flex flex-col bg-white border border-gray-100 rounded-3xl p-6 hover:shadow-xl hover:border-green-200 transition-all duration-300 transform hover:scale-[1.02]"
                                         >
                                             {/* Badges */}
                                             <div className="absolute top-4 left-4 z-10 space-y-2">
@@ -148,14 +148,14 @@ const ProductsList = () => {
                                             </div>
 
                                             {/* Content */}
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <div>
-                                                        <h3 className="font-bold text-gray-900 text-lg mb-1">
-                                                            {product.name}
-                                                        </h3>
-                                                        <div className="flex flex-col items-start 2xl:items-center 2xl:flex-row gap-[5px]">
-                                                            <span className="text-2xl font-bold text-green-600">
+                                            <div className="flex flex-col flex-1 space-y-3">
+                                                <h3 className="font-bold text-gray-900 text-lg line-clamp-2 min-h-[3.5rem]">
+                                                    {product.name}
+                                                </h3>
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div className="min-w-0">
+                                                        <div className="flex flex-col items-start gap-[5px]">
+                                                            <span className="text-base font-bold text-green-600 whitespace-nowrap">
                                                                 {utilities.naira}{product.discount_price || product.base_price}
                                                             </span>
                                                             {product.discount_price &&
@@ -174,7 +174,7 @@ const ProductsList = () => {
                                                         </p>
                                                     </div>
 
-                                                    <div className=" items-center justify-between">
+                                                    <div className="shrink-0">
                                                         <p className="text-sm text-right text-gray-500 flex items-center justify-end gap-1">
                                                             <MapPin className="w-3 h-3" />
                                                             {product.seller?.city || "Location"}
@@ -208,7 +208,7 @@ const ProductsList = () => {
                                                 </div> */}
 
                                                 {/* Action Button */}
-                                                <Link to={`/details/${product.id}`}>
+                                                <Link to={`/details/${product.id}`} className="block mt-auto pt-3">
                                                     <button className="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-2xl hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all transform active:scale-95 cursor-pointer">
                                                         View Details
                                                     </button>
